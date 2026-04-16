@@ -11,11 +11,17 @@ export interface PermissionMenu {
   id: string;
   parentId?: string;
   title: string;
-  path: string;
+  path?: string;
   icon?: string;
   orderNo: number;
+  type?: 'catalog' | 'menu' | 'hidden' | 'external';
   permissionCode?: string;
   hiddenInMenu?: boolean;
+  redirect?: string;
+  keepAlive?: boolean;
+  externalLink?: string;
+  badge?: string;
+  disabled?: boolean;
   children?: PermissionMenu[];
 }
 

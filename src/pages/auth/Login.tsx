@@ -1,3 +1,4 @@
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Input, message, Typography } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '@/services/auth';
@@ -40,22 +41,24 @@ function Login() {
     <div className="auth-card-wrap">
       {contextHolder}
       <Card className="auth-card">
-        <Title level={2}>登录后台</Title>
-        <Paragraph>测试账号：admin / 123456（全部权限），viewer / 123456（仅查看权限）</Paragraph>
-        <Form layout="vertical" onFinish={onFinish}>
+        <div className="auth-card-title">
+          <Title level={2}>登录后台</Title>
+          <Paragraph>使用账号进入管理工作台。</Paragraph>
+        </div>
+        <Form layout="vertical" size="large" onFinish={onFinish}>
           <Form.Item
             label="账号"
             name="username"
             rules={[{ required: true, message: '请输入账号' }]}
           >
-            <Input placeholder="请输入账号" />
+            <Input prefix={<UserOutlined />} placeholder="admin / viewer" />
           </Form.Item>
           <Form.Item
             label="密码"
             name="password"
             rules={[{ required: true, min: 6, message: '密码至少 6 位' }]}
           >
-            <Input.Password placeholder="请输入密码" />
+            <Input.Password prefix={<LockOutlined />} placeholder="123456" />
           </Form.Item>
           <Form.Item>
             <Button block htmlType="submit" type="primary">
@@ -63,6 +66,10 @@ function Login() {
             </Button>
           </Form.Item>
         </Form>
+        <div className="auth-account-tip">
+          <span>admin / 123456</span>
+          <span>viewer / 123456</span>
+        </div>
         <div className="auth-extra">
           还没有账号？ <Link to="/register">去注册</Link>
         </div>

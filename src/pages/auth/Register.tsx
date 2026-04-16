@@ -1,3 +1,4 @@
+import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Input, message, Typography } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { register } from '@/services/auth';
@@ -35,15 +36,17 @@ function Register() {
     <div className="auth-card-wrap">
       {contextHolder}
       <Card className="auth-card">
-        <Title level={2}>注册账号</Title>
-        <Paragraph>注册后可使用账号密码登录后台。</Paragraph>
-        <Form layout="vertical" onFinish={onFinish}>
+        <div className="auth-card-title">
+          <Title level={2}>注册账号</Title>
+          <Paragraph>创建用于访问后台的账号。</Paragraph>
+        </div>
+        <Form layout="vertical" size="large" onFinish={onFinish}>
           <Form.Item
             label="用户名"
             name="username"
             rules={[{ required: true, message: '请输入用户名' }]}
           >
-            <Input placeholder="请输入用户名" />
+            <Input prefix={<UserOutlined />} placeholder="请输入用户名" />
           </Form.Item>
           <Form.Item
             label="邮箱"
@@ -53,14 +56,14 @@ function Register() {
               { type: 'email', message: '请输入有效的邮箱地址' },
             ]}
           >
-            <Input placeholder="请输入邮箱" />
+            <Input prefix={<MailOutlined />} placeholder="请输入邮箱" />
           </Form.Item>
           <Form.Item
             label="密码"
             name="password"
             rules={[{ required: true, min: 6, message: '密码至少 6 位' }]}
           >
-            <Input.Password placeholder="请输入密码" />
+            <Input.Password prefix={<LockOutlined />} placeholder="请输入密码" />
           </Form.Item>
           <Form.Item
             label="确认密码"
@@ -78,7 +81,7 @@ function Register() {
               }),
             ]}
           >
-            <Input.Password placeholder="请再次输入密码" />
+            <Input.Password prefix={<LockOutlined />} placeholder="请再次输入密码" />
           </Form.Item>
           <Form.Item>
             <Button block htmlType="submit" type="primary">

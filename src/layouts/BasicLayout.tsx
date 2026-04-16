@@ -1,13 +1,22 @@
-import { LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import { Avatar, Button, Layout, Menu, Space, theme, Typography } from 'antd';
+import {
+  ClockCircleOutlined,
+  DownOutlined,
+  LogoutOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import { Avatar, Button, Dropdown, Layout, Menu, Space, theme, Typography } from 'antd';
 import type { MenuProps } from 'antd';
-import { useMemo, useState } from 'react';
+import dayjs from 'dayjs';
+import { useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { appMenus, mapPermissionMenusToAppMenus, type AppMenuItem } from '@/config/menu';
 import { useAuthStore } from '@/stores/auth';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
+const OPEN_KEYS_STORAGE_KEY = 'react-admin-starter:open-menu-keys';
 
 /**
  * 后台基础布局，使用 Ant Design Layout/Menu 承载业务页面。
@@ -17,6 +26,8 @@ const { Text } = Typography;
  */
 function BasicLayout() {
   const [collapsed, setCollapsed] = useState(false);
+  const [openKeys, setOpenKeys] = useState<string[]>(() => getSavedOpenKeys());
+  const [currentTime, setCurrentTime] = useState(() => dayjs().format('YYYY-MM-DD HH:mm'));
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = theme.useToken();
@@ -25,6 +36,7 @@ function BasicLayout() {
   const routeCodes = useAuthStore((state) => state.routeCodes);
 
   const isAdmin = role === 'admin';
+  const accountName = role || '未登录账号';
   const logout = useAuthStore((state) => state.logout);
 
   function handleLogout() {
@@ -44,6 +56,60 @@ function BasicLayout() {
   );
 
   const activeMenu = findActiveMenu(visibleMenus, location.pathname) || visibleMenus[0];
+  const activeMenuKeys = activeMenu ? [activeMenu.key] : ['dashboard'];
+  const activeParentKeys = useMemo(
+    () => (activeMenu ? findParentKeys(visibleMenus, activeMenu.key) : []),
+    [activeMenu, visibleMenus],
+  );
+
+  useEffect(() => {
+    setOpenKeys((prevKeys) => {
+      const nextKeys = Array.from(new Set([...prevKeys, ...activeParentKeys]));
+      saveOpenKeys(nextKeys);
+      return nextKeys;
+    });
+  }, [activeParentKeys]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setCurrentTime(dayjs().format('YYYY-MM-DD HH:mm'));
+    }, 60000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const userDropdownItems: MenuProps['items'] = [
+    {
+      key: 'profile',
+      disabled: true,
+      label: (
+        <div className="user-dropdown-profile">
+          <Avatar size={40} icon={<UserOutlined />}>
+            {isAdmin ? 'A' : 'V'}
+          </Avatar>
+          <div>
+            <strong>{accountName}</strong>
+            <span>{isAdmin ? '管理员' : '访客'}</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'time',
+      disabled: true,
+      icon: <ClockCircleOutlined />,
+      label: currentTime,
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      danger: true,
+      label: '退出登录',
+      onClick: handleLogout,
+    },
+  ];
 
   return (
     <Layout className="app-layout">
@@ -61,11 +127,21 @@ function BasicLayout() {
         </div>
         <Menu
           mode="inline"
-          selectedKeys={[activeMenu?.key || 'dashboard']}
+          selectedKeys={activeMenuKeys}
+          openKeys={collapsed ? [] : openKeys}
           items={visibleMenus.map(mapToMenuItem)}
+          onOpenChange={(keys) => {
+            const nextKeys = keys.map(String);
+            setOpenKeys(nextKeys);
+            saveOpenKeys(nextKeys);
+          }}
           onClick={({ key }) => {
             const target = findMenuByKey(visibleMenus, String(key));
-            if (target) {
+            if (target?.externalLink) {
+              window.open(target.externalLink, '_blank', 'noopener,noreferrer');
+              return;
+            }
+            if (target?.path && !target.disabled) {
               navigate(target.path);
             }
           }}
@@ -83,17 +159,19 @@ function BasicLayout() {
             />
             <Text strong>{activeMenu?.label || '工作台'}</Text>
           </div>
-          <Space className="app-header-user">
-            <Avatar size="small">{isAdmin ? 'A' : 'V'}</Avatar>
-            <Text type="secondary">{isAdmin ? '管理员' : '访客'}</Text>
-            <Button
-              type="text"
-              icon={<LogoutOutlined />}
-              onClick={handleLogout}
-            >
-              退出
+          <Dropdown
+            menu={{ items: userDropdownItems }}
+            placement="bottomRight"
+            trigger={['click']}
+          >
+            <Button className="app-header-user" type="text">
+              <Space size={8}>
+                <Avatar size="small">{isAdmin ? 'A' : 'V'}</Avatar>
+                <span className="app-header-user-name">{accountName}</span>
+                <DownOutlined />
+              </Space>
             </Button>
-          </Space>
+          </Dropdown>
         </Header>
         <Content className="app-content" style={{ background: token.colorBgLayout }}>
           <Outlet />
@@ -105,11 +183,25 @@ function BasicLayout() {
 
 function filterVisibleMenus(menus: AppMenuItem[], routeCodes: string[]): AppMenuItem[] {
   return menus
-    .filter((menu) => !menu.hiddenInMenu && routeCodes.includes(menu.key))
-    .map((menu) => ({
-      ...menu,
-      children: menu.children ? filterVisibleMenus(menu.children, routeCodes) : undefined,
-    }))
+    .map((menu) => {
+      const children = menu.children ? filterVisibleMenus(menu.children, routeCodes) : undefined;
+      return { ...menu, children };
+    })
+    .filter((menu) => {
+      if (menu.hiddenInMenu || menu.type === 'hidden') {
+        return false;
+      }
+      if (menu.children && menu.children.length > 0) {
+        return true;
+      }
+      if (menu.disabled) {
+        return true;
+      }
+      if (!menu.permissionCode) {
+        return true;
+      }
+      return routeCodes.includes(menu.key) || routeCodes.includes(getRouteCode(menu));
+    })
     .sort((prev, next) => prev.orderNo - next.orderNo);
 }
 
@@ -117,14 +209,15 @@ function mapToMenuItem(menu: AppMenuItem): NonNullable<MenuProps['items']>[numbe
   return {
     key: menu.key,
     icon: menu.icon,
-    label: menu.label,
+    label: menu.badge ? `${menu.label} ${menu.badge}` : menu.label,
+    disabled: menu.disabled,
     children: menu.children?.map(mapToMenuItem),
   };
 }
 
 function findActiveMenu(menus: AppMenuItem[], pathname: string): AppMenuItem | undefined {
   for (const menu of menus) {
-    if (pathname.startsWith(menu.path)) {
+    if (menu.path && pathname.startsWith(menu.path)) {
       return menu;
     }
     const child = menu.children ? findActiveMenu(menu.children, pathname) : undefined;
@@ -146,6 +239,42 @@ function findMenuByKey(menus: AppMenuItem[], key: string): AppMenuItem | undefin
     }
   }
   return undefined;
+}
+
+function findParentKeys(
+  menus: AppMenuItem[],
+  targetKey: string,
+  parentKeys: string[] = [],
+): string[] {
+  for (const menu of menus) {
+    if (menu.key === targetKey) {
+      return parentKeys;
+    }
+    const childKeys = menu.children
+      ? findParentKeys(menu.children, targetKey, [...parentKeys, menu.key])
+      : [];
+    if (childKeys.length > 0) {
+      return childKeys;
+    }
+  }
+  return [];
+}
+
+function getRouteCode(menu: AppMenuItem): string {
+  return menu.permissionCode?.split(':')[0] || menu.key;
+}
+
+function getSavedOpenKeys(): string[] {
+  try {
+    const rawValue = window.localStorage.getItem(OPEN_KEYS_STORAGE_KEY);
+    return rawValue ? JSON.parse(rawValue) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveOpenKeys(keys: string[]) {
+  window.localStorage.setItem(OPEN_KEYS_STORAGE_KEY, JSON.stringify(keys));
 }
 
 export default BasicLayout;

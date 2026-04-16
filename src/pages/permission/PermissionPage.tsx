@@ -1,7 +1,8 @@
 import { Card, Descriptions, Tag, Typography } from 'antd';
+import { PageHeader } from '@/components/PageHeader';
 import { useAuthStore } from '@/stores/auth';
 
-const { Title, Paragraph } = Typography;
+const { Paragraph } = Typography;
 
 /**
  * 权限目录页面，展示当前用户的权限信息和权限模型说明。
@@ -15,12 +16,7 @@ function PermissionPage() {
 
   return (
     <div className="page-stack">
-      <div className="compact-page-header">
-        <div>
-          <Title level={3}>权限目录</Title>
-          <Paragraph>当前登录用户：{role}。展示菜单权限、路由权限和按钮权限。</Paragraph>
-        </div>
-      </div>
+      <PageHeader title="权限目录" description={`当前登录用户：${role || '未知账号'}`} />
 
       <Card title="路由权限">
         {routeCodes.length === 0 ? (

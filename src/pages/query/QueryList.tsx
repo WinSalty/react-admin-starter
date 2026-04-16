@@ -15,17 +15,15 @@ import {
   Space,
   Table,
   Tag,
-  Typography,
 } from 'antd';
 import { Access } from '@/components/Access';
+import { PageHeader } from '@/components/PageHeader';
 import {
   fetchQueryDetail,
   fetchQueryPage,
   saveQueryRecord,
 } from '@/services/query';
 import type { QueryRecord, QuerySaveParams, QueryStatus } from '@/types/query';
-
-const { Title, Paragraph } = Typography;
 
 interface QuerySearchForm {
   keyword?: string;
@@ -258,12 +256,7 @@ function QueryList() {
 
   return (
     <div className="page-stack">
-      <div className="compact-page-header">
-        <div>
-          <Title level={3}>查询管理</Title>
-          <Paragraph>标准列表页模板，支持筛选、分页、详情和新增编辑。</Paragraph>
-        </div>
-      </div>
+      <PageHeader title="查询管理" description="查询配置检索、分页维护和详情查看。" />
 
       {errorMessage ? <Alert message={errorMessage} type="error" showIcon /> : null}
 
