@@ -1,4 +1,4 @@
-import type { PermissionBootstrap } from '@/types/permission';
+import type { PermissionBootstrap, RolePermissionAssignment } from '@/types/permission';
 
 /**
  * 权限 mock 数据。
@@ -115,10 +115,31 @@ const adminPermissions: PermissionBootstrap = {
           type: 'menu',
           permissionCode: 'system:log:view',
         },
+        {
+          id: '3-7',
+          parentId: '3',
+          title: '系统配置',
+          path: '/system/configs',
+          icon: 'SettingOutlined',
+          orderNo: 7,
+          type: 'menu',
+          permissionCode: 'system:config:view',
+        },
       ],
     },
   ],
-  routes: ['dashboard', 'query', 'statistics', 'permission', 'users', 'roles', 'menus', 'dicts', 'logs'],
+  routes: [
+    'dashboard',
+    'query',
+    'statistics',
+    'permission',
+    'users',
+    'roles',
+    'menus',
+    'dicts',
+    'logs',
+    'configs',
+  ],
   actions: [
     { code: 'query:add', name: '新增查询' },
     { code: 'query:edit', name: '编辑查询' },
@@ -144,6 +165,8 @@ const adminPermissions: PermissionBootstrap = {
     { code: 'system:dict:edit', name: '编辑字典' },
     { code: 'system:dict:status', name: '切换字典状态' },
     { code: 'system:dict:refresh', name: '刷新字典缓存' },
+    { code: 'system:config:view', name: '查看系统配置' },
+    { code: 'system:config:edit', name: '编辑系统配置' },
   ],
 };
 
@@ -163,6 +186,27 @@ const viewerPermissions: PermissionBootstrap = {
   actions: [],
 };
 
+let roleAssignments: Record<string, RolePermissionAssignment> = {
+  super_admin: {
+    roleCode: 'super_admin',
+    menuIds: collectMenuIds(adminPermissions.menus),
+    routeCodes: adminPermissions.routes,
+    actionCodes: adminPermissions.actions.map((action) => action.code),
+  },
+  readonly_viewer: {
+    roleCode: 'readonly_viewer',
+    menuIds: collectMenuIds(viewerPermissions.menus),
+    routeCodes: viewerPermissions.routes,
+    actionCodes: [],
+  },
+  system_auditor: {
+    roleCode: 'system_auditor',
+    menuIds: ['3', '3-1', '3-6'],
+    routeCodes: ['permission', 'logs'],
+    actionCodes: ['permission:view'],
+  },
+};
+
 /**
  * 根据角色获取权限 bootstrap 数据。
  */
@@ -173,6 +217,52 @@ export async function mockFetchPermissionBootstrap(
   return role === 'admin' ? { ...adminPermissions } : { ...viewerPermissions };
 }
 
+/**
+ * 根据角色编码获取权限分配占位数据。
+ */
+export async function mockFetchPermissionAssignment(
+  roleCode: string,
+): Promise<RolePermissionAssignment> {
+  await delay(260);
+  const assignment = roleAssignments[roleCode] || {
+    roleCode,
+    menuIds: [],
+    routeCodes: [],
+    actionCodes: [],
+  };
+  return cloneAssignment(assignment);
+}
+
+/**
+ * 保存权限分配占位数据。
+ */
+export async function mockSavePermissionAssignment(
+  params: RolePermissionAssignment,
+): Promise<RolePermissionAssignment> {
+  await delay(300);
+  roleAssignments = {
+    ...roleAssignments,
+    [params.roleCode]: cloneAssignment(params),
+  };
+  return cloneAssignment(roleAssignments[params.roleCode]);
+}
+
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function collectMenuIds(menus: PermissionBootstrap['menus']): string[] {
+  return menus.flatMap((menu) => [
+    menu.id,
+    ...(menu.children ? collectMenuIds(menu.children) : []),
+  ]);
+}
+
+function cloneAssignment(assignment: RolePermissionAssignment): RolePermissionAssignment {
+  return {
+    roleCode: assignment.roleCode,
+    menuIds: [...assignment.menuIds],
+    routeCodes: [...assignment.routeCodes],
+    actionCodes: [...assignment.actionCodes],
+  };
 }

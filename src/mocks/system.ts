@@ -1,6 +1,9 @@
 import type { PageResult } from '@/types/api';
 import type {
+  SystemConfigRecord,
   SystemListParams,
+  SystemMenuRecord,
+  SystemMenuSaveParams,
   SystemModuleKey,
   SystemRecord,
   SystemSaveParams,
@@ -104,10 +107,12 @@ let systemRecords: SystemRecord[] = [
     status: 'active',
     owner: '平台技术部',
     description: '系统管理一级目录，承载用户、角色、菜单、字典和日志模块。',
-    menuType: '目录',
+    parentId: '',
+    menuType: 'catalog',
+    icon: 'SettingOutlined',
     routePath: '',
     permissionCode: '',
-    orderNo: 3,
+    orderNo: 30,
     createdAt: '2026-03-01 09:20:00',
     updatedAt: '2026-04-16 19:30:00',
   },
@@ -119,10 +124,12 @@ let systemRecords: SystemRecord[] = [
     status: 'active',
     owner: '平台技术部',
     description: '维护后台用户、状态、角色分配和重置密码入口。',
-    menuType: '菜单',
+    parentId: 'M1001',
+    menuType: 'menu',
+    icon: 'UserOutlined',
     routePath: '/system/users',
     permissionCode: 'system:user:view',
-    orderNo: 2,
+    orderNo: 20,
     createdAt: '2026-03-01 09:22:00',
     updatedAt: '2026-04-17 09:18:00',
   },
@@ -134,12 +141,117 @@ let systemRecords: SystemRecord[] = [
     status: 'active',
     owner: '平台技术部',
     description: '维护角色基础信息和权限分配入口。',
-    menuType: '菜单',
+    parentId: 'M1001',
+    menuType: 'menu',
+    icon: 'TeamOutlined',
     routePath: '/system/roles',
     permissionCode: 'system:role:view',
-    orderNo: 3,
+    orderNo: 30,
     createdAt: '2026-03-01 09:24:00',
     updatedAt: '2026-04-17 09:19:00',
+  },
+  {
+    id: 'M1004',
+    moduleKey: 'menus',
+    name: '菜单管理',
+    code: 'system_menu',
+    status: 'active',
+    owner: '平台技术部',
+    description: '维护多级菜单、动态路由路径和权限编码。',
+    parentId: 'M1001',
+    menuType: 'menu',
+    icon: 'MenuOutlined',
+    routePath: '/system/menus',
+    permissionCode: 'system:menu:view',
+    orderNo: 40,
+    createdAt: '2026-03-01 09:26:00',
+    updatedAt: '2026-04-17 09:21:00',
+  },
+  {
+    id: 'M1005',
+    moduleKey: 'menus',
+    name: '字典管理',
+    code: 'system_dict',
+    status: 'active',
+    owner: '平台技术部',
+    description: '维护系统字典类型、字典项和缓存入口。',
+    parentId: 'M1001',
+    menuType: 'menu',
+    icon: 'BookOutlined',
+    routePath: '/system/dicts',
+    permissionCode: 'system:dict:view',
+    orderNo: 50,
+    createdAt: '2026-03-01 09:28:00',
+    updatedAt: '2026-04-17 09:22:00',
+  },
+  {
+    id: 'M1006',
+    moduleKey: 'menus',
+    name: '日志管理',
+    code: 'system_log',
+    status: 'active',
+    owner: '安全中心',
+    description: '提供登录日志、操作日志和接口日志查询入口。',
+    parentId: 'M1001',
+    menuType: 'menu',
+    icon: 'FileSearchOutlined',
+    routePath: '/system/logs',
+    permissionCode: 'system:log:view',
+    orderNo: 60,
+    createdAt: '2026-03-01 09:30:00',
+    updatedAt: '2026-04-17 09:24:00',
+  },
+  {
+    id: 'M1007',
+    moduleKey: 'menus',
+    name: '系统配置',
+    code: 'system_config',
+    status: 'active',
+    owner: '平台技术部',
+    description: '维护系统基础参数、开关配置和前端缓存配置。',
+    parentId: 'M1001',
+    menuType: 'menu',
+    icon: 'SettingOutlined',
+    routePath: '/system/configs',
+    permissionCode: 'system:config:view',
+    orderNo: 70,
+    createdAt: '2026-04-17 10:10:00',
+    updatedAt: '2026-04-17 10:10:00',
+  },
+  {
+    id: 'M1008',
+    moduleKey: 'menus',
+    name: '审计详情隐藏页',
+    code: 'system_log_detail',
+    status: 'active',
+    owner: '安全中心',
+    description: '日志详情路由占位，不展示在侧边栏。',
+    parentId: 'M1006',
+    menuType: 'hidden',
+    icon: 'FileSearchOutlined',
+    routePath: '/system/logs/detail',
+    permissionCode: 'system:log:detail',
+    orderNo: 10,
+    createdAt: '2026-04-17 10:12:00',
+    updatedAt: '2026-04-17 10:12:00',
+  },
+  {
+    id: 'M1009',
+    moduleKey: 'menus',
+    name: 'Ant Design 文档',
+    code: 'antd_docs',
+    status: 'active',
+    owner: '平台技术部',
+    description: '外链菜单示例，用于验证外部地址维护。',
+    parentId: '',
+    menuType: 'external',
+    icon: 'BookOutlined',
+    routePath: '',
+    permissionCode: 'docs:antd:view',
+    externalLink: 'https://ant.design',
+    orderNo: 90,
+    createdAt: '2026-04-17 10:15:00',
+    updatedAt: '2026-04-17 10:15:00',
   },
   {
     id: 'D1001',
@@ -233,6 +345,63 @@ let systemRecords: SystemRecord[] = [
   },
 ];
 
+let systemConfigs: SystemConfigRecord[] = [
+  {
+    id: 'C1001',
+    name: '系统名称',
+    code: 'app.name',
+    type: 'basic',
+    value: 'React Admin Starter',
+    description: '展示在后台布局和浏览器标题中的系统名称。',
+    updatedAt: '2026-04-17 10:20:00',
+  },
+  {
+    id: 'C1002',
+    name: '默认首页',
+    code: 'app.homePath',
+    type: 'basic',
+    value: '/dashboard',
+    description: '登录成功后的默认进入页面。',
+    updatedAt: '2026-04-17 10:20:00',
+  },
+  {
+    id: 'C1003',
+    name: '权限严格模式',
+    code: 'security.strictPermission',
+    type: 'switch',
+    value: true,
+    description: '启用后未显式授权的菜单、路由和按钮默认拒绝。',
+    updatedAt: '2026-04-17 10:20:00',
+  },
+  {
+    id: 'C1004',
+    name: '登录日志采集',
+    code: 'audit.loginLog',
+    type: 'switch',
+    value: true,
+    description: '控制真实后端接入后的登录审计记录开关。',
+    updatedAt: '2026-04-17 10:20:00',
+  },
+  {
+    id: 'C1005',
+    name: '菜单缓存版本',
+    code: 'cache.menuVersion',
+    type: 'cache',
+    value: '20260417.1',
+    description: '前端可根据版本变化清理本地菜单和权限缓存。',
+    updatedAt: '2026-04-17 10:20:00',
+  },
+  {
+    id: 'C1006',
+    name: '字典缓存 TTL',
+    code: 'cache.dictTtlSeconds',
+    type: 'cache',
+    value: 3600,
+    description: '字典类配置在前端缓存中的建议有效期，单位秒。',
+    updatedAt: '2026-04-17 10:20:00',
+  },
+];
+
 /**
  * 模拟系统管理分页查询。
  */
@@ -311,6 +480,107 @@ export async function mockUpdateSystemStatus(
   return { ...nextRecord };
 }
 
+/**
+ * 模拟菜单树查询。
+ */
+export async function mockFetchSystemMenuTree(params?: {
+  keyword?: string;
+  status?: SystemStatus;
+}): Promise<SystemMenuRecord[]> {
+  await delay(300);
+  const keyword = params?.keyword?.trim().toLowerCase();
+  const menuRecords = systemRecords
+    .filter((item) => item.moduleKey === 'menus')
+    .filter((item) => (params?.status ? item.status === params.status : true))
+    .filter((item) => {
+      if (!keyword) {
+        return true;
+      }
+      return [
+        item.name,
+        item.code,
+        item.description,
+        item.routePath,
+        item.permissionCode,
+      ].some((field) => String(field || '').toLowerCase().includes(keyword));
+    }) as SystemMenuRecord[];
+  return buildMenuTree(menuRecords).map(cloneMenuNode);
+}
+
+/**
+ * 模拟菜单保存。
+ */
+export async function mockSaveSystemMenu(
+  params: SystemMenuSaveParams,
+): Promise<SystemMenuRecord> {
+  await delay(320);
+  const now = '2026-04-17 10:30:00';
+  const nextRecord: SystemMenuRecord = {
+    id: params.id || getNextId('menus'),
+    moduleKey: 'menus',
+    name: params.name,
+    code: params.code,
+    status: params.status,
+    owner: '平台技术部',
+    description: params.description,
+    parentId: params.parentId || '',
+    menuType: params.menuType,
+    icon: params.icon || '',
+    routePath: params.routePath || '',
+    permissionCode: params.permissionCode || '',
+    externalLink: params.externalLink || '',
+    orderNo: params.orderNo,
+    createdAt: params.id
+      ? String(systemRecords.find((item) => item.id === params.id)?.createdAt || now)
+      : now,
+    updatedAt: now,
+  };
+
+  if (params.id) {
+    systemRecords = systemRecords.map((item) => (item.id === params.id ? nextRecord : item));
+  } else {
+    systemRecords = [nextRecord, ...systemRecords];
+  }
+  return cloneMenuNode(nextRecord);
+}
+
+/**
+ * 模拟菜单状态切换。
+ */
+export async function mockUpdateSystemMenuStatus(
+  id: string,
+  status: SystemStatus,
+): Promise<SystemMenuRecord | undefined> {
+  const record = await mockUpdateSystemStatus(id, status);
+  return record && record.moduleKey === 'menus' ? cloneMenuNode(record as SystemMenuRecord) : undefined;
+}
+
+/**
+ * 模拟系统配置查询。
+ */
+export async function mockFetchSystemConfigs(): Promise<SystemConfigRecord[]> {
+  await delay(260);
+  return systemConfigs.map((item) => ({ ...item }));
+}
+
+/**
+ * 模拟系统配置保存。
+ */
+export async function mockSaveSystemConfig(
+  id: string,
+  value: SystemConfigRecord['value'],
+): Promise<SystemConfigRecord | undefined> {
+  await delay(260);
+  const now = '2026-04-17 10:30:00';
+  const record = systemConfigs.find((item) => item.id === id);
+  if (!record) {
+    return undefined;
+  }
+  const nextRecord = { ...record, value, updatedAt: now };
+  systemConfigs = systemConfigs.map((item) => (item.id === id ? nextRecord : item));
+  return { ...nextRecord };
+}
+
 function buildUpdatedRecord(record: SystemRecord, params: SystemSaveParams, updatedAt: string) {
   return {
     ...record,
@@ -355,7 +625,7 @@ function buildExtraFields(params: SystemSaveParams): Record<string, string | num
   }
   if (params.moduleKey === 'menus') {
     return {
-      menuType: params.extraValue || '菜单',
+      menuType: params.extraValue || 'menu',
       routePath: params.code.startsWith('/') ? params.code : `/system/${params.code}`,
       permissionCode: params.code,
       orderNo: 99,
@@ -390,4 +660,38 @@ function getLogTypeName(logType: NonNullable<SystemListParams['logType']>) {
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function buildMenuTree(records: SystemMenuRecord[]): SystemMenuRecord[] {
+  const nodeMap = new Map<string, SystemMenuRecord>();
+  records.forEach((record) => {
+    nodeMap.set(record.id, { ...record, children: [] });
+  });
+
+  const roots: SystemMenuRecord[] = [];
+  nodeMap.forEach((node) => {
+    if (node.parentId && nodeMap.has(node.parentId)) {
+      nodeMap.get(node.parentId)?.children?.push(node);
+    } else {
+      roots.push(node);
+    }
+  });
+
+  return sortMenuNodes(roots);
+}
+
+function sortMenuNodes(nodes: SystemMenuRecord[]): SystemMenuRecord[] {
+  return nodes
+    .map((node) => ({
+      ...node,
+      children: node.children && node.children.length > 0 ? sortMenuNodes(node.children) : undefined,
+    }))
+    .sort((prev, next) => prev.orderNo - next.orderNo);
+}
+
+function cloneMenuNode(node: SystemMenuRecord): SystemMenuRecord {
+  return {
+    ...node,
+    children: node.children?.map(cloneMenuNode),
+  };
 }

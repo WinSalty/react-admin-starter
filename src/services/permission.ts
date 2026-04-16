@@ -1,6 +1,10 @@
 import type { ApiResponse } from '@/types/api';
-import type { PermissionBootstrap } from '@/types/permission';
-import { mockFetchPermissionBootstrap } from '@/mocks/permission';
+import type { PermissionBootstrap, RolePermissionAssignment } from '@/types/permission';
+import {
+  mockFetchPermissionAssignment,
+  mockFetchPermissionBootstrap,
+  mockSavePermissionAssignment,
+} from '@/mocks/permission';
 
 /**
  * 权限相关 API 请求封装。
@@ -21,6 +25,36 @@ export async function fetchPermissionBootstrap(
   return {
     code: 0,
     message: '获取成功',
+    data,
+  };
+}
+
+/**
+ * 获取角色维度权限分配数据。
+ * 对接后端 GET /api/permission/assignment
+ */
+export async function fetchPermissionAssignment(
+  roleCode: string,
+): Promise<ApiResponse<RolePermissionAssignment>> {
+  const data = await mockFetchPermissionAssignment(roleCode);
+  return {
+    code: 0,
+    message: '获取成功',
+    data,
+  };
+}
+
+/**
+ * 保存角色维度权限分配。
+ * 对接后端 POST /api/permission/assignment
+ */
+export async function savePermissionAssignment(
+  params: RolePermissionAssignment,
+): Promise<ApiResponse<RolePermissionAssignment>> {
+  const data = await mockSavePermissionAssignment(params);
+  return {
+    code: 0,
+    message: '保存成功',
     data,
   };
 }

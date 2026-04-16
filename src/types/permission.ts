@@ -43,6 +43,13 @@ export interface PermissionBootstrap {
   actions: PermissionAction[];
 }
 
+export interface RolePermissionAssignment {
+  roleCode: string;
+  menuIds: string[];
+  routeCodes: string[];
+  actionCodes: string[];
+}
+
 /**
  * 路由 meta 中配置的权限码，用于路由守卫判断。
  */

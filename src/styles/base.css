@@ -163,6 +163,23 @@ body {
   font-size: 13px;
 }
 
+.permission-assignment-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(220px, 0.8fr) minmax(280px, 1.2fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.permission-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.config-entry-tags {
+  margin-bottom: 16px;
+}
+
 .chart-placeholder {
   display: flex;
   min-height: 260px;
@@ -598,6 +615,10 @@ body {
 
   .dashboard-summary-grid div {
     min-height: 92px;
+  }
+
+  .permission-assignment-grid {
+    grid-template-columns: 1fr;
   }
 
   .app-header-user-name {

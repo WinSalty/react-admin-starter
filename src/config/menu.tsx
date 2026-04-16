@@ -143,6 +143,15 @@ export const appMenus: AppMenuItem[] = [
         type: 'menu',
         permissionCode: 'system:log:view',
       },
+      {
+        key: 'configs',
+        path: '/system/configs',
+        label: '系统配置',
+        icon: <SettingOutlined />,
+        orderNo: 7,
+        type: 'menu',
+        permissionCode: 'system:config:view',
+      },
     ],
   },
 ];

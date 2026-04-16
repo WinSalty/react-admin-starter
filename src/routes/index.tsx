@@ -2,6 +2,8 @@ import { lazy, Suspense } from 'react';
 import type { ReactNode } from 'react';
 import { Spin } from 'antd';
 import { createMemoryRouter, Navigate } from 'react-router-dom';
+import { dynamicRouteMap } from '@/access/routeMap';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AuthGuard, GuestGuard, RouteGuard } from '@/components/RouteGuard';
 
 const AuthLayout = lazy(() => import('@/layouts/AuthLayout'));
@@ -13,7 +15,9 @@ const PermissionPage = lazy(() => import('@/pages/permission/PermissionPage'));
 const QueryList = lazy(() => import('@/pages/query/QueryList'));
 const Statistics = lazy(() => import('@/pages/statistics/Statistics'));
 const Forbidden = lazy(() => import('@/pages/system/Forbidden'));
+const MenuManagementPage = lazy(() => import('@/pages/system/MenuManagementPage'));
 const NotFound = lazy(() => import('@/pages/system/NotFound'));
+const SystemConfigPage = lazy(() => import('@/pages/system/SystemConfigPage'));
 const SystemModulePage = lazy(() => import('@/pages/system/SystemModulePage'));
 
 /**
@@ -30,7 +34,7 @@ function LazyRoute({ children }: { children: ReactNode }) {
         </div>
       }
     >
-      {children}
+      <ErrorBoundary>{children}</ErrorBoundary>
     </Suspense>
   );
 }
@@ -55,91 +59,101 @@ export const router = createMemoryRouter(
       ),
       children: [
         {
-          path: '/dashboard',
+          path: dynamicRouteMap.dashboard.path,
           element: (
             <LazyRoute>
-              <RouteGuard permissionCode="dashboard">
+              <RouteGuard permissionCode={dynamicRouteMap.dashboard.routeCode}>
                 <Dashboard />
               </RouteGuard>
             </LazyRoute>
           ),
         },
         {
-          path: '/query',
+          path: dynamicRouteMap.query.path,
           element: (
             <LazyRoute>
-              <RouteGuard permissionCode="query">
+              <RouteGuard permissionCode={dynamicRouteMap.query.routeCode}>
                 <QueryList />
               </RouteGuard>
             </LazyRoute>
           ),
         },
         {
-          path: '/statistics',
+          path: dynamicRouteMap.statistics.path,
           element: (
             <LazyRoute>
-              <RouteGuard permissionCode="statistics">
+              <RouteGuard permissionCode={dynamicRouteMap.statistics.routeCode}>
                 <Statistics />
               </RouteGuard>
             </LazyRoute>
           ),
         },
         {
-          path: '/permission',
+          path: dynamicRouteMap.permission.path,
           element: (
             <LazyRoute>
-              <RouteGuard permissionCode="permission">
+              <RouteGuard permissionCode={dynamicRouteMap.permission.routeCode}>
                 <PermissionPage />
               </RouteGuard>
             </LazyRoute>
           ),
         },
         {
-          path: '/system/users',
+          path: dynamicRouteMap.users.path,
           element: (
             <LazyRoute>
-              <RouteGuard permissionCode="users">
+              <RouteGuard permissionCode={dynamicRouteMap.users.routeCode}>
                 <SystemModulePage moduleKey="users" />
               </RouteGuard>
             </LazyRoute>
           ),
         },
         {
-          path: '/system/roles',
+          path: dynamicRouteMap.roles.path,
           element: (
             <LazyRoute>
-              <RouteGuard permissionCode="roles">
+              <RouteGuard permissionCode={dynamicRouteMap.roles.routeCode}>
                 <SystemModulePage moduleKey="roles" />
               </RouteGuard>
             </LazyRoute>
           ),
         },
         {
-          path: '/system/menus',
+          path: dynamicRouteMap.menus.path,
           element: (
             <LazyRoute>
-              <RouteGuard permissionCode="menus">
-                <SystemModulePage moduleKey="menus" />
+              <RouteGuard permissionCode={dynamicRouteMap.menus.routeCode}>
+                <MenuManagementPage />
               </RouteGuard>
             </LazyRoute>
           ),
         },
         {
-          path: '/system/dicts',
+          path: dynamicRouteMap.dicts.path,
           element: (
             <LazyRoute>
-              <RouteGuard permissionCode="dicts">
+              <RouteGuard permissionCode={dynamicRouteMap.dicts.routeCode}>
                 <SystemModulePage moduleKey="dicts" />
               </RouteGuard>
             </LazyRoute>
           ),
         },
         {
-          path: '/system/logs',
+          path: dynamicRouteMap.logs.path,
           element: (
             <LazyRoute>
-              <RouteGuard permissionCode="logs">
+              <RouteGuard permissionCode={dynamicRouteMap.logs.routeCode}>
                 <SystemModulePage moduleKey="logs" />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: dynamicRouteMap.configs.path,
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode={dynamicRouteMap.configs.routeCode}>
+                <SystemConfigPage />
               </RouteGuard>
             </LazyRoute>
           ),

@@ -9,7 +9,8 @@ React Admin Starter 是基于 Ant Design 的前端脚手架项目，提供 React
 - 已接入权限控制：动态菜单过滤、路由守卫、按钮权限组件（Access）。
 - 已完成 Dashboard 与 ECharts 数据统计，数据通过 service/mock 链路获取。
 - 已完成查询管理模板，支持筛选、分页、详情、新增和编辑。
-- 已完成系统管理基础模块：用户、角色、菜单、字典、日志页面模板均通过 service/mock 链路获取数据。
+- 已完成系统管理基础模块：用户、角色、菜单、字典、日志和系统配置页面均通过 service/mock 链路获取数据。
+- 已完成角色维度权限分配 UI、动态路由映射表、React Error Boundary、Vitest 配置骨架和后端接入 checklist。
 - 已统一认证页配色，登录和注册页视觉与后台主界面保持蓝白主色一致。
 - 已完成路由懒加载和 vendor chunk 拆分，生产构建不再出现 chunk 超限警告。
 - 已使用内存路由，页面切换不改变浏览器地址栏 URL。
@@ -240,6 +241,45 @@ function mapBackendMenu(item: BackendMenu): PermissionMenu {
 }
 ```
 
+### 权限编码规范
+
+权限编码统一使用小写英文、冒号分段，建议格式为：
+
+```txt
+{domain}:{resource}:{action}
+```
+
+命名约定：
+
+| 权限类型 | 命名规则 | 示例 |
+|---|---|---|
+| 菜单权限 | `{domain}:{resource}:view` | `system:menu:view` |
+| 路由权限 | 使用稳定 routeCode，不带冒号 | `menus`、`configs` |
+| 按钮权限 | `{domain}:{resource}:{operation}` | `system:role:assign-permission` |
+| 隐藏路由 | 仍归属具体资源动作 | `system:log:detail` |
+| 外链菜单 | 按资源归属定义查看权限 | `docs:antd:view` |
+
+编码要求：
+
+- `domain` 表示业务域，如 `system`、`query`、`statistics`。
+- `resource` 表示资源名，使用单数形式，如 `user`、`role`、`menu`。
+- `action` 表示动作，常用 `view`、`add`、`edit`、`status`、`delete`、`export`。
+- 路由守卫只判断 `routeCode`，不要直接复用按钮权限编码，避免路由和按钮权限耦合。
+- 后端下发菜单权限、路由权限、按钮权限时应保持三类集合独立。
+
+### 权限分配说明
+
+权限目录页已扩展为角色维度权限分配 UI：
+
+- 角色选项通过 `src/services/system.ts` 获取角色列表。
+- 菜单权限树、路由权限、按钮权限通过 `src/services/permission.ts` 获取和保存。
+- 当前使用 `src/mocks/permission.ts` 中的占位分配数据，后续替换真实接口即可。
+- 页面保存的是 `RolePermissionAssignment`，包含 `roleCode`、`menuIds`、`routeCodes`、`actionCodes`。
+
+### 动态路由映射
+
+后端动态菜单到本地页面组件的白名单映射维护在 `src/access/routeMap.ts`。后端建议只下发 `routePath`、`routeCode`、`componentKey` 等稳定字段，前端通过映射表决定实际页面组件，避免任意组件路径加载。
+
 ## Dashboard 数据说明
 
 Dashboard 已接入统计卡片、访问与订单趋势图、模块使用柱状图和业务状态饼图。页面不直接维护业务假数据，统一通过 `src/services/dashboard.ts` 获取数据，mock 数据维护在 `src/mocks/dashboard.ts`。
@@ -274,13 +314,15 @@ request.post('/api/query/save', params);
 - 用户管理：用户列表、筛选、详情、新增/编辑、状态切换、重置密码占位、分配角色入口。
 - 角色管理：角色列表、筛选、详情、新增/编辑、状态切换、权限分配入口。
 - 菜单管理：菜单类型、路由路径、权限编码、排序和状态维护模板。
+- 菜单管理：多级树形表格、目录/菜单/隐藏/外链类型、图标、父级菜单、排序、路由路径、权限编码、外链地址和状态维护。
 - 字典管理：字典类型、字典项数量、状态、缓存键和缓存刷新入口。
 - 日志管理：登录日志、操作日志、接口日志列表和类型筛选模板。
+- 系统配置：基础参数、开关配置、前端缓存配置入口。
 
-页面组件统一复用 `src/pages/system/SystemModulePage.tsx`，配置驱动不同模块的列、详情字段和操作入口。数据链路统一为：
+用户、角色、字典和日志复用 `src/pages/system/SystemModulePage.tsx`，菜单管理和系统配置按字段复杂度使用独立页面。数据链路统一为：
 
 ```txt
-SystemModulePage -> src/services/system.ts -> src/mocks/system.ts
+Page -> src/services/system.ts -> src/mocks/system.ts
 ```
 
 对接真实接口时，可将系统管理 service 中的 mock 调用替换为：
@@ -290,7 +332,53 @@ request.get('/api/system/{moduleKey}/list', { params });
 request.get('/api/system/detail', { params: { id } });
 request.post('/api/system/save', params);
 request.post('/api/system/status', { id, status });
+request.get('/api/system/menus/tree', { params });
+request.post('/api/system/menus/save', params);
+request.post('/api/system/menus/status', { id, status });
+request.get('/api/system/configs');
+request.post('/api/system/configs/save', { id, value });
 ```
+
+## 质量保障说明
+
+项目已增加页面级错误边界 `src/components/ErrorBoundary.tsx`，所有懒加载路由会经过错误边界兜底，页面渲染异常时展示 500 结果页并提供重试入口。
+
+### 单元测试方案
+
+已新增 Vitest 配置骨架：
+
+- `vitest.config.ts`：配置 React、路径别名、jsdom、setupFiles。
+- `tests/setupTests.ts`：接入 `@testing-library/jest-dom/vitest`。
+- `npm run test:unit`：执行单元测试。
+
+建议优先补充以下单元测试：
+
+- `src/utils/token.ts`：token、角色、权限本地存储读写。
+- `src/config/menu.tsx`：后端菜单到 Ant Design 菜单模型的映射、排序和 key 生成。
+- `src/hooks/usePermission.ts`：路由权限、按钮权限、任意权限和全部权限判断。
+- `src/services/*`：mapper 和 mock service 返回结构。
+
+### 端到端冒烟测试方案
+
+建议后续引入 Playwright，覆盖以下最小链路：
+
+- 登录成功后进入工作台，侧边栏按 admin 权限展示。
+- viewer 登录后只能看到工作台，访问系统管理路由应进入 403。
+- 查询管理完成筛选、打开详情、新增弹窗。
+- 菜单管理展开树形表格，打开新增和编辑弹窗，切换状态。
+- 权限目录切换角色并保存菜单、路由、按钮权限。
+
+### 真实后端接入 Checklist
+
+- 确认 `src/services/request.ts` 的 `baseURL`、超时、认证头和 401 处理符合后端网关规则。
+- 将 `src/services/auth.ts`、`src/services/permission.ts`、`src/services/system.ts`、`src/services/query.ts`、`src/services/dashboard.ts` 中的 mock 调用替换为真实接口。
+- 在 service 层完成字段 mapper，页面层只消费前端统一类型。
+- 后端权限 bootstrap 必须一次性返回菜单树、路由 routeCodes、按钮 actions。
+- 后端动态菜单必须能映射到 `src/access/routeMap.ts` 中的白名单 componentKey。
+- 统一接口响应为 `ApiResponse<T>`，分页响应为 `PageResult<T>` 或在 service 中转换。
+- 明确 token 过期、刷新、登出后的本地缓存清理策略。
+- 建立菜单缓存版本或权限版本字段，配合系统配置中的缓存入口清理本地权限。
+- 接入生产前执行 `npm run typecheck`、`npm run build`、单元测试和端到端冒烟测试。
 
 ## 主题定制说明
 
@@ -368,7 +456,7 @@ hasAllAction(['a', 'b']);    // 是否全部权限
 ## 路由说明
 
 - 项目使用内存路由，页面切换不改变浏览器地址栏 URL。
-- 当前不会在地址栏暴露 `/dashboard`、`/query`、`/statistics`、`/permission`、`/system/users`、`/system/roles`、`/system/menus`、`/system/dicts`、`/system/logs`、`/login`、`/register` 等内部路径。
+- 当前不会在地址栏暴露 `/dashboard`、`/query`、`/statistics`、`/permission`、`/system/users`、`/system/roles`、`/system/menus`、`/system/dicts`、`/system/logs`、`/system/configs`、`/login`、`/register` 等内部路径。
 
 ## 页面体验规范
 
@@ -380,7 +468,7 @@ hasAllAction(['a', 'b']);    // 是否全部权限
 
 ## 后续开发方向
 
-当前已从“基础脚手架可用”进入系统管理模块扩展阶段。后续优先深化权限配置和质量保障能力。
+当前已完成阶段 0-11 的脚手架建设，具备后台基础工程、系统管理、权限配置、系统配置和质量保障骨架。
 
 ### 阶段 8：框架体验升级
 
@@ -423,7 +511,7 @@ hasAllAction(['a', 'b']);    // 是否全部权限
 
 ## 下一阶段建议
 
-建议继续执行阶段 10。阶段 9 已补齐系统管理基础模板，下一步应深化角色权限分配 UI、后端动态菜单到本地组件的映射表，以及系统配置页面模板。
+建议下一阶段接入真实后端接口，补齐真实业务单元测试和 Playwright 端到端冒烟测试，并按具体业务域扩展系统配置项。
 
 ## 阶段进度
 
