@@ -9,8 +9,9 @@ React Admin Starter 是基于 Ant Design 的前端脚手架项目，提供 React
 - 已接入权限控制：动态菜单过滤、路由守卫、按钮权限组件（Access）。
 - 已完成 Dashboard 与 ECharts 数据统计，数据通过 service/mock 链路获取。
 - 已完成查询管理模板，支持筛选、分页、详情、新增和编辑。
+- 已完成路由懒加载和 vendor chunk 拆分，生产构建不再出现 chunk 超限警告。
 - 已使用内存路由，页面切换不改变浏览器地址栏 URL。
-- 下一阶段为工程完善，详见 [todolist.md](./todolist.md) 的“下一步任务”。
+- 当前阶段计划已完成，详见 [todolist.md](./todolist.md)。
 
 ## 技术栈
 
@@ -122,6 +123,8 @@ npm run build
 
 构建成功后会生成 `dist` 文件夹。如果构建失败或出现 chunk 超过 500kB 的警告，可通过路由懒加载或 chunk 拆分优化。
 
+当前工程已配置页面路由懒加载，并在 `vite.config.ts` 中拆分 `react`、`antd`、`echarts` vendor chunk，避免 Ant Design 和 ECharts 全部进入首屏主包。
+
 ### 类型检查
 
 提交前可执行类型检查：
@@ -182,6 +185,38 @@ npm run preview
 
 对接真实接口时，只需修改 `src/services/permission.ts` 中的 `fetchPermissionBootstrap` 方法，将 mock 调用替换为 `request.get('/api/permission/bootstrap')`。
 
+### 权限字段映射示例
+
+后端字段可以不完全等同于前端模型，但需要在 service 或 mapper 中统一转换为 `PermissionBootstrap`。推荐映射关系如下：
+
+| 后端字段 | 前端字段 | 说明 |
+|---|---|---|
+| `menuId` | `id` | 菜单唯一标识 |
+| `parentMenuId` | `parentId` | 父级菜单标识 |
+| `menuName` | `title` | 菜单显示名称 |
+| `routePath` | `path` | 前端路由路径 |
+| `iconName` | `icon` | Ant Design Icon 名称 |
+| `sort` | `orderNo` | 菜单排序 |
+| `permCode` | `permissionCode` | 菜单权限编码 |
+| `hidden` | `hiddenInMenu` | 是否隐藏菜单 |
+
+转换示例：
+
+```ts
+function mapBackendMenu(item: BackendMenu): PermissionMenu {
+  return {
+    id: String(item.menuId),
+    parentId: item.parentMenuId ? String(item.parentMenuId) : undefined,
+    title: item.menuName,
+    path: item.routePath,
+    icon: item.iconName,
+    orderNo: item.sort,
+    permissionCode: item.permCode,
+    hiddenInMenu: item.hidden,
+  };
+}
+```
+
 ## Dashboard 数据说明
 
 Dashboard 已接入统计卡片、访问与订单趋势图、模块使用柱状图和业务状态饼图。页面不直接维护业务假数据，统一通过 `src/services/dashboard.ts` 获取数据，mock 数据维护在 `src/mocks/dashboard.ts`。
@@ -207,6 +242,50 @@ return request.get('/api/dashboard/overview');
 request.get('/api/query/list', { params });
 request.get('/api/query/detail', { params: { id } });
 request.post('/api/query/save', params);
+```
+
+## 主题定制说明
+
+主题集中维护在 `src/theme/index.ts`，通过 Ant Design `ConfigProvider` token 生效。常用调整项：
+
+- `token.colorPrimary`：主色。
+- `token.borderRadius`：全局圆角。
+- `token.fontFamily`：全局字体。
+- `components.Layout`：后台布局背景。
+- `components.Menu`：菜单项样式。
+- `components.Card`：卡片圆角。
+
+示例：
+
+```ts
+export const themeConfig = {
+  token: {
+    colorPrimary: '#1677ff',
+    borderRadius: 6,
+  },
+};
+```
+
+局部样式统一写在 `src/styles/base.css`，不要在页面组件里散落大段样式覆盖。
+
+## 服务层替换真实 API
+
+项目页面不直接请求 mock 数据，统一通过 `src/services` 访问数据。替换真实接口时按以下步骤处理：
+
+1. 在 `src/services/request.ts` 配置 `baseURL`、认证请求头和错误处理。
+2. 将对应 service 中的 mock 调用替换为 `request.get` 或 `request.post`。
+3. 保持 service 返回 `ApiResponse<T>` 或 `PageResult<T>` 结构，避免页面层跟着接口字段变动。
+4. 如后端字段和前端模型不同，在 service 内增加 mapper，不在页面组件中做字段适配。
+
+示例：
+
+```ts
+export async function fetchQueryPage(params: QueryListParams) {
+  const response = await request.get<ApiResponse<PageResult<QueryRecord>>>('/query/list', {
+    params,
+  });
+  return response.data;
+}
 ```
 
 ### 使用 Access 组件控制按钮权限

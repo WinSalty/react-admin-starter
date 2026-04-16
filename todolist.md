@@ -230,16 +230,16 @@ GET  /api/permission/bootstrap
 
 ### 阶段 7：工程完善
 
-- [ ] 完善 README。
-- [ ] 补充主题定制说明。
-- [ ] 补充服务层替换真实 API 的说明。
-- [ ] 补充权限接口字段映射示例。
-- [ ] 运行构建验证。
-- [ ] 整理最终提交。
+- [x] 完善 README。
+- [x] 补充主题定制说明。
+- [x] 补充服务层替换真实 API 的说明。
+- [x] 补充权限接口字段映射示例。
+- [x] 运行构建验证。
+- [x] 整理最终提交。
 
 ## 当前进度
 
-阶段 6 已完成。查询管理页已实现筛选区、表格列表、分页、详情 Drawer、新增/编辑 Modal、loading/empty/error 状态和 service/mock 数据链路。已通过 `npm run typecheck` 验证。
+阶段 7 已完成。README 已补充主题定制、服务层替换真实 API、权限接口字段映射和构建拆包说明；路由已改为懒加载，Vite 已拆分 `react`、`antd`、`echarts` vendor chunk。已通过 `npm run typecheck` 和 `npm run build` 验证。
 
 当前额外约定：
 
@@ -251,9 +251,9 @@ GET  /api/permission/bootstrap
 
 ## 下一步任务
 
-1. 进入阶段 7，完善 README 和工程说明。
-2. 补充主题定制、服务层替换真实 API、权限接口字段映射示例。
-3. 运行构建验证，整理最终提交。
+1. 当前阶段计划已完成。
+2. 后续可按业务项目需要接入真实后端接口。
+3. 如继续扩展，可优先补充单元测试、端到端测试和真实权限字段 mapper。
 
 ## 完成记录
 
@@ -273,3 +273,4 @@ GET  /api/permission/bootstrap
 - 2026-04-16：根据代码审查补齐阶段 4 动态菜单链路：保存后端 menus、增加 PermissionMenu mapper、BasicLayout 优先使用动态菜单、修复 401 内存路由处理、收紧权限恢复逻辑并修正权限目录空状态文案。gpt-5.4
 - 2026-04-16：完成阶段 5，新增 Dashboard 类型、service/mock 数据链路，首页接入统计卡片、ECharts 趋势图、柱状图、饼图和加载失败状态。gpt-5.4
 - 2026-04-16：完成阶段 6，新增查询管理类型、service/mock 数据链路，查询页接入筛选、分页、详情 Drawer、新增/编辑 Modal 和列表状态处理。gpt-5.4
+- 2026-04-16：完成阶段 7，补充 README 工程说明，新增路由懒加载和 Vite vendor chunk 拆分，构建验证无 chunk 超限警告。gpt-5.4

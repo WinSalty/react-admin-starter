@@ -80,6 +80,13 @@ body {
   gap: 16px;
 }
 
+.route-loading {
+  display: flex;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+}
+
 .page-title-block h2,
 .compact-page-header h3 {
   margin-bottom: 8px;
