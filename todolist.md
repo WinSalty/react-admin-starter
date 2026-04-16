@@ -200,6 +200,16 @@ GET  /api/permission/bootstrap
 - [x] 实现按钮权限控制工具。
 - [x] README 补充后端权限接口对接说明。
 
+### 代码审查修复清单
+
+- [x] 将后端下发的 `menus` 保存到 auth store，并持久化到 localStorage。
+- [x] 增加 `PermissionMenu` 到 Ant Design 菜单项的 mapper，支持静态菜单兜底。
+- [x] `BasicLayout` 优先渲染后端动态菜单，后端菜单为空时回退静态 `appMenus`。
+- [x] 修复 axios 401 处理，避免 `window.location.href` 破坏内存路由约定。
+- [x] 收紧本地权限恢复逻辑，避免只有按钮权限时误判为权限已加载。
+- [x] 修正权限目录中空 `routeCodes` 的展示文案。
+- [ ] 阶段 5 开始前处理 Dashboard 统计卡片、ECharts、service/mock 链路。
+
 ### 阶段 5：Dashboard 与 ECharts
 
 - [ ] 实现统计卡片。
@@ -229,7 +239,7 @@ GET  /api/permission/bootstrap
 
 ## 当前进度
 
-阶段 4 已完成。已实现权限类型定义、mock 数据（admin/viewer 角色）、permission service、usePermission hook、Access 按钮权限组件、动态菜单过滤、路由权限守卫。已通过 `npm run build` 验证。
+阶段 4 已完成。已实现权限类型定义、mock 数据（admin/viewer 角色）、permission service、PermissionMenu mapper、动态菜单渲染、usePermission hook、Access 按钮权限组件、路由权限守卫。已通过 `npm run typecheck` 验证。
 
 当前额外约定：
 
@@ -260,3 +270,4 @@ GET  /api/permission/bootstrap
 - 2026-04-16：代码审查，将未实现的 `Breadcrumb` 从阶段 2 移除，清理 `vite.config.d.ts` 编译产物。claude
 - 2026-04-16：完成阶段 3，新增登录注册表单校验、zustand 登录态 store、token 工具、auth service、mock 数据、路由守卫和 axios 拦截器。默认测试账号 admin/123456。claude
 - 2026-04-16：完成阶段 4，新增权限类型定义、权限 mock 数据（admin/viewer）、permission service、usePermission hook、Access 按钮权限组件、动态菜单过滤、路由权限守卫。QueryList 页面已接入 Access 控制「新增」按钮。claude
+- 2026-04-16：根据代码审查补齐阶段 4 动态菜单链路：保存后端 menus、增加 PermissionMenu mapper、BasicLayout 优先使用动态菜单、修复 401 内存路由处理、收紧权限恢复逻辑并修正权限目录空状态文案。gpt-5.4

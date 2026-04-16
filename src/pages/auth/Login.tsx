@@ -25,7 +25,7 @@ function Login() {
       loginStore(res.data.token, role);
       const permRes = await fetchPermissionBootstrap(role);
       if (permRes.code === 0) {
-        setPermissions(permRes.data.routes, permRes.data.actions);
+        setPermissions(permRes.data.menus, permRes.data.routes, permRes.data.actions);
         messageApi.success('登录成功');
         navigate('/dashboard', { replace: true });
       } else {

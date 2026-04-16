@@ -1,8 +1,9 @@
 import { LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Avatar, Button, Layout, Menu, Space, theme, Typography } from 'antd';
+import type { MenuProps } from 'antd';
 import { useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { appMenus } from '@/config/menu';
+import { appMenus, mapPermissionMenusToAppMenus, type AppMenuItem } from '@/config/menu';
 import { useAuthStore } from '@/stores/auth';
 
 const { Header, Sider, Content } = Layout;
@@ -20,6 +21,7 @@ function BasicLayout() {
   const location = useLocation();
   const { token } = theme.useToken();
   const role = useAuthStore((state) => state.role);
+  const permissionMenus = useAuthStore((state) => state.menus);
   const routeCodes = useAuthStore((state) => state.routeCodes);
 
   const isAdmin = role === 'admin';
@@ -30,19 +32,18 @@ function BasicLayout() {
     navigate('/login', { replace: true });
   }
 
-  // 默认拒绝：仅当 menu.key 在 routeCodes 中时才显示
-  const visibleMenus = useMemo(
-    () =>
-      appMenus
-        .filter((menu) => {
-          if (menu.hiddenInMenu) return false;
-          return routeCodes.includes(menu.key);
-        })
-        .sort((prev, next) => prev.orderNo - next.orderNo),
-    [routeCodes],
+  const sourceMenus = useMemo(
+    () => (permissionMenus.length > 0 ? mapPermissionMenusToAppMenus(permissionMenus) : appMenus),
+    [permissionMenus],
   );
 
-  const activeMenu = visibleMenus.find((menu) => location.pathname.startsWith(menu.path)) || visibleMenus[0];
+  // 默认拒绝：仅当 menu.key 在 routeCodes 中时才显示
+  const visibleMenus = useMemo(
+    () => filterVisibleMenus(sourceMenus, routeCodes),
+    [sourceMenus, routeCodes],
+  );
+
+  const activeMenu = findActiveMenu(visibleMenus, location.pathname) || visibleMenus[0];
 
   return (
     <Layout className="app-layout">
@@ -61,13 +62,9 @@ function BasicLayout() {
         <Menu
           mode="inline"
           selectedKeys={[activeMenu?.key || 'dashboard']}
-          items={visibleMenus.map((menu) => ({
-            key: menu.key,
-            icon: menu.icon,
-            label: menu.label,
-          }))}
+          items={visibleMenus.map(mapToMenuItem)}
           onClick={({ key }) => {
-            const target = visibleMenus.find((menu) => menu.key === key);
+            const target = findMenuByKey(visibleMenus, String(key));
             if (target) {
               navigate(target.path);
             }
@@ -104,6 +101,51 @@ function BasicLayout() {
       </Layout>
     </Layout>
   );
+}
+
+function filterVisibleMenus(menus: AppMenuItem[], routeCodes: string[]): AppMenuItem[] {
+  return menus
+    .filter((menu) => !menu.hiddenInMenu && routeCodes.includes(menu.key))
+    .map((menu) => ({
+      ...menu,
+      children: menu.children ? filterVisibleMenus(menu.children, routeCodes) : undefined,
+    }))
+    .sort((prev, next) => prev.orderNo - next.orderNo);
+}
+
+function mapToMenuItem(menu: AppMenuItem): NonNullable<MenuProps['items']>[number] {
+  return {
+    key: menu.key,
+    icon: menu.icon,
+    label: menu.label,
+    children: menu.children?.map(mapToMenuItem),
+  };
+}
+
+function findActiveMenu(menus: AppMenuItem[], pathname: string): AppMenuItem | undefined {
+  for (const menu of menus) {
+    if (pathname.startsWith(menu.path)) {
+      return menu;
+    }
+    const child = menu.children ? findActiveMenu(menu.children, pathname) : undefined;
+    if (child) {
+      return child;
+    }
+  }
+  return undefined;
+}
+
+function findMenuByKey(menus: AppMenuItem[], key: string): AppMenuItem | undefined {
+  for (const menu of menus) {
+    if (menu.key === key) {
+      return menu;
+    }
+    const child = menu.children ? findMenuByKey(menu.children, key) : undefined;
+    if (child) {
+      return child;
+    }
+  }
+  return undefined;
 }
 
 export default BasicLayout;

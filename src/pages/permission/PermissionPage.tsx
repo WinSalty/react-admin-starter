@@ -24,7 +24,7 @@ function PermissionPage() {
 
       <Card title="路由权限">
         {routeCodes.length === 0 ? (
-          <Paragraph type="secondary">拥有全部路由权限。</Paragraph>
+          <Paragraph type="secondary">暂无路由权限或权限数据未加载。</Paragraph>
         ) : (
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {routeCodes.map((code) => (

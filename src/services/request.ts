@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { getToken, clearToken } from '@/utils/token';
+import { useAuthStore } from '@/stores/auth';
+import { getToken } from '@/utils/token';
 
 export const request = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -28,8 +29,7 @@ request.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      clearToken();
-      window.location.href = '/login';
+      useAuthStore.getState().logout();
     }
     return Promise.reject(error);
   },

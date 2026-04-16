@@ -4,6 +4,8 @@ dist
 vite.config.js
 vite.config.d.ts
 .DS_Store
+.idea/
+.vscode/
 *.local
 .env.local
 .env.development.local
