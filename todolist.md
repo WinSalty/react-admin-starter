@@ -7,14 +7,14 @@
 当前目录仍为：
 
 ```txt
-/Users/salty/codeProject/codex/react-admin-starter
+/Users/salty/codeProject/ai/react-admin-starter
 ```
 
 当前只保留本 `todolist.md`。下一步将重新初始化项目工程和 git 仓库。
 
 ## 新项目定位
 
-本项目是基于 Ant Design 的生产级 React 后台管理系统脚手架，目标是为其他业务项目提供可复制、可扩展、可维护的管理后台基础工程。
+本项目是基于 Ant Design 的前端脚手架项目，提供 React 后台管理系统的基础工程模板。项目只包含前端代码，后端接口由其他业务项目提供。
 
 核心目标：
 
@@ -173,7 +173,7 @@ GET  /api/permission/bootstrap
 
 - [x] 实现 `BasicLayout`。
 - [x] 实现 `AuthLayout`。
-- [x] 使用 Ant Design `Layout`、`Menu`、`Breadcrumb`。
+- [x] 使用 Ant Design `Layout`、`Menu`。
 - [x] 创建路由配置。
 - [x] 创建静态菜单配置，字段按权限模型设计。
 - [x] 创建 Dashboard、查询管理、数据统计、权限目录、403、404 占位页面。
@@ -181,24 +181,24 @@ GET  /api/permission/bootstrap
 
 ### 阶段 3：登录注册与认证
 
-- [ ] 实现登录页面。
-- [ ] 实现注册页面。
-- [ ] 实现 token 存储和清理。
-- [ ] 实现登录态 store。
-- [ ] 实现路由守卫。
-- [ ] 创建 `services/auth.ts`。
-- [ ] 创建认证 mock 数据。
+- [x] 实现登录页面。
+- [x] 实现注册页面。
+- [x] 实现 token 存储和清理。
+- [x] 实现登录态 store。
+- [x] 实现路由守卫。
+- [x] 创建 `services/auth.ts`。
+- [x] 创建认证 mock 数据。
 
 ### 阶段 4：权限目录与访问控制
 
-- [ ] 定义权限类型。
-- [ ] 创建 `services/permission.ts`。
-- [ ] 创建权限 mock 数据。
-- [ ] 实现权限 mapper。
-- [ ] 实现动态菜单过滤和排序。
-- [ ] 实现路由权限守卫。
-- [ ] 实现按钮权限控制工具。
-- [ ] README 补充后端权限接口对接说明。
+- [x] 定义权限类型。
+- [x] 创建 `services/permission.ts`。
+- [x] 创建权限 mock 数据。
+- [x] 实现权限 mapper。
+- [x] 实现动态菜单过滤和排序。
+- [x] 实现路由权限守卫。
+- [x] 实现按钮权限控制工具。
+- [x] README 补充后端权限接口对接说明。
 
 ### 阶段 5：Dashboard 与 ECharts
 
@@ -229,20 +229,21 @@ GET  /api/permission/bootstrap
 
 ## 当前进度
 
-阶段 2 已完成。已基于 Ant Design `Layout`、`Menu` 完成后台基础布局、认证布局、菜单配置、路由配置和占位页面，并已通过 `npm run build` 验证。
+阶段 4 已完成。已实现权限类型定义、mock 数据（admin/viewer 角色）、permission service、usePermission hook、Access 按钮权限组件、动态菜单过滤、路由权限守卫。已通过 `npm run build` 验证。
 
 当前额外约定：
 
 - 使用内存路由，页面切换不改变浏览器地址栏 URL。
-- 顶部栏已移除面包屑和说明文案，只显示菜单折叠按钮、当前页面名称和管理员占位。
+- 顶部栏显示当前用户角色（管理员/访客）。
+- 登录测试账号：admin / 123456（全部权限），viewer / 123456（仅 dashboard 查看权限）。
 - 下次继续开发前先执行 `git status --short`，确认工作区干净。
 - 如需预览页面，执行 `npm run dev` 后访问 `http://localhost:5173/`。
 
 ## 下一步任务
 
-1. 进入阶段 3，实现登录页面和注册页面的表单逻辑。
-2. 实现 token 存储、登录态 store 和路由守卫。
-3. 创建 `services/auth.ts` 和认证 mock 数据。
+1. 进入阶段 5，实现 Dashboard 与 ECharts 数据统计。
+2. 实现统计卡片、趋势图、柱状图、饼图组件。
+3. 首页统计数据通过 service 获取，mock 数据放入 `src/mocks`。
 
 ## 完成记录
 
@@ -256,3 +257,6 @@ GET  /api/permission/bootstrap
 - 2026-04-16：根据要求将浏览器路由改为内存路由，页面切换不再改变浏览器地址栏 URL，README 已同步说明。
 - 2026-04-16：优化顶部栏显示，移除面包屑和脚手架说明文案，改为当前页面标题与管理员占位。
 - 2026-04-16：维护 README 和 todolist，补充当前状态、下次继续入口和开发前检查命令。
+- 2026-04-16：代码审查，将未实现的 `Breadcrumb` 从阶段 2 移除，清理 `vite.config.d.ts` 编译产物。claude
+- 2026-04-16：完成阶段 3，新增登录注册表单校验、zustand 登录态 store、token 工具、auth service、mock 数据、路由守卫和 axios 拦截器。默认测试账号 admin/123456。claude
+- 2026-04-16：完成阶段 4，新增权限类型定义、权限 mock 数据（admin/viewer）、permission service、usePermission hook、Access 按钮权限组件、动态菜单过滤、路由权限守卫。QueryList 页面已接入 Access 控制「新增」按钮。claude

@@ -1,4 +1,5 @@
 import { createMemoryRouter, Navigate } from 'react-router-dom';
+import { AuthGuard, GuestGuard, RouteGuard } from '@/components/RouteGuard';
 import AuthLayout from '@/layouts/AuthLayout';
 import BasicLayout from '@/layouts/BasicLayout';
 import Login from '@/pages/auth/Login';
@@ -17,23 +18,43 @@ export const router = createMemoryRouter(
       element: <Navigate to="/dashboard" replace />,
     },
     {
-      element: <BasicLayout />,
+      element: (
+        <AuthGuard>
+          <BasicLayout />
+        </AuthGuard>
+      ),
       children: [
         {
           path: '/dashboard',
-          element: <Dashboard />,
+          element: (
+            <RouteGuard permissionCode="dashboard">
+              <Dashboard />
+            </RouteGuard>
+          ),
         },
         {
           path: '/query',
-          element: <QueryList />,
+          element: (
+            <RouteGuard permissionCode="query">
+              <QueryList />
+            </RouteGuard>
+          ),
         },
         {
           path: '/statistics',
-          element: <Statistics />,
+          element: (
+            <RouteGuard permissionCode="statistics">
+              <Statistics />
+            </RouteGuard>
+          ),
         },
         {
           path: '/permission',
-          element: <PermissionPage />,
+          element: (
+            <RouteGuard permissionCode="permission">
+              <PermissionPage />
+            </RouteGuard>
+          ),
         },
         {
           path: '/403',
@@ -42,7 +63,11 @@ export const router = createMemoryRouter(
       ],
     },
     {
-      element: <AuthLayout />,
+      element: (
+        <GuestGuard>
+          <AuthLayout />
+        </GuestGuard>
+      ),
       children: [
         {
           path: '/login',

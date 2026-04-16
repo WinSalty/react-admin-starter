@@ -1,11 +1,13 @@
 import { Button, Card, Empty, Form, Input, Select, Space, Table, Typography } from 'antd';
+import { Access } from '@/components/Access';
 
 const { Title, Paragraph } = Typography;
 
 /**
  * 查询管理占位页面，阶段 6 会接入真实查询模板。
- * 创建日期：2026-04-16
+ * 按钮权限已接入 Access 组件控制，无权限时按钮隐藏。
  * author: sunshengxian
+ * 创建日期：2026-04-16
  */
 function QueryList() {
   return (
@@ -42,7 +44,11 @@ function QueryList() {
         </Form>
       </Card>
 
-      <Card title="查询结果" extra={<Button type="primary">新增</Button>}>
+      <Card title="查询结果" extra={
+        <Access action="query:add">
+          <Button type="primary">新增</Button>
+        </Access>
+      }>
         <Table
           columns={[
             { title: '名称', dataIndex: 'name' },
