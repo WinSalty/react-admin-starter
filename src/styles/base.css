@@ -1,0 +1,24 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+body {
+  background: #f5f7fb;
+  color: rgba(0, 0, 0, 0.88);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.starter-page {
+  min-height: 100vh;
+  padding: 24px;
+  background: #f5f7fb;
+}

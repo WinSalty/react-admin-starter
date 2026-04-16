@@ -160,13 +160,13 @@ GET  /api/permission/bootstrap
 
 ### 阶段 1：Ant Design 基础工程
 
-- [ ] 初始化 Vite + React + TypeScript 工程。
-- [ ] 安装 Ant Design、Ant Design Icons、React Router、Axios、ECharts、dayjs。
-- [ ] 配置 `package.json`、`tsconfig.json`、`vite.config.ts`。
-- [ ] 创建 `src/main.tsx`、`src/App.tsx`。
-- [ ] 接入 Ant Design `ConfigProvider` 和主题 token。
-- [ ] 创建 README 第一版，写清启动、停止、构建命令。
-- [ ] 运行构建验证。
+- [x] 初始化 Vite + React + TypeScript 工程。
+- [x] 安装 Ant Design、Ant Design Icons、React Router、Axios、ECharts、dayjs。
+- [x] 配置 `package.json`、`tsconfig.json`、`vite.config.ts`。
+- [x] 创建 `src/main.tsx`、`src/App.tsx`。
+- [x] 接入 Ant Design `ConfigProvider` 和主题 token。
+- [x] 创建 README 第一版，写清启动、停止、构建命令。
+- [x] 运行构建验证。
 
 ### 阶段 2：布局与路由
 
@@ -228,16 +228,18 @@ GET  /api/permission/bootstrap
 
 ## 当前进度
 
-项目已重启。旧代码和旧 git 仓库已删除，只保留新的 Ant Design 方向 `todolist.md`，并已重新初始化 git 仓库。
+阶段 1 已完成。Ant Design 版 React + TypeScript + Vite 基础工程、主题配置、路由骨架、README 和基础服务/类型/工具目录已创建，并已通过 `npm run build` 验证。
 
 ## 下一步任务
 
-1. 进入阶段 1，初始化 Ant Design 版 React 基础工程。
-2. 安装 Ant Design、Ant Design Icons、React Router、Axios、ECharts、dayjs。
-3. 配置基础工程文件、README 和构建验证。
+1. 进入阶段 2，实现 Ant Design `BasicLayout` 和 `AuthLayout`。
+2. 使用 `Layout`、`Menu`、`Breadcrumb` 创建后台基础布局。
+3. 创建 Dashboard、查询管理、数据统计、权限目录、403、404 占位页面，并实现响应式侧边栏折叠。
 
 ## 完成记录
 
 - 2026-04-16：按要求删除原 React 自研 UI 版本代码、依赖、构建产物和 `.git` 仓库。
 - 2026-04-16：重写 `todolist.md`，项目方向切换为 Ant Design 后台管理系统脚手架。
 - 2026-04-16：重新初始化 `react-admin-starter` git 仓库，完成项目重启规划。
+- 2026-04-16：完成阶段 1，新增 Ant Design 版 React + TypeScript + Vite 基础工程、主题配置、路由骨架、README、request 封装、公共类型和 storage 工具。
+- 2026-04-16：执行 `npm run build` 通过；构建提示首包超过 500 kB，后续阶段可通过路由懒加载和 chunk 拆分优化。`npm install` 报告 2 个 moderate 漏洞，未执行 `npm audit fix --force`。
