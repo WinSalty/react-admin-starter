@@ -1,5 +1,5 @@
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import { Button, Breadcrumb, Layout, Menu, theme, Typography } from 'antd';
+import { Avatar, Button, Layout, Menu, Space, theme, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { appMenus } from '@/config/menu';
@@ -58,21 +58,19 @@ function BasicLayout() {
 
       <Layout>
         <Header className="app-header">
-          <Button
-            aria-label={collapsed ? '展开菜单' : '折叠菜单'}
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            type="text"
-            onClick={() => setCollapsed(!collapsed)}
-          />
-          <div>
-            <Breadcrumb
-              items={[
-                { title: '后台管理' },
-                { title: activeMenu?.label || '工作台' },
-              ]}
+          <div className="app-header-left">
+            <Button
+              aria-label={collapsed ? '展开菜单' : '折叠菜单'}
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              type="text"
+              onClick={() => setCollapsed(!collapsed)}
             />
-            <Text type="secondary">Ant Design 管理后台脚手架</Text>
+            <Text strong>{activeMenu?.label || '工作台'}</Text>
           </div>
+          <Space className="app-header-user">
+            <Avatar size="small">A</Avatar>
+            <Text type="secondary">管理员</Text>
+          </Space>
         </Header>
         <Content className="app-content" style={{ background: token.colorBgLayout }}>
           <Outlet />

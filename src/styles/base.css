@@ -53,9 +53,20 @@ body {
   display: flex;
   height: 64px;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
   border-bottom: 1px solid rgba(5, 5, 5, 0.06);
   padding: 0 20px;
+}
+
+.app-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-header-user {
+  flex: 0 0 auto;
 }
 
 .app-content {
