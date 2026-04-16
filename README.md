@@ -41,6 +41,17 @@ npm run dev
 http://localhost:5173/
 ```
 
+常用页面：
+
+```txt
+http://localhost:5173/dashboard
+http://localhost:5173/query
+http://localhost:5173/statistics
+http://localhost:5173/permission
+http://localhost:5173/login
+http://localhost:5173/register
+```
+
 ### 终止开发服务
 
 如果服务在当前终端运行，按：

@@ -1,4 +1,4 @@
-import { Card, Result, Space, Typography } from 'antd';
+import { Card, Col, Row, Statistic, Typography } from 'antd';
 
 const { Paragraph, Title } = Typography;
 
@@ -9,18 +9,38 @@ const { Paragraph, Title } = Typography;
  */
 function Dashboard() {
   return (
-    <main className="starter-page">
+    <div className="page-stack">
       <Card>
-        <Space direction="vertical" size={16}>
+        <div className="page-title-block">
           <Title level={2}>React Admin Starter</Title>
           <Paragraph>
-            Ant Design 版基础工程已启动。后续阶段会接入后台布局、菜单权限、登录注册、查询管理和
-            ECharts 数据统计。
+            Ant Design 版后台基础布局已启动。后续阶段会接入权限、认证、查询管理和 ECharts 数据统计。
           </Paragraph>
-          <Result status="success" title="Ant Design 基础工程已准备" subTitle="当前页面用于验证主题、路由和构建配置。" />
-        </Space>
+        </div>
       </Card>
-    </main>
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic title="菜单数量" value={4} suffix="项" />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic title="页面模板" value={6} suffix="个" />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic title="权限占位" value={3} suffix="类" />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic title="构建状态" value="通过" />
+          </Card>
+        </Col>
+      </Row>
+    </div>
   );
 }
 

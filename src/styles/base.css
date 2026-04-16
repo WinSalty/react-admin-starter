@@ -17,8 +17,125 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-.starter-page {
+.app-layout,
+.auth-layout {
   min-height: 100vh;
-  padding: 24px;
+}
+
+.app-logo {
+  display: flex;
+  height: 56px;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(5, 5, 5, 0.06);
+  padding: 0 16px;
+}
+
+.app-logo span {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #1677ff;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.app-logo strong {
+  color: rgba(0, 0, 0, 0.88);
+  font-size: 15px;
+}
+
+.app-header {
+  display: flex;
+  height: 64px;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid rgba(5, 5, 5, 0.06);
+  padding: 0 20px;
+}
+
+.app-content {
+  min-height: calc(100vh - 64px);
+  padding: 20px;
+}
+
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.page-title-block h2,
+.compact-page-header h3 {
+  margin-bottom: 8px;
+}
+
+.page-title-block .ant-typography,
+.compact-page-header .ant-typography {
+  margin-bottom: 0;
+}
+
+.compact-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 44px;
+}
+
+.query-form {
+  row-gap: 12px;
+}
+
+.chart-placeholder {
+  display: flex;
+  min-height: 260px;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(5, 5, 5, 0.18);
+  border-radius: 8px;
   background: #f5f7fb;
+  color: rgba(0, 0, 0, 0.45);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.auth-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f7fb;
+  padding: 24px;
+}
+
+.auth-card-wrap {
+  width: min(420px, 100%);
+}
+
+.auth-card {
+  width: 100%;
+}
+
+.auth-extra {
+  margin-top: 18px;
+  color: rgba(0, 0, 0, 0.45);
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0 12px;
+  }
+
+  .app-content {
+    padding: 12px;
+  }
+
+  .compact-page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
