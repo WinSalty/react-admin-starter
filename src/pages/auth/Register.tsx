@@ -37,8 +37,9 @@ function Register() {
       {contextHolder}
       <Card className="auth-card">
         <div className="auth-card-title">
+          <span>Create account</span>
           <Title level={2}>注册账号</Title>
-          <Paragraph>创建用于访问后台的账号。</Paragraph>
+          <Paragraph>创建账号后即可进入后台框架体验完整流程。</Paragraph>
         </div>
         <Form layout="vertical" size="large" onFinish={onFinish}>
           <Form.Item

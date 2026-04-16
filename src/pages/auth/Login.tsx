@@ -42,8 +42,9 @@ function Login() {
       {contextHolder}
       <Card className="auth-card">
         <div className="auth-card-title">
+          <span>Welcome back</span>
           <Title level={2}>登录后台</Title>
-          <Paragraph>使用账号进入管理工作台。</Paragraph>
+          <Paragraph>输入账号密码，继续管理你的业务系统。</Paragraph>
         </div>
         <Form layout="vertical" size="large" onFinish={onFinish}>
           <Form.Item

@@ -11,23 +11,54 @@ function AuthLayout() {
     <Layout className="auth-layout">
       <div className="auth-shell">
         <section className="auth-brand-panel">
-          <div className="auth-brand-mark">RA</div>
-          <div>
-            <h1>React Admin</h1>
-            <p>面向业务后台的 Ant Design 管理系统脚手架。</p>
+          <div className="auth-brand-copy">
+            <div className="auth-brand-mark">RA</div>
+            <div>
+              <span className="auth-brand-eyebrow">React Admin Starter</span>
+              <h1>让后台系统从第一屏就进入状态</h1>
+              <p>多级菜单、权限控制、数据看板和管理模板已经准备好。</p>
+            </div>
+          </div>
+          <div className="auth-product-preview" aria-hidden="true">
+            <div className="auth-preview-sidebar">
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="auth-preview-main">
+              <div className="auth-preview-topbar">
+                <span />
+                <span />
+              </div>
+              <div className="auth-preview-grid">
+                <div className="auth-preview-card auth-preview-card-wide">
+                  <i />
+                  <i />
+                  <i />
+                </div>
+                <div className="auth-preview-card">
+                  <strong />
+                  <span />
+                </div>
+                <div className="auth-preview-card">
+                  <strong />
+                  <span />
+                </div>
+              </div>
+            </div>
           </div>
           <div className="auth-brand-metrics">
             <div>
-              <strong>动态</strong>
-              <span>菜单权限</span>
+              <strong>多级</strong>
+              <span>动态菜单</span>
             </div>
             <div>
-              <strong>清晰</strong>
-              <span>服务分层</span>
+              <strong>可控</strong>
+              <span>权限模型</span>
             </div>
             <div>
-              <strong>高效</strong>
-              <span>页面模板</span>
+              <strong>模板</strong>
+              <span>管理页面</span>
             </div>
           </div>
         </section>
