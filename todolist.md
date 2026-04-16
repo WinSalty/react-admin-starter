@@ -229,7 +229,14 @@ GET  /api/permission/bootstrap
 
 ## 当前进度
 
-阶段 2 已完成。已基于 Ant Design `Layout`、`Menu`、`Breadcrumb` 完成后台基础布局、认证布局、菜单配置、路由配置和占位页面，并已通过 `npm run build` 验证。
+阶段 2 已完成。已基于 Ant Design `Layout`、`Menu` 完成后台基础布局、认证布局、菜单配置、路由配置和占位页面，并已通过 `npm run build` 验证。
+
+当前额外约定：
+
+- 使用内存路由，页面切换不改变浏览器地址栏 URL。
+- 顶部栏已移除面包屑和说明文案，只显示菜单折叠按钮、当前页面名称和管理员占位。
+- 下次继续开发前先执行 `git status --short`，确认工作区干净。
+- 如需预览页面，执行 `npm run dev` 后访问 `http://localhost:5173/`。
 
 ## 下一步任务
 
@@ -247,3 +254,5 @@ GET  /api/permission/bootstrap
 - 2026-04-16：完成阶段 2，新增 `BasicLayout`、`AuthLayout`、静态菜单配置、后台路由、Dashboard、查询管理、数据统计、权限目录、403、登录和注册占位页面。
 - 2026-04-16：执行 `npm run build` 通过，README 已补充常用页面地址。
 - 2026-04-16：根据要求将浏览器路由改为内存路由，页面切换不再改变浏览器地址栏 URL，README 已同步说明。
+- 2026-04-16：优化顶部栏显示，移除面包屑和脚手架说明文案，改为当前页面标题与管理员占位。
+- 2026-04-16：维护 README 和 todolist，补充当前状态、下次继续入口和开发前检查命令。

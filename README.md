@@ -2,6 +2,13 @@
 
 React Admin Starter 是基于 Ant Design 的 React 后台管理系统脚手架。
 
+## 当前状态
+
+- 已完成 Ant Design 基础工程。
+- 已完成后台基础布局、认证布局、菜单配置和占位页面。
+- 已使用内存路由隐藏内部页面路径，页面切换不会改变浏览器地址栏 URL。
+- 下一阶段从登录注册与认证开始，详见 [todolist.md](./todolist.md) 的“下一步任务”。
+
 ## 技术栈
 
 - React 18
@@ -78,3 +85,12 @@ npm run build
 ## 阶段进度
 
 项目阶段计划和完成记录维护在 [todolist.md](./todolist.md)。
+
+下次继续开发前建议执行：
+
+```bash
+cd /Users/salty/codeProject/codex/react-admin-starter
+git status --short
+sed -n '1,320p' todolist.md
+npm run build
+```
