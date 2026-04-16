@@ -208,15 +208,15 @@ GET  /api/permission/bootstrap
 - [x] 修复 axios 401 处理，避免 `window.location.href` 破坏内存路由约定。
 - [x] 收紧本地权限恢复逻辑，避免只有按钮权限时误判为权限已加载。
 - [x] 修正权限目录中空 `routeCodes` 的展示文案。
-- [ ] 阶段 5 开始前处理 Dashboard 统计卡片、ECharts、service/mock 链路。
+- [x] 阶段 5 开始前处理 Dashboard 统计卡片、ECharts、service/mock 链路。
 
 ### 阶段 5：Dashboard 与 ECharts
 
-- [ ] 实现统计卡片。
-- [ ] 接入 ECharts。
-- [ ] 实现趋势图、柱状图、饼图组件。
-- [ ] 首页统计数据通过 service 获取。
-- [ ] mock 数据放入 `src/mocks`。
+- [x] 实现统计卡片。
+- [x] 接入 ECharts。
+- [x] 实现趋势图、柱状图、饼图组件。
+- [x] 首页统计数据通过 service 获取。
+- [x] mock 数据放入 `src/mocks`。
 
 ### 阶段 6：查询管理模板
 
@@ -239,7 +239,7 @@ GET  /api/permission/bootstrap
 
 ## 当前进度
 
-阶段 4 已完成。已实现权限类型定义、mock 数据（admin/viewer 角色）、permission service、PermissionMenu mapper、动态菜单渲染、usePermission hook、Access 按钮权限组件、路由权限守卫。已通过 `npm run typecheck` 验证。
+阶段 5 已完成。Dashboard 已实现统计卡片、访问与订单趋势图、模块使用柱状图、业务状态饼图、loading/error 状态和 service/mock 数据链路。已通过 `npm run typecheck` 验证。
 
 当前额外约定：
 
@@ -251,9 +251,9 @@ GET  /api/permission/bootstrap
 
 ## 下一步任务
 
-1. 进入阶段 5，实现 Dashboard 与 ECharts 数据统计。
-2. 实现统计卡片、趋势图、柱状图、饼图组件。
-3. 首页统计数据通过 service 获取，mock 数据放入 `src/mocks`。
+1. 进入阶段 6，实现查询管理模板。
+2. 使用 Ant Design `Form` 和 `Table` 实现筛选区、列表、分页。
+3. 查询数据通过 service 获取，补充详情 `Drawer` 或 `Modal`、新增/编辑弹窗占位、loading/empty/error 状态。
 
 ## 完成记录
 
@@ -271,3 +271,4 @@ GET  /api/permission/bootstrap
 - 2026-04-16：完成阶段 3，新增登录注册表单校验、zustand 登录态 store、token 工具、auth service、mock 数据、路由守卫和 axios 拦截器。默认测试账号 admin/123456。claude
 - 2026-04-16：完成阶段 4，新增权限类型定义、权限 mock 数据（admin/viewer）、permission service、usePermission hook、Access 按钮权限组件、动态菜单过滤、路由权限守卫。QueryList 页面已接入 Access 控制「新增」按钮。claude
 - 2026-04-16：根据代码审查补齐阶段 4 动态菜单链路：保存后端 menus、增加 PermissionMenu mapper、BasicLayout 优先使用动态菜单、修复 401 内存路由处理、收紧权限恢复逻辑并修正权限目录空状态文案。gpt-5.4
+- 2026-04-16：完成阶段 5，新增 Dashboard 类型、service/mock 数据链路，首页接入统计卡片、ECharts 趋势图、柱状图、饼图和加载失败状态。gpt-5.4

@@ -114,6 +114,74 @@ body {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
+.metric-card .ant-statistic-content {
+  min-height: 36px;
+}
+
+.metric-trend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+}
+
+.metric-trend strong {
+  color: rgba(0, 0, 0, 0.72);
+  font-weight: 600;
+}
+
+.metric-trend-up .anticon,
+.metric-trend-up strong {
+  color: #1677ff;
+}
+
+.metric-trend-down .anticon,
+.metric-trend-down strong {
+  color: #52c41a;
+}
+
+.metric-trend-stable .anticon,
+.metric-trend-stable strong {
+  color: #faad14;
+}
+
+.dashboard-chart {
+  width: 100%;
+  min-height: 260px;
+}
+
+.dashboard-summary-grid {
+  display: grid;
+  min-height: 320px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.dashboard-summary-grid div {
+  display: flex;
+  min-height: 120px;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid rgba(5, 5, 5, 0.06);
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 18px;
+}
+
+.dashboard-summary-grid span {
+  margin-bottom: 10px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+}
+
+.dashboard-summary-grid strong {
+  color: rgba(0, 0, 0, 0.88);
+  font-size: 20px;
+  font-weight: 600;
+}
+
 .auth-layout {
   display: flex;
   align-items: center;
@@ -148,5 +216,14 @@ body {
   .compact-page-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .dashboard-summary-grid {
+    min-height: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-summary-grid div {
+    min-height: 92px;
   }
 }

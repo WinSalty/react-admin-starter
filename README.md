@@ -7,8 +7,9 @@ React Admin Starter 是基于 Ant Design 的前端脚手架项目，提供 React
 - 已完成 Ant Design 基础工程、后台布局和权限体系。
 - 已完成登录注册页面、表单校验、认证服务和 mock 数据。
 - 已接入权限控制：动态菜单过滤、路由守卫、按钮权限组件（Access）。
+- 已完成 Dashboard 与 ECharts 数据统计，数据通过 service/mock 链路获取。
 - 已使用内存路由，页面切换不改变浏览器地址栏 URL。
-- 下一阶段为 Dashboard 与 ECharts 数据统计，详见 [todolist.md](./todolist.md) 的”下一步任务”。
+- 下一阶段为查询管理模板，详见 [todolist.md](./todolist.md) 的“下一步任务”。
 
 ## 技术栈
 
@@ -179,6 +180,16 @@ npm run preview
 ```
 
 对接真实接口时，只需修改 `src/services/permission.ts` 中的 `fetchPermissionBootstrap` 方法，将 mock 调用替换为 `request.get('/api/permission/bootstrap')`。
+
+## Dashboard 数据说明
+
+Dashboard 已接入统计卡片、访问与订单趋势图、模块使用柱状图和业务状态饼图。页面不直接维护业务假数据，统一通过 `src/services/dashboard.ts` 获取数据，mock 数据维护在 `src/mocks/dashboard.ts`。
+
+对接真实接口时，将 `fetchDashboardOverview` 方法中的 mock 调用替换为真实请求即可：
+
+```ts
+return request.get('/api/dashboard/overview');
+```
 
 ### 使用 Access 组件控制按钮权限
 
