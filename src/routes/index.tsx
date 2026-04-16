@@ -14,6 +14,7 @@ const QueryList = lazy(() => import('@/pages/query/QueryList'));
 const Statistics = lazy(() => import('@/pages/statistics/Statistics'));
 const Forbidden = lazy(() => import('@/pages/system/Forbidden'));
 const NotFound = lazy(() => import('@/pages/system/NotFound'));
+const SystemModulePage = lazy(() => import('@/pages/system/SystemModulePage'));
 
 /**
  * 路由懒加载包装组件，避免所有页面和图表库进入首屏主包。
@@ -89,6 +90,56 @@ export const router = createMemoryRouter(
             <LazyRoute>
               <RouteGuard permissionCode="permission">
                 <PermissionPage />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: '/system/users',
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode="users">
+                <SystemModulePage moduleKey="users" />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: '/system/roles',
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode="roles">
+                <SystemModulePage moduleKey="roles" />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: '/system/menus',
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode="menus">
+                <SystemModulePage moduleKey="menus" />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: '/system/dicts',
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode="dicts">
+                <SystemModulePage moduleKey="dicts" />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: '/system/logs',
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode="logs">
+                <SystemModulePage moduleKey="logs" />
               </RouteGuard>
             </LazyRoute>
           ),

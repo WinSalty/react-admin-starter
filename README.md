@@ -9,9 +9,11 @@ React Admin Starter 是基于 Ant Design 的前端脚手架项目，提供 React
 - 已接入权限控制：动态菜单过滤、路由守卫、按钮权限组件（Access）。
 - 已完成 Dashboard 与 ECharts 数据统计，数据通过 service/mock 链路获取。
 - 已完成查询管理模板，支持筛选、分页、详情、新增和编辑。
+- 已完成系统管理基础模块：用户、角色、菜单、字典、日志页面模板均通过 service/mock 链路获取数据。
+- 已统一认证页配色，登录和注册页视觉与后台主界面保持蓝白主色一致。
 - 已完成路由懒加载和 vendor chunk 拆分，生产构建不再出现 chunk 超限警告。
 - 已使用内存路由，页面切换不改变浏览器地址栏 URL。
-- 当前阶段计划已完成，详见 [todolist.md](./todolist.md)。
+- 当前阶段计划详见 [todolist.md](./todolist.md)。
 
 ## 技术栈
 
@@ -195,7 +197,7 @@ npm run preview
     "menus": [
       { "id": "1", "title": "工作台", "path": "/dashboard", "icon": "DashboardOutlined", "orderNo": 1, "permissionCode": "dashboard:view" }
     ],
-    "routes": ["dashboard", "query", "statistics", "permission"],
+    "routes": ["dashboard", "query", "statistics", "permission", "users", "roles", "menus", "dicts", "logs"],
     "actions": [
       { "code": "query:add", "name": "新增查询" },
       { "code": "query:edit", "name": "编辑查询" }
@@ -263,6 +265,31 @@ return request.get('/api/dashboard/overview');
 request.get('/api/query/list', { params });
 request.get('/api/query/detail', { params: { id } });
 request.post('/api/query/save', params);
+```
+
+## 系统管理说明
+
+系统管理已提供基础页面模板，适合作为真实后台的二次开发起点：
+
+- 用户管理：用户列表、筛选、详情、新增/编辑、状态切换、重置密码占位、分配角色入口。
+- 角色管理：角色列表、筛选、详情、新增/编辑、状态切换、权限分配入口。
+- 菜单管理：菜单类型、路由路径、权限编码、排序和状态维护模板。
+- 字典管理：字典类型、字典项数量、状态、缓存键和缓存刷新入口。
+- 日志管理：登录日志、操作日志、接口日志列表和类型筛选模板。
+
+页面组件统一复用 `src/pages/system/SystemModulePage.tsx`，配置驱动不同模块的列、详情字段和操作入口。数据链路统一为：
+
+```txt
+SystemModulePage -> src/services/system.ts -> src/mocks/system.ts
+```
+
+对接真实接口时，可将系统管理 service 中的 mock 调用替换为：
+
+```ts
+request.get('/api/system/{moduleKey}/list', { params });
+request.get('/api/system/detail', { params: { id } });
+request.post('/api/system/save', params);
+request.post('/api/system/status', { id, status });
 ```
 
 ## 主题定制说明
@@ -341,7 +368,7 @@ hasAllAction(['a', 'b']);    // 是否全部权限
 ## 路由说明
 
 - 项目使用内存路由，页面切换不改变浏览器地址栏 URL。
-- 当前不会在地址栏暴露 `/dashboard`、`/query`、`/statistics`、`/permission`、`/login`、`/register` 等内部路径。
+- 当前不会在地址栏暴露 `/dashboard`、`/query`、`/statistics`、`/permission`、`/system/users`、`/system/roles`、`/system/menus`、`/system/dicts`、`/system/logs`、`/login`、`/register` 等内部路径。
 
 ## 页面体验规范
 
@@ -349,11 +376,11 @@ hasAllAction(['a', 'b']);    // 是否全部权限
 - 列表页、配置页和权限页使用 `PageHeader` 紧凑头部，减少顶部空白。
 - 页面主操作优先放在内容卡片 `extra` 或 `PageHeader` 右侧，不在页面顶部堆叠说明文案。
 - 右上角用户区使用头像下拉面板，展示登录账号、角色、当前时间，并在下拉操作中提供退出登录。
-- 登录和注册页使用左右分栏认证布局，左侧展示品牌和能力摘要，右侧承载表单；移动端自动切换为单列。
+- 登录和注册页使用左右分栏认证布局，左侧展示品牌和能力摘要，右侧承载表单；配色与后台主界面蓝白主色一致，移动端自动切换为单列。
 
 ## 后续开发方向
 
-下一阶段从“基础脚手架可用”进入“后台管理框架体验完善”。优先处理框架层能力，再扩展业务模块。
+当前已从“基础脚手架可用”进入系统管理模块扩展阶段。后续优先深化权限配置和质量保障能力。
 
 ### 阶段 8：框架体验升级
 
@@ -374,7 +401,7 @@ hasAllAction(['a', 'b']);    // 是否全部权限
 - 角色管理：角色列表、权限分配入口、角色状态管理。
 - 菜单管理：多级菜单树、菜单类型、图标、排序、路由路径、权限编码维护。
 - 字典管理：字典类型、字典项、状态、排序、缓存刷新入口。
-- 日志管理：登录日志、操作日志、接口日志，支持时间范围、账号、模块和结果筛选。
+- 日志管理：登录日志、操作日志、接口日志，支持账号、类型和结果筛选。
 
 ### 阶段 10：权限与配置深化
 
@@ -396,7 +423,7 @@ hasAllAction(['a', 'b']);    // 是否全部权限
 
 ## 下一阶段建议
 
-建议先执行阶段 8。它会影响布局、菜单模型、权限过滤和认证页视觉，是后续用户管理、菜单管理等模块的基础。阶段 8 完成后，再进入阶段 9 扩展系统管理模块。
+建议继续执行阶段 10。阶段 9 已补齐系统管理基础模板，下一步应深化角色权限分配 UI、后端动态菜单到本地组件的映射表，以及系统配置页面模板。
 
 ## 阶段进度
 
