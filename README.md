@@ -41,16 +41,11 @@ npm run dev
 http://localhost:5173/
 ```
 
-常用页面：
+页面切换说明：
 
-```txt
-http://localhost:5173/dashboard
-http://localhost:5173/query
-http://localhost:5173/statistics
-http://localhost:5173/permission
-http://localhost:5173/login
-http://localhost:5173/register
-```
+项目使用内存路由，页面切换不会改变浏览器地址栏 URL。启动后访问 `http://localhost:5173/`，再通过页面内菜单或后续登录流程进入不同页面。
+
+当前不会在地址栏暴露 `/dashboard`、`/query`、`/statistics`、`/permission`、`/login`、`/register` 等内部路径。
 
 ### 终止开发服务
 

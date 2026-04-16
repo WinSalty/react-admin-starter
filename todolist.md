@@ -65,6 +65,7 @@
 - 主题配置放在 `src/theme`。
 - 路由配置放在 `src/routes`。
 - 权限相关逻辑放在 `src/access`、`src/services/permission.ts` 或 `src/hooks`。
+- 默认使用内存路由隐藏内部页面路径，页面切换不改变浏览器地址栏 URL。
 - 页面不得直接写入大段假数据，必须通过 service 或 mock adapter 获取。
 - 不允许在主体代码中写 demo 代码或测试代码。
 - 不允许使用来源不清晰的非官方依赖包。
@@ -245,3 +246,4 @@ GET  /api/permission/bootstrap
 - 2026-04-16：执行 `npm run build` 通过；构建提示首包超过 500 kB，后续阶段可通过路由懒加载和 chunk 拆分优化。`npm install` 报告 2 个 moderate 漏洞，未执行 `npm audit fix --force`。
 - 2026-04-16：完成阶段 2，新增 `BasicLayout`、`AuthLayout`、静态菜单配置、后台路由、Dashboard、查询管理、数据统计、权限目录、403、登录和注册占位页面。
 - 2026-04-16：执行 `npm run build` 通过，README 已补充常用页面地址。
+- 2026-04-16：根据要求将浏览器路由改为内存路由，页面切换不再改变浏览器地址栏 URL，README 已同步说明。
