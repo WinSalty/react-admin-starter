@@ -102,6 +102,30 @@ body {
   row-gap: 12px;
 }
 
+.query-name-cell {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.query-name-cell strong,
+.query-name-cell span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.query-name-cell span {
+  color: rgba(0, 0, 0, 0.45);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+}
+
+.query-save-form {
+  padding-top: 8px;
+}
+
 .chart-placeholder {
   display: flex;
   min-height: 260px;
@@ -216,6 +240,21 @@ body {
   .compact-page-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .query-form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .query-form .ant-form-item {
+    width: 100%;
+    margin-inline-end: 0;
+  }
+
+  .query-form .ant-input,
+  .query-form .ant-select {
+    width: 100% !important;
   }
 
   .dashboard-summary-grid {

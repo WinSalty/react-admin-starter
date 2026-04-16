@@ -220,13 +220,13 @@ GET  /api/permission/bootstrap
 
 ### 阶段 6：查询管理模板
 
-- [ ] 使用 Ant Design `Form` 实现查询筛选区。
-- [ ] 使用 Ant Design `Table` 实现列表。
-- [ ] 实现分页。
-- [ ] 实现详情 `Drawer` 或 `Modal`。
-- [ ] 实现新增/编辑弹窗占位。
-- [ ] 实现 loading、empty、error 状态。
-- [ ] 查询数据通过 service 获取。
+- [x] 使用 Ant Design `Form` 实现查询筛选区。
+- [x] 使用 Ant Design `Table` 实现列表。
+- [x] 实现分页。
+- [x] 实现详情 `Drawer` 或 `Modal`。
+- [x] 实现新增/编辑弹窗占位。
+- [x] 实现 loading、empty、error 状态。
+- [x] 查询数据通过 service 获取。
 
 ### 阶段 7：工程完善
 
@@ -239,7 +239,7 @@ GET  /api/permission/bootstrap
 
 ## 当前进度
 
-阶段 5 已完成。Dashboard 已实现统计卡片、访问与订单趋势图、模块使用柱状图、业务状态饼图、loading/error 状态和 service/mock 数据链路。已通过 `npm run typecheck` 验证。
+阶段 6 已完成。查询管理页已实现筛选区、表格列表、分页、详情 Drawer、新增/编辑 Modal、loading/empty/error 状态和 service/mock 数据链路。已通过 `npm run typecheck` 验证。
 
 当前额外约定：
 
@@ -251,9 +251,9 @@ GET  /api/permission/bootstrap
 
 ## 下一步任务
 
-1. 进入阶段 6，实现查询管理模板。
-2. 使用 Ant Design `Form` 和 `Table` 实现筛选区、列表、分页。
-3. 查询数据通过 service 获取，补充详情 `Drawer` 或 `Modal`、新增/编辑弹窗占位、loading/empty/error 状态。
+1. 进入阶段 7，完善 README 和工程说明。
+2. 补充主题定制、服务层替换真实 API、权限接口字段映射示例。
+3. 运行构建验证，整理最终提交。
 
 ## 完成记录
 
@@ -272,3 +272,4 @@ GET  /api/permission/bootstrap
 - 2026-04-16：完成阶段 4，新增权限类型定义、权限 mock 数据（admin/viewer）、permission service、usePermission hook、Access 按钮权限组件、动态菜单过滤、路由权限守卫。QueryList 页面已接入 Access 控制「新增」按钮。claude
 - 2026-04-16：根据代码审查补齐阶段 4 动态菜单链路：保存后端 menus、增加 PermissionMenu mapper、BasicLayout 优先使用动态菜单、修复 401 内存路由处理、收紧权限恢复逻辑并修正权限目录空状态文案。gpt-5.4
 - 2026-04-16：完成阶段 5，新增 Dashboard 类型、service/mock 数据链路，首页接入统计卡片、ECharts 趋势图、柱状图、饼图和加载失败状态。gpt-5.4
+- 2026-04-16：完成阶段 6，新增查询管理类型、service/mock 数据链路，查询页接入筛选、分页、详情 Drawer、新增/编辑 Modal 和列表状态处理。gpt-5.4
