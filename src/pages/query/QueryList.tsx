@@ -17,7 +17,6 @@ import {
   Tag,
 } from 'antd';
 import { Access } from '@/components/Access';
-import { PageHeader } from '@/components/PageHeader';
 import {
   fetchQueryDetail,
   fetchQueryPage,
@@ -256,8 +255,6 @@ function QueryList() {
 
   return (
     <div className="page-stack">
-      <PageHeader title="查询管理" description="查询配置检索、分页维护和详情查看。" />
-
       {errorMessage ? <Alert message={errorMessage} type="error" showIcon /> : null}
 
       <Card>

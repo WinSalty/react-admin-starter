@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowDownOutlined, ArrowUpOutlined, MinusOutlined } from '@ant-design/icons';
-import { Alert, Card, Col, Row, Skeleton, Statistic, Typography } from 'antd';
+import { Alert, Card, Col, Row, Skeleton, Statistic } from 'antd';
 import * as echarts from 'echarts';
 import type { EChartsOption } from 'echarts';
 import { fetchDashboardOverview } from '@/services/dashboard';
@@ -11,8 +11,6 @@ import type {
   StatusPieItem,
   TrendPoint,
 } from '@/types/dashboard';
-
-const { Paragraph, Title } = Typography;
 
 /**
  * Ant Design 版后台首页，展示统计卡片和 ECharts 数据看板。
@@ -70,13 +68,6 @@ function Dashboard() {
 
   return (
     <div className="page-stack">
-      <div className="compact-page-header">
-        <div>
-          <Title level={3}>工作台</Title>
-          <Paragraph>核心指标、访问趋势和业务分布概览。</Paragraph>
-        </div>
-      </div>
-
       {errorMessage ? <Alert message={errorMessage} type="error" showIcon /> : null}
 
       <Row gutter={[16, 16]}>

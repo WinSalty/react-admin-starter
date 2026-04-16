@@ -1,5 +1,4 @@
 import { Card, Descriptions, Tag, Typography } from 'antd';
-import { PageHeader } from '@/components/PageHeader';
 import { useAuthStore } from '@/stores/auth';
 
 const { Paragraph } = Typography;
@@ -16,8 +15,6 @@ function PermissionPage() {
 
   return (
     <div className="page-stack">
-      <PageHeader title="权限目录" description={`当前登录用户：${role || '未知账号'}`} />
-
       <Card title="路由权限">
         {routeCodes.length === 0 ? (
           <Paragraph type="secondary">暂无路由权限或权限数据未加载。</Paragraph>
