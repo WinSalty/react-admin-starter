@@ -1,7 +1,8 @@
+import { useEffect, useState } from 'react';
 import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Card, Form, Input, message, Typography } from 'antd';
+import { Button, Card, Form, Input, message, Space, Typography } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import { register } from '@/services/auth';
+import { register, sendRegisterVerifyCode } from '@/services/auth';
 
 const { Paragraph, Title } = Typography;
 
@@ -13,8 +14,60 @@ const { Paragraph, Title } = Typography;
 function Register() {
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
+  const [form] = Form.useForm<{
+    username: string;
+    email: string;
+    verifyCode: string;
+    password: string;
+    confirmPassword: string;
+  }>();
+  const [sendingCode, setSendingCode] = useState(false);
+  const [countdown, setCountdown] = useState(0);
 
-  async function onFinish(values: { username: string; email: string; password: string; confirmPassword: string }) {
+  useEffect(() => {
+    if (countdown <= 0) {
+      return undefined;
+    }
+    const timer = window.setTimeout(() => {
+      setCountdown((current) => current - 1);
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [countdown]);
+
+  async function handleSendVerifyCode() {
+    const email = form.getFieldValue('email');
+    if (!email) {
+      messageApi.error('请先输入邮箱');
+      return;
+    }
+    try {
+      await form.validateFields(['email']);
+    } catch {
+      return;
+    }
+    setSendingCode(true);
+    try {
+      const res = await sendRegisterVerifyCode(email);
+      if (res.code !== 0) {
+        messageApi.error(res.message || '验证码发送失败');
+        return;
+      }
+      messageApi.success(`验证码已发送，当前演示验证码：${res.data}`);
+      setCountdown(60);
+    } catch {
+      messageApi.error('验证码发送失败，请稍后重试');
+    } finally {
+      setSendingCode(false);
+    }
+  }
+
+  async function onFinish(values: {
+    username: string;
+    email: string;
+    verifyCode: string;
+    password: string;
+    confirmPassword: string;
+  }) {
     if (values.password !== values.confirmPassword) {
       messageApi.error('两次输入的密码不一致');
       return;
@@ -22,6 +75,7 @@ function Register() {
     const res = await register({
       username: values.username,
       email: values.email,
+      verifyCode: values.verifyCode,
       password: values.password,
     });
     if (res.code === 0) {
@@ -41,7 +95,7 @@ function Register() {
           <Title level={2}>注册账号</Title>
           <Paragraph>创建账号后即可进入后台框架体验完整流程。</Paragraph>
         </div>
-        <Form layout="vertical" size="large" onFinish={onFinish}>
+        <Form form={form} layout="vertical" size="large" onFinish={onFinish}>
           <Form.Item
             label="用户名"
             name="username"
@@ -58,6 +112,21 @@ function Register() {
             ]}
           >
             <Input prefix={<MailOutlined />} placeholder="请输入邮箱" />
+          </Form.Item>
+          <Form.Item
+            label="邮箱验证码"
+            name="verifyCode"
+            rules={[
+              { required: true, message: '请输入邮箱验证码' },
+              { len: 6, message: '邮箱验证码为 6 位' },
+            ]}
+          >
+            <Space.Compact style={{ width: '100%' }}>
+              <Input placeholder="请输入邮箱验证码" maxLength={6} />
+              <Button onClick={() => void handleSendVerifyCode()} loading={sendingCode} disabled={countdown > 0}>
+                {countdown > 0 ? `${countdown}s 后重发` : '发送验证码'}
+              </Button>
+            </Space.Compact>
           </Form.Item>
           <Form.Item
             label="密码"

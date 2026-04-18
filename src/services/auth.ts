@@ -9,6 +9,7 @@ export interface LoginParams {
 export interface RegisterParams {
   username: string;
   email: string;
+  verifyCode: string;
   password: string;
 }
 
@@ -43,5 +44,15 @@ export async function login(params: LoginParams): Promise<ApiResponse<LoginResul
  */
 export async function register(params: RegisterParams): Promise<ApiResponse<void>> {
   const response = await request.post<ApiResponse<void>>('/api/auth/register', params);
+  return response.data;
+}
+
+/**
+ * 发送注册邮箱验证码。
+ */
+export async function sendRegisterVerifyCode(email: string): Promise<ApiResponse<string>> {
+  const response = await request.get<ApiResponse<string>>('/api/auth/register/verify-code', {
+    params: { email },
+  });
   return response.data;
 }
