@@ -61,8 +61,96 @@ body {
 
 .app-header-left {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 12px;
+}
+
+.header-notice-ticker {
+  display: flex;
+  flex: 1 1 auto;
+  max-width: 520px;
+  min-width: 180px;
+  height: 38px;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  border: 1px solid rgba(5, 5, 5, 0.06);
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 0 12px;
+}
+
+.header-notice-window {
+  position: relative;
+  display: block;
+  min-width: 0;
+  flex: 1;
+  height: 28px;
+  overflow: hidden;
+  text-align: left;
+}
+
+.header-notice-line {
+  display: flex;
+  height: 28px;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  animation: header-notice-slide 4s ease-in-out;
+}
+
+.header-notice-line > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-notice-dropdown {
+  width: min(420px, calc(100vw - 32px));
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid rgba(5, 5, 5, 0.06);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(5, 5, 5, 0.12);
+  padding: 12px;
+}
+
+.header-notice-dropdown-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.header-notice-dropdown .ant-list-item {
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 10px 8px;
+}
+
+.header-notice-dropdown .ant-list-item:hover {
+  background: #f5f7fb;
+}
+
+@keyframes header-notice-slide {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  12%,
+  86% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
 }
 
 .app-header-user {
@@ -228,6 +316,63 @@ body {
 .dashboard-chart {
   width: 100%;
   min-height: 260px;
+}
+
+.notice-overview-card {
+  min-height: 368px;
+}
+
+.notice-overview-card .ant-card-body {
+  min-height: 316px;
+}
+
+.notice-overview-list .ant-list-item {
+  align-items: flex-start;
+  border-block-end: 1px solid rgba(5, 5, 5, 0.06);
+  padding: 13px 0;
+}
+
+.notice-overview-list .ant-list-item:first-child {
+  padding-top: 0;
+}
+
+.notice-overview-list .ant-list-item-meta {
+  min-width: 0;
+}
+
+.notice-overview-meta {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notice-overview-content {
+  margin-bottom: 0 !important;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.notice-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notice-detail h4.ant-typography {
+  margin: 0;
+}
+
+.notice-detail .ant-typography {
+  margin-bottom: 0;
+  white-space: pre-wrap;
+}
+
+.notice-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-top: 1px solid rgba(5, 5, 5, 0.06);
+  padding-top: 12px;
 }
 
 .dashboard-summary-grid {
@@ -572,6 +717,11 @@ body {
     padding: 0 12px;
   }
 
+  .header-notice-ticker {
+    max-width: none;
+    min-width: 0;
+  }
+
   .app-content {
     padding: 12px;
   }
@@ -606,6 +756,21 @@ body {
 
   .app-header-user-name {
     display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-header {
+    gap: 8px;
+  }
+
+  .header-notice-ticker {
+    display: none;
+  }
+
+  .notice-overview-card,
+  .notice-overview-card .ant-card-body {
+    min-height: auto;
   }
 }
 

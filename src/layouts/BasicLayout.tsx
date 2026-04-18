@@ -11,7 +11,9 @@ import type { MenuProps } from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { HeaderNoticeTicker } from '@/components/NoticeHighlights';
 import { appMenus, mapPermissionMenusToAppMenus, type AppMenuItem } from '@/config/menu';
+import { useActiveNotices } from '@/hooks/useActiveNotices';
 import { useAuthStore } from '@/stores/auth';
 
 const { Header, Sider, Content } = Layout;
@@ -34,6 +36,11 @@ function BasicLayout() {
   const role = useAuthStore((state) => state.role);
   const permissionMenus = useAuthStore((state) => state.menus);
   const routeCodes = useAuthStore((state) => state.routeCodes);
+  const {
+    notices,
+    loading: noticesLoading,
+    errorMessage: noticesErrorMessage,
+  } = useActiveNotices();
 
   const isAdmin = role === 'admin';
   const accountName = role || '未登录账号';
@@ -159,6 +166,11 @@ function BasicLayout() {
             />
             <Text strong>{activeMenu?.label || '工作台'}</Text>
           </div>
+          <HeaderNoticeTicker
+            notices={notices}
+            loading={noticesLoading}
+            errorMessage={noticesErrorMessage}
+          />
           <Dropdown
             menu={{ items: userDropdownItems }}
             placement="bottomRight"

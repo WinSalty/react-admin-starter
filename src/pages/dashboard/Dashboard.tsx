@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowDownOutlined, ArrowUpOutlined, MinusOutlined } from '@ant-design/icons';
-import { Alert, Card, Col, Row, Skeleton, Statistic, Tag } from 'antd';
+import { Alert, Card, Col, Row, Skeleton, Statistic } from 'antd';
 import * as echarts from 'echarts';
-import { fetchActiveNotices } from '@/services/notice';
+import { DashboardNoticeCard } from '@/components/NoticeHighlights';
+import { useActiveNotices } from '@/hooks/useActiveNotices';
 import type { EChartsOption } from 'echarts';
 import { fetchDashboardOverview } from '@/services/dashboard';
 import type {
@@ -12,7 +13,6 @@ import type {
   StatusPieItem,
   TrendPoint,
 } from '@/types/dashboard';
-import type { NoticeRecord } from '@/types/notice';
 
 /**
  * Ant Design 版后台首页，展示统计卡片和 ECharts 数据看板。
@@ -23,7 +23,11 @@ function Dashboard() {
   const [overview, setOverview] = useState<DashboardOverview>();
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
-  const [noticeList, setNoticeList] = useState<NoticeRecord[]>([]);
+  const {
+    notices,
+    loading: noticesLoading,
+    errorMessage: noticeErrorMessage,
+  } = useActiveNotices();
 
   useEffect(() => {
     let mounted = true;
@@ -48,18 +52,6 @@ function Dashboard() {
       .finally(() => {
         if (mounted) {
           setLoading(false);
-        }
-      });
-
-    fetchActiveNotices()
-      .then((response) => {
-        if (mounted && response.code === 0) {
-          setNoticeList(response.data || []);
-        }
-      })
-      .catch(() => {
-        if (mounted) {
-          setNoticeList([]);
         }
       });
 
@@ -119,27 +111,11 @@ function Dashboard() {
           </Card>
         </Col>
         <Col xs={24} xl={10}>
-          <Card title={`公告提醒 (${noticeList.length})`}>
-            <div className="dashboard-summary-grid">
-              {noticeList.length > 0 ? (
-                noticeList.slice(0, 4).map((notice) => (
-                  <div key={notice.id}>
-                    <span>{notice.title}</span>
-                    <strong>
-                      <Tag color={notice.priority === 'urgent' ? 'red' : notice.priority === 'high' ? 'volcano' : 'blue'}>
-                        {notice.priority}
-                      </Tag>
-                    </strong>
-                  </div>
-                ))
-              ) : (
-                <div>
-                  <span>当前没有生效公告</span>
-                  <strong>已清空</strong>
-                </div>
-              )}
-            </div>
-          </Card>
+          <DashboardNoticeCard
+            notices={notices}
+            loading={noticesLoading}
+            errorMessage={noticeErrorMessage}
+          />
         </Col>
         <Col xs={24} xl={14}>
           <Card title="运行摘要">
