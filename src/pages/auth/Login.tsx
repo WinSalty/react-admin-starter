@@ -6,10 +6,10 @@ import { fetchPermissionBootstrap } from '@/services/permission';
 import { useAuthStore } from '@/stores/auth';
 
 const { Paragraph, Title } = Typography;
+const showDemoCredentials = import.meta.env.DEV;
 
 /**
  * 登录页面，接入认证服务和表单校验。
- * 测试账号：admin / 123456（全部权限），viewer / 123456（仅 dashboard 查看权限）
  * author: sunshengxian
  * 创建日期：2026-04-16
  */
@@ -53,14 +53,20 @@ function Login() {
             name="username"
             rules={[{ required: true, message: '请输入账号' }]}
           >
-            <Input prefix={<UserOutlined />} placeholder="admin / viewer" />
+            <Input
+              prefix={<UserOutlined />}
+              placeholder={showDemoCredentials ? 'admin / viewer' : '请输入账号'}
+            />
           </Form.Item>
           <Form.Item
             label="密码"
             name="password"
             rules={[{ required: true, min: 6, message: '密码至少 6 位' }]}
           >
-            <Input.Password prefix={<LockOutlined />} placeholder="123456" />
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder={showDemoCredentials ? '123456' : '请输入密码'}
+            />
           </Form.Item>
           <Form.Item>
             <Button block htmlType="submit" type="primary">
@@ -68,10 +74,12 @@ function Login() {
             </Button>
           </Form.Item>
         </Form>
-        <div className="auth-account-tip">
-          <span>admin / 123456</span>
-          <span>viewer / 123456</span>
-        </div>
+        {showDemoCredentials ? (
+          <div className="auth-account-tip">
+            <span>admin / 123456</span>
+            <span>viewer / 123456</span>
+          </div>
+        ) : null}
         <div className="auth-extra">
           还没有账号？ <Link to="/register">去注册</Link>
         </div>

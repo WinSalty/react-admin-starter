@@ -234,7 +234,8 @@ VITE_API_BASE_URL=https://api.example.com npm run build
 
 ## 认证说明
 
-- 测试账号：`admin` / `123456`（全部权限），`viewer` / `123456`（仅 dashboard 查看权限）
+- 本地开发环境演示账号：`admin` / `123456`（全部权限），`viewer` / `123456`（仅 dashboard 查看权限）。
+- 登录页仅在 Vite 开发环境展示演示账号提示，生产构建不会展示默认账号和密码。
 - Token 存储在 localStorage，通过 axios 拦截器以 `Bearer` 方式携带到请求头。
 - 未登录访问后台页面会重定向到 `/login`，已登录访问登录页会重定向到 `/dashboard`。
 
