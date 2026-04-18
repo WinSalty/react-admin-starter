@@ -69,16 +69,24 @@ body {
 .header-notice-ticker {
   display: flex;
   flex: 1 1 auto;
-  max-width: 520px;
+  max-width: 460px;
   min-width: 180px;
-  height: 38px;
+  height: 36px;
   align-items: center;
   justify-content: flex-start;
   overflow: hidden;
-  border: 1px solid rgba(5, 5, 5, 0.06);
   border-radius: 8px;
-  background: #f8fafc;
-  padding: 0 12px;
+  color: rgba(0, 0, 0, 0.58);
+  padding: 0 8px;
+}
+
+.header-notice-ticker:hover {
+  background: rgba(5, 5, 5, 0.04);
+  color: rgba(0, 0, 0, 0.78);
+}
+
+.header-notice-ticker .anticon {
+  color: rgba(0, 0, 0, 0.36);
 }
 
 .header-notice-window {
@@ -99,6 +107,10 @@ body {
   gap: 8px;
   overflow: hidden;
   animation: header-notice-slide 4s ease-in-out;
+}
+
+.header-notice-line .ant-tag {
+  margin-inline-end: 0;
 }
 
 .header-notice-line > span:last-child {
@@ -319,11 +331,11 @@ body {
 }
 
 .notice-overview-card {
-  min-height: 368px;
+  min-height: 408px;
 }
 
 .notice-overview-card .ant-card-body {
-  min-height: 316px;
+  min-height: 356px;
 }
 
 .notice-overview-list .ant-list-item {

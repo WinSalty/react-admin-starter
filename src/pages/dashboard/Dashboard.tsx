@@ -97,17 +97,7 @@ function Dashboard() {
       <Row gutter={[16, 16]}>
         <Col xs={24} xl={14}>
           <Card title="访问与订单趋势" loading={loading && !trendOption}>
-            <ChartPanel option={trendOption} height={320} />
-          </Card>
-        </Col>
-        <Col xs={24} xl={10}>
-          <Card title="模块使用排行" loading={loading && !categoryOption}>
-            <ChartPanel option={categoryOption} height={320} />
-          </Card>
-        </Col>
-        <Col xs={24} xl={10}>
-          <Card title="业务状态分布" loading={loading && !statusOption}>
-            <ChartPanel option={statusOption} height={320} />
+            <ChartPanel option={trendOption} height={360} />
           </Card>
         </Col>
         <Col xs={24} xl={10}>
@@ -117,7 +107,20 @@ function Dashboard() {
             errorMessage={noticeErrorMessage}
           />
         </Col>
+      </Row>
+
+      <Row gutter={[16, 16]}>
         <Col xs={24} xl={14}>
+          <Card title="模块使用排行" loading={loading && !categoryOption}>
+            <ChartPanel option={categoryOption} height={320} />
+          </Card>
+        </Col>
+        <Col xs={24} xl={10}>
+          <Card title="业务状态分布" loading={loading && !statusOption}>
+            <ChartPanel option={statusOption} height={320} />
+          </Card>
+        </Col>
+        <Col xs={24}>
           <Card title="运行摘要">
             <div className="dashboard-summary-grid">
               <div>

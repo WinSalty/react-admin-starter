@@ -165,7 +165,7 @@ export function HeaderNoticeTicker({ notices, loading, errorMessage }: NoticeLis
           <span className="header-notice-window">
             {activeNotice ? (
               <span key={activeNotice.id} className="header-notice-line">
-                <Tag color={getPriorityMeta(activeNotice.priority).color}>
+                <Tag bordered={false} color={getPriorityMeta(activeNotice.priority).color}>
                   {getPriorityMeta(activeNotice.priority).label}
                 </Tag>
                 <span>{activeNotice.title}</span>
