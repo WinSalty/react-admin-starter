@@ -60,8 +60,8 @@ export async function register(params: RegisterParams): Promise<ApiResponse<void
 /**
  * 发送注册邮箱验证码。
  */
-export async function sendRegisterVerifyCode(email: string): Promise<ApiResponse<string>> {
-  const response = await request.get<ApiResponse<string>>('/api/auth/register/verify-code', {
+export async function sendRegisterVerifyCode(email: string): Promise<ApiResponse<void>> {
+  const response = await request.get<ApiResponse<void>>('/api/auth/register/verify-code', {
     params: { email },
   });
   return response.data;

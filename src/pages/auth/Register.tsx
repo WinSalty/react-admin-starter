@@ -52,7 +52,7 @@ function Register() {
         messageApi.error(res.message || '验证码发送失败');
         return;
       }
-      messageApi.success(`验证码已发送，当前演示验证码：${res.data}`);
+      messageApi.success('验证码已发送，请查收邮箱');
       setCountdown(60);
     } catch {
       messageApi.error('验证码发送失败，请稍后重试');
