@@ -8,10 +8,17 @@ export default defineConfig({
     chunkSizeWarningLimit: 1200,
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ['react', 'react-dom', 'react-router-dom', 'zustand'],
-          antd: ['antd', '@ant-design/icons'],
-          echarts: ['echarts'],
+        manualChunks(id) {
+          if (!id.includes('node_modules')) {
+            return undefined;
+          }
+          if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/react-router-dom/') || id.includes('/zustand/')) {
+            return 'react';
+          }
+          if (id.includes('/echarts/')) {
+            return 'echarts';
+          }
+          return undefined;
         },
       },
     },

@@ -6,7 +6,6 @@ import { fetchPermissionBootstrap } from '@/services/permission';
 import { useAuthStore } from '@/stores/auth';
 
 const { Paragraph, Title } = Typography;
-const showDemoCredentials = import.meta.env.DEV;
 
 /**
  * 登录页面，接入认证服务和表单校验。
@@ -55,7 +54,7 @@ function Login() {
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder={showDemoCredentials ? 'admin / viewer' : '请输入账号'}
+              placeholder="请输入账号"
             />
           </Form.Item>
           <Form.Item
@@ -65,7 +64,7 @@ function Login() {
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder={showDemoCredentials ? '123456' : '请输入密码'}
+              placeholder="请输入密码"
             />
           </Form.Item>
           <Form.Item>
@@ -74,12 +73,6 @@ function Login() {
             </Button>
           </Form.Item>
         </Form>
-        {showDemoCredentials ? (
-          <div className="auth-account-tip">
-            <span>admin / 123456</span>
-            <span>viewer / 123456</span>
-          </div>
-        ) : null}
         <div className="auth-extra">
           还没有账号？ <Link to="/register">去注册</Link>
         </div>

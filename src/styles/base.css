@@ -561,23 +561,6 @@ body {
   color: rgba(0, 0, 0, 0.45);
 }
 
-.auth-account-tip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: -8px;
-}
-
-.auth-account-tip span {
-  border: 1px solid rgba(22, 119, 255, 0.20);
-  border-radius: 6px;
-  background: rgba(22, 119, 255, 0.07);
-  color: #1677ff;
-  font-size: 12px;
-  line-height: 22px;
-  padding: 0 8px;
-}
-
 .auth-extra {
   margin-top: 18px;
   color: rgba(0, 0, 0, 0.45);
