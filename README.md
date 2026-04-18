@@ -149,6 +149,89 @@ npm run preview
 
 启动后访问 `http://localhost:4173/`（默认端口 4173）。
 
+## 生产部署说明
+
+前端生产部署的目标是把 `npm run build` 生成的 `dist/` 静态文件发布到 Nginx、对象存储 CDN 或其他静态资源服务器。生产环境不要使用 `npm run dev` 或 Vite 代理。
+
+### 部署前检查
+
+1. 确认后端生产服务已经可访问，例如 `https://api.example.com`。
+2. 确认后端 CORS 允许前端生产域名，例如 `https://admin.example.com`。
+3. 确认登录、权限 bootstrap、系统管理等接口在生产后端可正常访问。
+4. 确认浏览器路由由 Web 服务器做 SPA 回退，否则刷新 `/system/users` 等二级路由会 404。
+5. 执行质量检查：
+
+```bash
+npm run typecheck
+npm run build
+```
+
+### 配置生产 API 地址
+
+如果前端和后端同域部署，并由 Nginx 把 `/api` 反向代理到后端，可以不配置 `VITE_API_BASE_URL`，请求会直接走相对路径 `/api/...`。
+
+如果前端和后端分开域名部署，构建时指定后端地址：
+
+```bash
+VITE_API_BASE_URL=https://api.example.com npm run build
+```
+
+注意：Vite 的环境变量会在构建时写入产物，生产 API 地址变更后需要重新构建并重新发布 `dist/`。
+
+### Nginx 部署示例
+
+将 `dist/` 上传到服务器，例如 `/usr/share/nginx/html/react-admin-starter`，然后配置 Nginx：
+
+```nginx
+server {
+    listen 80;
+    server_name admin.example.com;
+
+    root /usr/share/nginx/html/react-admin-starter;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8080/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location ~* \.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    location = /index.html {
+        add_header Cache-Control "no-cache";
+    }
+}
+```
+
+如果使用 HTTPS，建议在网关或 Nginx 层配置 TLS 证书，并把 HTTP 强制跳转到 HTTPS。
+
+### 发布步骤
+
+```bash
+cd /Users/salty/codeProject/ai/react-admin-starter
+npm ci
+VITE_API_BASE_URL=https://api.example.com npm run build
+```
+
+然后把 `dist/` 目录中的文件发布到静态资源服务器。发布后访问生产域名，按以下链路冒烟验证：
+
+- 打开首页后能跳转到 `/dashboard`。
+- 使用 `admin` 账号登录后能看到完整菜单。
+- 刷新 `/query`、`/system/users`、`/system/configs` 不出现 404。
+- 打开浏览器 Network，确认 `/api/auth/login`、`/api/permission/bootstrap`、`/api/dashboard/overview` 都请求到生产后端。
+- 退出登录后再次访问后台页面会回到登录页。
+
 ## 认证说明
 
 - 测试账号：`admin` / `123456`（全部权限），`viewer` / `123456`（仅 dashboard 查看权限）

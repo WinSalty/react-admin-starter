@@ -217,12 +217,12 @@ function mapToMenuItem(menu: AppMenuItem): NonNullable<MenuProps['items']>[numbe
 
 function findActiveMenu(menus: AppMenuItem[], pathname: string): AppMenuItem | undefined {
   for (const menu of menus) {
-    if (menu.path && pathname.startsWith(menu.path)) {
-      return menu;
-    }
     const child = menu.children ? findActiveMenu(menu.children, pathname) : undefined;
     if (child) {
       return child;
+    }
+    if (menu.path && pathname.startsWith(menu.path)) {
+      return menu;
     }
   }
   return undefined;

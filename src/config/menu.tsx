@@ -1,4 +1,5 @@
 import {
+  ApartmentOutlined,
   AppstoreOutlined,
   BookOutlined,
   DashboardOutlined,
@@ -6,12 +7,14 @@ import {
   KeyOutlined,
   LineChartOutlined,
   MenuOutlined,
+  NotificationOutlined,
   SearchOutlined,
   SettingOutlined,
   TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import type { ReactNode } from 'react';
+import { dynamicRouteMap } from '@/access/routeMap';
 import type { PermissionMenu } from '@/types/permission';
 
 export interface AppMenuItem {
@@ -32,6 +35,7 @@ export interface AppMenuItem {
 }
 
 const menuIconMap: Record<string, ReactNode> = {
+  ApartmentOutlined: <ApartmentOutlined />,
   AppstoreOutlined: <AppstoreOutlined />,
   BookOutlined: <BookOutlined />,
   DashboardOutlined: <DashboardOutlined />,
@@ -43,7 +47,12 @@ const menuIconMap: Record<string, ReactNode> = {
   TeamOutlined: <TeamOutlined />,
   UserOutlined: <UserOutlined />,
   FileSearchOutlined: <FileSearchOutlined />,
+  NotificationOutlined: <NotificationOutlined />,
 };
+
+const supportedInternalPaths: Set<string> = new Set(
+  Object.values(dynamicRouteMap).map((route) => route.path),
+);
 
 export const appMenus: AppMenuItem[] = [
   {
@@ -158,23 +167,37 @@ export const appMenus: AppMenuItem[] = [
 
 export function mapPermissionMenusToAppMenus(menus: PermissionMenu[]): AppMenuItem[] {
   return menus
-    .map((menu) => ({
-      key: getMenuKey(menu),
-      path: menu.path,
-      label: menu.title,
-      icon: menu.icon ? menuIconMap[menu.icon] : undefined,
-      orderNo: menu.orderNo,
-      type: menu.type,
-      permissionCode: menu.permissionCode,
-      hiddenInMenu: menu.hiddenInMenu,
-      redirect: menu.redirect,
-      keepAlive: menu.keepAlive,
-      externalLink: menu.externalLink,
-      badge: menu.badge,
-      disabled: menu.disabled,
-      children: menu.children ? mapPermissionMenusToAppMenus(menu.children) : undefined,
-    }))
+    .map((menu) => {
+      const children = menu.children ? mapPermissionMenusToAppMenus(menu.children) : [];
+      return {
+        key: getMenuKey(menu),
+        path: menu.path,
+        label: menu.title,
+        icon: menu.icon ? menuIconMap[menu.icon] : undefined,
+        orderNo: menu.orderNo,
+        type: menu.type,
+        permissionCode: menu.permissionCode,
+        hiddenInMenu: menu.hiddenInMenu,
+        redirect: menu.redirect,
+        keepAlive: menu.keepAlive,
+        externalLink: menu.externalLink,
+        badge: menu.badge,
+        disabled: menu.disabled,
+        children: children.length > 0 ? children : undefined,
+      };
+    })
+    .filter((menu) => menu.children?.length || isSupportedMenu(menu))
     .sort((prev, next) => prev.orderNo - next.orderNo);
+}
+
+function isSupportedMenu(menu: AppMenuItem): boolean {
+  if (menu.type === 'external') {
+    return Boolean(menu.externalLink);
+  }
+  if (!menu.path) {
+    return true;
+  }
+  return supportedInternalPaths.has(menu.path);
 }
 
 function getMenuKey(menu: PermissionMenu): string {
