@@ -26,6 +26,7 @@ interface AuthState {
   permissionsLoaded: boolean;
   isAuthenticated: boolean;
   login: (token: string, refreshToken?: string, role?: string) => void;
+  updateTokens: (token: string, refreshToken?: string) => void;
   logout: () => void;
   setPermissions: (menus: PermissionMenu[], routeCodes: string[], actions: PermissionAction[]) => void;
 }
@@ -37,13 +38,14 @@ interface AuthState {
  * 创建日期：2026-04-16
  */
 export const useAuthStore = create<AuthState>((set) => {
+  const savedToken = getToken();
   const savedRole = getRole();
   const savedMenus = getMenus();
   const savedRouteCodes = getRouteCodes();
   const savedActions = getActions();
-  const hasToken = !!getToken();
+  const hasToken = !!savedToken;
   return {
-    token: getToken(),
+    token: savedToken,
     refreshToken: getRefreshToken(),
     role: savedRole,
     menus: savedMenus,
@@ -67,6 +69,18 @@ export const useAuthStore = create<AuthState>((set) => {
         routeCodes: [],
         actions: [],
         permissionsLoaded: false,
+      });
+    },
+    updateTokens: (token: string, refreshToken?: string) => {
+      const nextRefreshToken = refreshToken || getRefreshToken();
+      setToken(token);
+      if (nextRefreshToken) {
+        setRefreshToken(nextRefreshToken);
+      }
+      set({
+        token,
+        refreshToken: nextRefreshToken,
+        isAuthenticated: true,
       });
     },
     logout: () => {

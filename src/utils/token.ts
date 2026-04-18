@@ -27,6 +27,32 @@ export function setToken(token: string): void {
 }
 
 /**
+ * 判断 JWT 是否仍然有效，路由守卫用它避免过期 token 继续驱动跳转。
+ */
+export function isTokenUsable(token: string | null): boolean {
+  if (!token) {
+    return false;
+  }
+  try {
+    const payloadText = decodeJwtPayload(token);
+    const payload = JSON.parse(payloadText) as { exp?: number };
+    return typeof payload.exp === 'number' && payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+}
+
+function decodeJwtPayload(token: string): string {
+  const [, payload] = token.split('.');
+  if (!payload) {
+    throw new Error('Invalid token payload');
+  }
+  const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+  return atob(padded);
+}
+
+/**
  * 获取刷新 token。
  */
 export function getRefreshToken(): string | null {

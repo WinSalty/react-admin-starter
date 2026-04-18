@@ -1,7 +1,8 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth';
 import { usePermission } from '@/hooks/usePermission';
+import { isTokenUsable } from '@/utils/token';
 
 /**
  * 认证路由守卫组件。
@@ -28,7 +29,17 @@ export function AuthGuard({ children }: { children: ReactNode }) {
 export function GuestGuard({ children }: { children: ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const permissionsLoaded = useAuthStore((state) => state.permissionsLoaded);
-  if (isAuthenticated && permissionsLoaded) {
+  const token = useAuthStore((state) => state.token);
+  const logout = useAuthStore((state) => state.logout);
+  const tokenValid = isTokenUsable(token);
+
+  useEffect(() => {
+    if (isAuthenticated && !tokenValid) {
+      logout();
+    }
+  }, [isAuthenticated, logout, tokenValid]);
+
+  if (isAuthenticated && permissionsLoaded && tokenValid) {
     return <Navigate to="/dashboard" replace />;
   }
   return children;
