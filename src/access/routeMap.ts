@@ -50,6 +50,11 @@ export const dynamicRouteMap = {
     componentKey: 'SystemModulePage:logs',
     routeCode: 'logs',
   },
+  notices: {
+    path: '/system/notices',
+    componentKey: 'NoticePage',
+    routeCode: 'notices',
+  },
   configs: {
     path: '/system/configs',
     componentKey: 'SystemConfigPage',

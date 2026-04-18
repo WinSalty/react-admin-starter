@@ -19,6 +19,7 @@ const MenuManagementPage = lazy(() => import('@/pages/system/MenuManagementPage'
 const NotFound = lazy(() => import('@/pages/system/NotFound'));
 const SystemConfigPage = lazy(() => import('@/pages/system/SystemConfigPage'));
 const SystemModulePage = lazy(() => import('@/pages/system/SystemModulePage'));
+const NoticePage = lazy(() => import('@/pages/notice/NoticePage'));
 
 /**
  * 路由懒加载包装组件，避免所有页面和图表库进入首屏主包。
@@ -144,6 +145,16 @@ export const router = createBrowserRouter(
             <LazyRoute>
               <RouteGuard permissionCode={dynamicRouteMap.logs.routeCode}>
                 <SystemModulePage moduleKey="logs" />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: dynamicRouteMap.notices.path,
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode={dynamicRouteMap.notices.routeCode}>
+                <NoticePage />
               </RouteGuard>
             </LazyRoute>
           ),
