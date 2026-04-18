@@ -1,5 +1,5 @@
 import type { ApiResponse } from '@/types/api';
-import { mockLogin, mockRegister } from '@/mocks/auth';
+import { request } from '@/services/request';
 
 export interface LoginParams {
   username: string;
@@ -14,11 +14,18 @@ export interface RegisterParams {
 
 export interface LoginResult {
   token: string;
+  accessToken?: string;
+  refreshToken?: string;
+  expiresIn?: number;
+  refreshExpiresIn?: number;
+  tokenType?: string;
+  roleCode?: string;
+  roleName?: string;
 }
 
 /**
  * 认证相关 API 请求封装。
- * 当前使用 mock 数据，后续接入真实后端时替换方法体。
+ * 统一对接后端认证接口。
  * author: sunshengxian
  * 创建日期：2026-04-16
  */
@@ -27,12 +34,14 @@ export interface LoginResult {
  * 用户登录。
  */
 export async function login(params: LoginParams): Promise<ApiResponse<LoginResult>> {
-  return mockLogin(params);
+  const response = await request.post<ApiResponse<LoginResult>>('/api/auth/login', params);
+  return response.data;
 }
 
 /**
  * 用户注册。
  */
 export async function register(params: RegisterParams): Promise<ApiResponse<void>> {
-  return mockRegister(params);
+  const response = await request.post<ApiResponse<void>>('/api/auth/register', params);
+  return response.data;
 }

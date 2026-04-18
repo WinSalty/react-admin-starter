@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import type { ReactNode } from 'react';
 import { Spin } from 'antd';
-import { createMemoryRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { dynamicRouteMap } from '@/access/routeMap';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AuthGuard, GuestGuard, RouteGuard } from '@/components/RouteGuard';
@@ -39,7 +39,7 @@ function LazyRoute({ children }: { children: ReactNode }) {
   );
 }
 
-export const router = createMemoryRouter(
+export const router = createBrowserRouter(
   [
     {
       path: '/',
@@ -204,7 +204,4 @@ export const router = createMemoryRouter(
       ),
     },
   ],
-  {
-    initialEntries: ['/dashboard'],
-  },
 );

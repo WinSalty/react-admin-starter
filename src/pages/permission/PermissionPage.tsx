@@ -11,7 +11,7 @@ const { Paragraph } = Typography;
 
 /**
  * 权限目录与角色权限分配页面。
- * 支持从 service/mock 链路读取角色、菜单树、路由权限和按钮权限。
+ * 支持从真实后端链路读取角色、菜单树、路由权限和按钮权限。
  * author: sunshengxian
  * 创建日期：2026-04-16
  */
@@ -23,7 +23,7 @@ function PermissionPage() {
   const actions = useAuthStore((state) => state.actions);
   const role = useAuthStore((state) => state.role);
   const [roles, setRoles] = useState<SystemRecord[]>([]);
-  const [selectedRole, setSelectedRole] = useState('super_admin');
+  const [selectedRole, setSelectedRole] = useState('admin');
   const [checkedMenuIds, setCheckedMenuIds] = useState<string[]>([]);
   const [checkedRouteCodes, setCheckedRouteCodes] = useState<string[]>([]);
   const [checkedActionCodes, setCheckedActionCodes] = useState<string[]>([]);
@@ -60,6 +60,9 @@ function PermissionPage() {
     });
     if (response.code === 0) {
       setRoles(response.data.records);
+      if (response.data.records.length > 0 && !response.data.records.some((item) => item.code === selectedRole)) {
+        setSelectedRole(response.data.records[0].code);
+      }
     }
   }
 

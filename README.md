@@ -455,8 +455,15 @@ hasAllAction(['a', 'b']);    // 是否全部权限
 
 ## 路由说明
 
-- 项目使用内存路由，页面切换不改变浏览器地址栏 URL。
-- 当前不会在地址栏暴露 `/dashboard`、`/query`、`/statistics`、`/permission`、`/system/users`、`/system/roles`、`/system/menus`、`/system/dicts`、`/system/logs`、`/system/configs`、`/login`、`/register` 等内部路径。
+- 项目使用浏览器路由，页面切换会同步浏览器地址栏 URL。
+- 当前路由包含 `/dashboard`、`/query`、`/statistics`、`/permission`、`/system/users`、`/system/roles`、`/system/menus`、`/system/dicts`、`/system/logs`、`/system/configs`、`/login`、`/register` 等内部路径。
+
+## 后端联调说明
+
+- 默认通过 Vite dev server 将 `/api` 代理到 `http://localhost:8080`，前端 service 直接请求真实后端接口。
+- 如需绕过 Vite 代理，可配置 `VITE_API_BASE_URL=http://localhost:8080`，请求路径仍保持 `/api/...`。
+- 登录链路为 `POST /api/auth/login` -> 保存 Bearer Token 与角色编码 -> `GET /api/permission/bootstrap` 拉取菜单、路由和按钮权限。
+- 当前已替换 `auth`、`dashboard`、`query`、`permission`、`system` service 中的 mock 调用。
 
 ## 页面体验规范
 

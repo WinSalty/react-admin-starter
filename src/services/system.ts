@@ -8,21 +8,11 @@ import type {
   SystemSaveParams,
   SystemStatus,
 } from '@/types/system';
-import {
-  mockFetchSystemConfigs,
-  mockFetchSystemDetail,
-  mockFetchSystemMenuTree,
-  mockFetchSystemPage,
-  mockSaveSystemConfig,
-  mockSaveSystemMenu,
-  mockSaveSystemRecord,
-  mockUpdateSystemMenuStatus,
-  mockUpdateSystemStatus,
-} from '@/mocks/system';
+import { request } from '@/services/request';
 
 /**
  * 系统管理相关 API 请求封装。
- * 当前使用 mock 数据，后续接入真实后端时替换方法体。
+ * 统一对接后端系统管理接口。
  * author: sunshengxian
  * 创建日期：2026-04-17
  */
@@ -34,12 +24,12 @@ import {
 export async function fetchSystemPage(
   params: SystemListParams,
 ): Promise<ApiResponse<PageResult<SystemRecord>>> {
-  const data = await mockFetchSystemPage(params);
-  return {
-    code: 0,
-    message: '获取成功',
-    data,
-  };
+  const { moduleKey, ...queryParams } = params;
+  const response = await request.get<ApiResponse<PageResult<SystemRecord>>>(
+    `/api/system/${moduleKey}/list`,
+    { params: queryParams },
+  );
+  return response.data;
 }
 
 /**
@@ -47,12 +37,10 @@ export async function fetchSystemPage(
  * 对接后端 GET /api/system/detail
  */
 export async function fetchSystemDetail(id: string): Promise<ApiResponse<SystemRecord | undefined>> {
-  const data = await mockFetchSystemDetail(id);
-  return {
-    code: data ? 0 : 404,
-    message: data ? '获取成功' : '记录不存在',
-    data,
-  };
+  const response = await request.get<ApiResponse<SystemRecord>>('/api/system/detail', {
+    params: { id },
+  });
+  return response.data;
 }
 
 /**
@@ -62,12 +50,8 @@ export async function fetchSystemDetail(id: string): Promise<ApiResponse<SystemR
 export async function saveSystemRecord(
   params: SystemSaveParams,
 ): Promise<ApiResponse<SystemRecord>> {
-  const data = await mockSaveSystemRecord(params);
-  return {
-    code: 0,
-    message: '保存成功',
-    data,
-  };
+  const response = await request.post<ApiResponse<SystemRecord>>('/api/system/save', params);
+  return response.data;
 }
 
 /**
@@ -78,12 +62,11 @@ export async function updateSystemStatus(
   id: string,
   status: SystemStatus,
 ): Promise<ApiResponse<SystemRecord | undefined>> {
-  const data = await mockUpdateSystemStatus(id, status);
-  return {
-    code: data ? 0 : 404,
-    message: data ? '状态已更新' : '记录不存在',
-    data,
-  };
+  const response = await request.post<ApiResponse<SystemRecord>>('/api/system/status', {
+    id,
+    status,
+  });
+  return response.data;
 }
 
 /**
@@ -94,12 +77,10 @@ export async function fetchSystemMenuTree(params?: {
   keyword?: string;
   status?: SystemStatus;
 }): Promise<ApiResponse<SystemMenuRecord[]>> {
-  const data = await mockFetchSystemMenuTree(params);
-  return {
-    code: 0,
-    message: '获取成功',
-    data,
-  };
+  const response = await request.get<ApiResponse<SystemMenuRecord[]>>('/api/system/menus/tree', {
+    params,
+  });
+  return response.data;
 }
 
 /**
@@ -109,12 +90,8 @@ export async function fetchSystemMenuTree(params?: {
 export async function saveSystemMenu(
   params: SystemMenuSaveParams,
 ): Promise<ApiResponse<SystemMenuRecord>> {
-  const data = await mockSaveSystemMenu(params);
-  return {
-    code: 0,
-    message: '保存成功',
-    data,
-  };
+  const response = await request.post<ApiResponse<SystemMenuRecord>>('/api/system/menus/save', params);
+  return response.data;
 }
 
 /**
@@ -125,12 +102,11 @@ export async function updateSystemMenuStatus(
   id: string,
   status: SystemStatus,
 ): Promise<ApiResponse<SystemMenuRecord | undefined>> {
-  const data = await mockUpdateSystemMenuStatus(id, status);
-  return {
-    code: data ? 0 : 404,
-    message: data ? '状态已更新' : '记录不存在',
-    data,
-  };
+  const response = await request.post<ApiResponse<SystemMenuRecord>>('/api/system/menus/status', {
+    id,
+    status,
+  });
+  return response.data;
 }
 
 /**
@@ -138,12 +114,8 @@ export async function updateSystemMenuStatus(
  * 对接后端 GET /api/system/configs
  */
 export async function fetchSystemConfigs(): Promise<ApiResponse<SystemConfigRecord[]>> {
-  const data = await mockFetchSystemConfigs();
-  return {
-    code: 0,
-    message: '获取成功',
-    data,
-  };
+  const response = await request.get<ApiResponse<SystemConfigRecord[]>>('/api/system/configs');
+  return response.data;
 }
 
 /**
@@ -154,10 +126,9 @@ export async function saveSystemConfig(
   id: string,
   value: SystemConfigRecord['value'],
 ): Promise<ApiResponse<SystemConfigRecord | undefined>> {
-  const data = await mockSaveSystemConfig(id, value);
-  return {
-    code: data ? 0 : 404,
-    message: data ? '配置已保存' : '配置不存在',
-    data,
-  };
+  const response = await request.post<ApiResponse<SystemConfigRecord>>('/api/system/configs/save', {
+    id,
+    value,
+  });
+  return response.data;
 }

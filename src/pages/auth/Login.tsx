@@ -21,10 +21,11 @@ function Login() {
 
   async function onFinish(values: { username: string; password: string }) {
     const res = await login(values);
-    if (res.code === 0 && res.data.token) {
-      const role = values.username;
-      loginStore(res.data.token, role);
-      const permRes = await fetchPermissionBootstrap(role);
+    const token = res.data?.accessToken || res.data?.token;
+    if (res.code === 0 && token) {
+      const role = res.data.roleCode || 'viewer';
+      loginStore(token, role);
+      const permRes = await fetchPermissionBootstrap();
       if (permRes.code === 0) {
         setPermissions(permRes.data.menus, permRes.data.routes, permRes.data.actions);
         messageApi.success('登录成功');

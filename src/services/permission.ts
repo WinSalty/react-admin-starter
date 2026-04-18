@@ -1,14 +1,10 @@
 import type { ApiResponse } from '@/types/api';
 import type { PermissionBootstrap, RolePermissionAssignment } from '@/types/permission';
-import {
-  mockFetchPermissionAssignment,
-  mockFetchPermissionBootstrap,
-  mockSavePermissionAssignment,
-} from '@/mocks/permission';
+import { request } from '@/services/request';
 
 /**
  * 权限相关 API 请求封装。
- * 当前使用 mock 数据，后续接入真实后端时替换方法体。
+ * 统一对接后端权限接口。
  * author: sunshengxian
  * 创建日期：2026-04-16
  */
@@ -20,13 +16,10 @@ import {
 export async function fetchPermissionBootstrap(
   role?: string,
 ): Promise<ApiResponse<PermissionBootstrap>> {
-  // 后续替换为：return request.get('/api/permission/bootstrap', { params: { role } })
-  const data = await mockFetchPermissionBootstrap((role as 'admin' | 'viewer') || 'admin');
-  return {
-    code: 0,
-    message: '获取成功',
-    data,
-  };
+  const response = await request.get<ApiResponse<PermissionBootstrap>>('/api/permission/bootstrap', {
+    params: role ? { role } : undefined,
+  });
+  return response.data;
 }
 
 /**
@@ -36,12 +29,10 @@ export async function fetchPermissionBootstrap(
 export async function fetchPermissionAssignment(
   roleCode: string,
 ): Promise<ApiResponse<RolePermissionAssignment>> {
-  const data = await mockFetchPermissionAssignment(roleCode);
-  return {
-    code: 0,
-    message: '获取成功',
-    data,
-  };
+  const response = await request.get<ApiResponse<RolePermissionAssignment>>('/api/permission/assignment', {
+    params: { roleCode },
+  });
+  return response.data;
 }
 
 /**
@@ -51,10 +42,9 @@ export async function fetchPermissionAssignment(
 export async function savePermissionAssignment(
   params: RolePermissionAssignment,
 ): Promise<ApiResponse<RolePermissionAssignment>> {
-  const data = await mockSavePermissionAssignment(params);
-  return {
-    code: 0,
-    message: '保存成功',
-    data,
-  };
+  const response = await request.post<ApiResponse<RolePermissionAssignment>>(
+    '/api/permission/assignment',
+    params,
+  );
+  return response.data;
 }

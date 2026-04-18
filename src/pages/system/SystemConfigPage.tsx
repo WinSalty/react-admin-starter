@@ -7,7 +7,7 @@ import type { SystemConfigRecord, SystemConfigType } from '@/types/system';
 
 /**
  * 系统配置页面模板。
- * 覆盖基础参数、开关配置和前端缓存配置入口，数据统一通过 service/mock 链路获取。
+ * 覆盖基础参数、开关配置和前端缓存配置入口，数据统一通过后端配置接口获取。
  * author: sunshengxian
  * 创建日期：2026-04-17
  */
@@ -145,7 +145,7 @@ function SystemConfigPage() {
     <div className="page-stack">
       <Card title="系统配置">
         <p className="system-module-desc">
-          系统配置页面提供基础参数、开关配置和前端缓存配置入口，后续可直接替换真实配置接口。
+          系统配置页面提供基础参数、开关配置和前端缓存配置入口。
         </p>
         <Space size={[8, 8]} wrap className="config-entry-tags">
           <Tag color="blue">基础参数</Tag>

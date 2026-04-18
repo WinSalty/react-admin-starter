@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth';
 import { getToken } from '@/utils/token';
 
 export const request = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '',
   timeout: 10000,
 });
 

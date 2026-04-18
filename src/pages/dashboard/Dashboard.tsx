@@ -112,7 +112,7 @@ function Dashboard() {
               </div>
               <div>
                 <span>图表来源</span>
-                <strong>service/mock</strong>
+                <strong>后端接口</strong>
               </div>
               <div>
                 <span>页面状态</span>
