@@ -40,6 +40,16 @@ export async function login(params: LoginParams): Promise<ApiResponse<LoginResul
 }
 
 /**
+ * 刷新访问令牌。
+ */
+export async function refreshToken(refreshToken: string): Promise<ApiResponse<LoginResult>> {
+  const response = await request.post<ApiResponse<LoginResult>>('/api/auth/refresh-token', {
+    refreshToken,
+  });
+  return response.data;
+}
+
+/**
  * 用户注册。
  */
 export async function register(params: RegisterParams): Promise<ApiResponse<void>> {

@@ -2,6 +2,7 @@ import { readStorage, writeStorage, removeStorage } from '@/utils/storage';
 import type { PermissionAction, PermissionMenu } from '@/types/permission';
 
 const TOKEN_KEY = 'auth_token';
+const REFRESH_TOKEN_KEY = 'auth_refresh_token';
 const ROLE_KEY = 'auth_role';
 const MENUS_KEY = 'auth_menus';
 const ROUTE_CODES_KEY = 'auth_route_codes';
@@ -26,12 +27,27 @@ export function setToken(token: string): void {
 }
 
 /**
+ * 获取刷新 token。
+ */
+export function getRefreshToken(): string | null {
+  return readStorage(REFRESH_TOKEN_KEY);
+}
+
+/**
+ * 存储刷新 token。
+ */
+export function setRefreshToken(token: string): void {
+  writeStorage(REFRESH_TOKEN_KEY, token);
+}
+
+/**
  * 清除认证 token。
  * author: sunshengxian
  * 创建日期：2026-04-16
  */
 export function clearToken(): void {
   removeStorage(TOKEN_KEY);
+  removeStorage(REFRESH_TOKEN_KEY);
   removeStorage(ROLE_KEY);
   removeStorage(MENUS_KEY);
   removeStorage(ROUTE_CODES_KEY);

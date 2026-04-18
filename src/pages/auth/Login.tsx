@@ -24,7 +24,7 @@ function Login() {
     const token = res.data?.accessToken || res.data?.token;
     if (res.code === 0 && token) {
       const role = res.data.roleCode || 'viewer';
-      loginStore(token, role);
+      loginStore(token, res.data?.refreshToken, role);
       const permRes = await fetchPermissionBootstrap();
       if (permRes.code === 0) {
         setPermissions(permRes.data.menus, permRes.data.routes, permRes.data.actions);

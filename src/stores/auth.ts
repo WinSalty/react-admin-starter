@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 import {
   getToken,
+  getRefreshToken,
   setToken,
+  setRefreshToken,
   clearToken,
   getRole,
   setRole,
@@ -16,13 +18,14 @@ import type { PermissionAction, PermissionMenu } from '@/types/permission';
 
 interface AuthState {
   token: string | null;
+  refreshToken: string | null;
   role: string;
   menus: PermissionMenu[];
   routeCodes: string[];
   actions: PermissionAction[];
   permissionsLoaded: boolean;
   isAuthenticated: boolean;
-  login: (token: string, role?: string) => void;
+  login: (token: string, refreshToken?: string, role?: string) => void;
   logout: () => void;
   setPermissions: (menus: PermissionMenu[], routeCodes: string[], actions: PermissionAction[]) => void;
 }
@@ -41,18 +44,23 @@ export const useAuthStore = create<AuthState>((set) => {
   const hasToken = !!getToken();
   return {
     token: getToken(),
+    refreshToken: getRefreshToken(),
     role: savedRole,
     menus: savedMenus,
     routeCodes: savedRouteCodes,
     actions: savedActions,
     permissionsLoaded: hasToken && savedMenus.length > 0 && savedRouteCodes.length > 0,
     isAuthenticated: hasToken,
-    login: (token: string, role?: string) => {
+    login: (token: string, refreshToken?: string, role?: string) => {
       const resolvedRole = role || 'admin';
       setToken(token);
+      if (refreshToken) {
+        setRefreshToken(refreshToken);
+      }
       setRole(resolvedRole);
       set({
         token,
+        refreshToken: refreshToken || null,
         role: resolvedRole,
         isAuthenticated: true,
         menus: [],
@@ -65,6 +73,7 @@ export const useAuthStore = create<AuthState>((set) => {
       clearToken();
       set({
         token: null,
+        refreshToken: null,
         role: '',
         isAuthenticated: false,
         menus: [],
