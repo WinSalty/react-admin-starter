@@ -60,6 +60,11 @@ export const dynamicRouteMap = {
     componentKey: 'SystemConfigPage',
     routeCode: 'configs',
   },
+  accountSettings: {
+    path: '/account/settings',
+    componentKey: 'AccountSettings',
+    routeCode: 'account_settings',
+  },
 } as const;
 
 export type DynamicRouteKey = keyof typeof dynamicRouteMap;

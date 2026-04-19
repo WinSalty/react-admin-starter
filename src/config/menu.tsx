@@ -172,6 +172,24 @@ export const appMenus: AppMenuItem[] = [
       },
     ],
   },
+  {
+    key: 'account',
+    label: '个人中心',
+    icon: <UserOutlined />,
+    orderNo: 4,
+    type: 'catalog',
+    children: [
+      {
+        key: 'account-settings',
+        path: '/account/settings',
+        label: '个人设置',
+        icon: <UserOutlined />,
+        orderNo: 1,
+        type: 'menu',
+        permissionCode: 'account_settings:view',
+      },
+    ],
+  },
 ];
 
 export function mapPermissionMenusToAppMenus(menus: PermissionMenu[]): AppMenuItem[] {

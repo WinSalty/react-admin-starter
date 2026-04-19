@@ -127,6 +127,25 @@ const adminPermissions: PermissionBootstrap = {
         },
       ],
     },
+    {
+      id: '4',
+      title: '个人中心',
+      icon: 'UserOutlined',
+      orderNo: 4,
+      type: 'catalog',
+      children: [
+        {
+          id: '4-1',
+          parentId: '4',
+          title: '个人设置',
+          path: '/account/settings',
+          icon: 'UserOutlined',
+          orderNo: 1,
+          type: 'menu',
+          permissionCode: 'account_settings:view',
+        },
+      ],
+    },
   ],
   routes: [
     'dashboard',
@@ -139,6 +158,7 @@ const adminPermissions: PermissionBootstrap = {
     'dicts',
     'logs',
     'configs',
+    'account_settings',
   ],
   actions: [
     { code: 'query:add', name: '新增查询' },
@@ -167,6 +187,7 @@ const adminPermissions: PermissionBootstrap = {
     { code: 'system:dict:refresh', name: '刷新字典缓存' },
     { code: 'system:config:view', name: '查看系统配置' },
     { code: 'system:config:edit', name: '编辑系统配置' },
+    { code: 'account_settings:view', name: '查看个人设置' },
   ],
 };
 
@@ -181,8 +202,27 @@ const viewerPermissions: PermissionBootstrap = {
       type: 'menu',
       permissionCode: 'dashboard:view',
     },
+    {
+      id: '2',
+      title: '个人中心',
+      icon: 'UserOutlined',
+      orderNo: 4,
+      type: 'catalog',
+      children: [
+        {
+          id: '2-1',
+          parentId: '2',
+          title: '个人设置',
+          path: '/account/settings',
+          icon: 'UserOutlined',
+          orderNo: 1,
+          type: 'menu',
+          permissionCode: 'account_settings:view',
+        },
+      ],
+    },
   ],
-  routes: ['dashboard'],
+  routes: ['dashboard', 'account_settings'],
   actions: [],
 };
 

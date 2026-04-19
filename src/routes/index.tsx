@@ -10,6 +10,7 @@ const AuthLayout = lazy(() => import('@/layouts/AuthLayout'));
 const BasicLayout = lazy(() => import('@/layouts/BasicLayout'));
 const Login = lazy(() => import('@/pages/auth/Login'));
 const Register = lazy(() => import('@/pages/auth/Register'));
+const AccountSettings = lazy(() => import('@/pages/account/AccountSettings'));
 const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
 const PermissionPage = lazy(() => import('@/pages/permission/PermissionPage'));
 const QueryList = lazy(() => import('@/pages/query/QueryList'));
@@ -165,6 +166,16 @@ export const router = createBrowserRouter(
             <LazyRoute>
               <RouteGuard permissionCode={dynamicRouteMap.configs.routeCode}>
                 <SystemConfigPage />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: dynamicRouteMap.accountSettings.path,
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode={dynamicRouteMap.accountSettings.routeCode}>
+                <AccountSettings />
               </RouteGuard>
             </LazyRoute>
           ),

@@ -107,6 +107,12 @@ function BasicLayout() {
       label: currentTime,
     },
     {
+      key: 'settings',
+      icon: <UserOutlined />,
+      label: '个人设置',
+      onClick: () => navigate('/account/settings'),
+    },
+    {
       type: 'divider',
     },
     {

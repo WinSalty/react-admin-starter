@@ -724,6 +724,114 @@ body {
   text-align: center;
 }
 
+.account-settings-card .ant-card-body {
+  padding: 0;
+}
+
+.account-settings-layout {
+  display: grid;
+  min-height: 560px;
+  grid-template-columns: 224px minmax(0, 1fr);
+}
+
+.account-settings-menu {
+  border-right: 1px solid rgba(5, 5, 5, 0.06);
+  padding: 16px 0;
+}
+
+.account-settings-menu .ant-menu {
+  border-inline-end: 0;
+}
+
+.account-settings-content {
+  min-width: 0;
+  padding: 28px 32px 36px;
+}
+
+.account-settings-panel {
+  max-width: 920px;
+}
+
+.account-settings-panel h4.ant-typography {
+  margin: 0 0 24px;
+}
+
+.account-settings-form {
+  max-width: 560px;
+}
+
+.account-phone-prefix {
+  width: 86px;
+}
+
+.account-avatar-panel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 4px;
+  text-align: center;
+  flex-direction: column;
+}
+
+.account-security-summary,
+.account-binding-item,
+.account-notification-item {
+  border-bottom: 1px solid rgba(5, 5, 5, 0.06);
+  padding: 16px 0;
+}
+
+.account-security-summary {
+  margin-bottom: 20px;
+  padding-top: 0;
+}
+
+.account-security-summary .ant-space-item:last-child,
+.account-binding-item .ant-space-item:last-child,
+.account-notification-item > div {
+  min-width: 0;
+}
+
+.account-security-summary div div,
+.account-binding-item div div,
+.account-notification-item > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.account-security-summary span,
+.account-binding-item span,
+.account-notification-item span {
+  color: rgba(0, 0, 0, 0.58);
+}
+
+.account-binding-list {
+  display: flex;
+  max-width: 720px;
+  flex-direction: column;
+}
+
+.account-binding-item,
+.account-notification-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.account-binding-icon {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #f0f5ff;
+  color: #1677ff;
+  font-size: 18px;
+}
+
 @media (max-width: 768px) {
   .app-header {
     padding: 0 12px;
@@ -768,6 +876,25 @@ body {
 
   .app-header-user-name {
     display: none;
+  }
+
+  .account-settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .account-settings-menu {
+    border-right: 0;
+    border-bottom: 1px solid rgba(5, 5, 5, 0.06);
+  }
+
+  .account-settings-content {
+    padding: 20px 16px 24px;
+  }
+
+  .account-binding-item,
+  .account-notification-item {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 
