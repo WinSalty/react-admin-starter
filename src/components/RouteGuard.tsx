@@ -1,5 +1,7 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
+import { Spin } from 'antd';
 import { Navigate } from 'react-router-dom';
+import { fetchPermissionBootstrap } from '@/services/permission';
 import { useAuthStore } from '@/stores/auth';
 import { usePermission } from '@/hooks/usePermission';
 import { isTokenUsable } from '@/utils/token';
@@ -11,10 +13,12 @@ import { isTokenUsable } from '@/utils/token';
  * 创建日期：2026-04-16
  */
 export function AuthGuard({ children }: { children: ReactNode }) {
+  const [refreshingPermissions, setRefreshingPermissions] = useState(true);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const permissionsLoaded = useAuthStore((state) => state.permissionsLoaded);
   const token = useAuthStore((state) => state.token);
   const logout = useAuthStore((state) => state.logout);
+  const setPermissions = useAuthStore((state) => state.setPermissions);
   const tokenValid = isTokenUsable(token);
 
   useEffect(() => {
@@ -23,8 +27,50 @@ export function AuthGuard({ children }: { children: ReactNode }) {
     }
   }, [isAuthenticated, logout, tokenValid]);
 
-  if (!isAuthenticated || !permissionsLoaded || !tokenValid) {
+  useEffect(() => {
+    let mounted = true;
+    if (!isAuthenticated || !tokenValid) {
+      setRefreshingPermissions(false);
+      return () => {
+        mounted = false;
+      };
+    }
+    setRefreshingPermissions(true);
+    fetchPermissionBootstrap()
+      .then((response) => {
+        if (!mounted) {
+          return;
+        }
+        if (response.code !== 0 || !response.data) {
+          logout();
+          return;
+        }
+        setPermissions(response.data.menus, response.data.routes, response.data.actions);
+      })
+      .catch(() => {
+        if (mounted) {
+          logout();
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          setRefreshingPermissions(false);
+        }
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [isAuthenticated, logout, setPermissions, token, tokenValid]);
+
+  if (!isAuthenticated || !tokenValid) {
     return <Navigate to="/login" replace />;
+  }
+  if (refreshingPermissions || !permissionsLoaded) {
+    return (
+      <div className="route-loading">
+        <Spin />
+      </div>
+    );
   }
   return children;
 }
