@@ -14,6 +14,7 @@ React Admin Starter 是基于 Ant Design 的前端脚手架项目，提供 React
 - 已统一认证页配色，登录和注册页视觉与后台主界面保持蓝白主色一致。
 - 已完成路由懒加载和 vendor chunk 拆分，生产构建不再出现 chunk 超限警告。
 - 已使用内存路由，页面切换不改变浏览器地址栏 URL。
+- 已完成登录鉴权前端加固：认证数据改为会话级存储，401 refresh token 自动刷新改为串行处理。
 - 当前阶段计划详见 [todolist.md](./todolist.md)。
 
 ## 技术栈
@@ -158,6 +159,7 @@ npm run preview
 1. 确认后端生产服务已经可访问，例如 `https://api.example.com`。
 2. 确认后端 CORS 允许前端生产域名，例如 `https://admin.example.com`。
 3. 确认登录、权限 bootstrap、系统管理等接口在生产后端可正常访问。
+4. 确认生产环境已部署后端登录限流、JWT 密钥强校验和 refresh token 轮换能力。
 4. 确认浏览器路由由 Web 服务器做 SPA 回退，否则刷新 `/system/users` 等二级路由会 404。
 5. 执行质量检查：
 

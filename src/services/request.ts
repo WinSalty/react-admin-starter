@@ -14,6 +14,7 @@ const SUCCESS_CODE = 0;
 const REFRESH_TOKEN_URL = '/api/auth/refresh-token';
 let lastErrorMessage = '';
 let lastErrorMessageAt = 0;
+let refreshPromise: Promise<string> | null = null;
 
 function isApiResponse(data: unknown): data is ApiResponse<unknown> {
   return (
@@ -48,6 +49,32 @@ function getErrorMessage(error: unknown): string {
 
 function isRefreshTokenRequest(url?: string): boolean {
   return !!url && url.includes(REFRESH_TOKEN_URL);
+}
+
+async function refreshAccessToken(refreshToken: string): Promise<string> {
+  if (!refreshPromise) {
+    refreshPromise = requestRefreshToken(refreshToken)
+      .then((response) => {
+        if (response.code !== SUCCESS_CODE) {
+          useAuthStore.getState().logout();
+          showErrorMessage(response.message);
+          throw new Error(response.message || '登录已过期，请重新登录');
+        }
+        const nextToken = response.data?.accessToken || response.data?.token;
+        const nextRefreshToken = response.data?.refreshToken || refreshToken;
+        if (!nextToken) {
+          useAuthStore.getState().logout();
+          showErrorMessage(response.message || '登录已过期，请重新登录');
+          throw new Error(response.message || '登录已过期，请重新登录');
+        }
+        useAuthStore.getState().updateTokens(nextToken, nextRefreshToken);
+        return nextToken;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
 }
 
 /**
@@ -91,20 +118,7 @@ request.interceptors.response.use(
       }
       originalRequest._retry = true;
       try {
-        const response = await requestRefreshToken(refreshToken);
-        if (response.code !== SUCCESS_CODE) {
-          useAuthStore.getState().logout();
-          showErrorMessage(response.message);
-          return Promise.reject(error);
-        }
-        const nextToken = response.data?.accessToken || response.data?.token;
-        const nextRefreshToken = response.data?.refreshToken || refreshToken;
-        if (!nextToken) {
-          useAuthStore.getState().logout();
-          showErrorMessage(response.message || '登录已过期，请重新登录');
-          return Promise.reject(error);
-        }
-        useAuthStore.getState().updateTokens(nextToken, nextRefreshToken);
+        const nextToken = await refreshAccessToken(refreshToken);
         originalRequest.headers = originalRequest.headers || {};
         originalRequest.headers.Authorization = `Bearer ${nextToken}`;
         return request(originalRequest);
