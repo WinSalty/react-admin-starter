@@ -326,6 +326,10 @@ body {
   font-weight: 600;
 }
 
+.metric-card-icon .anticon {
+  font-size: 32px;
+}
+
 .metric-card-icon-visits {
   background: #f3e8ff;
   color: #7c3aed;
@@ -549,6 +553,15 @@ body {
 
 .notice-quick-list .ant-list-item {
   padding: 10px 0;
+}
+
+.notice-quick-list-item {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.notice-quick-list-item:hover {
+  background: rgba(22, 119, 255, 0.04);
 }
 
 .notice-quick-item {

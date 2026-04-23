@@ -1,14 +1,27 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowDownOutlined, ArrowUpOutlined, MinusOutlined } from '@ant-design/icons';
+import {
+  AlertOutlined,
+  ArrowDownOutlined,
+  ArrowUpOutlined,
+  CalendarOutlined,
+  ClockCircleOutlined,
+  DollarCircleOutlined,
+  MinusOutlined,
+  ShoppingOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 import {
   Alert,
   Card,
   Col,
   List,
+  Modal,
   Row,
   Skeleton,
+  Space,
   Statistic,
   Table,
+  Tag,
   Typography,
 } from 'antd';
 import type { TableProps } from 'antd';
@@ -25,7 +38,7 @@ import type {
 } from '@/types/dashboard';
 import type { NoticeRecord } from '@/types/notice';
 
-const { Text } = Typography;
+const { Paragraph, Text, Title } = Typography;
 
 interface DashboardTableRow {
   key: string;
@@ -214,10 +227,10 @@ function Dashboard() {
 function MetricCard({ metric, loading }: { metric: DashboardMetric; loading: boolean }) {
   const trendClassName = `metric-trend metric-trend-${metric.trendType}`;
   const iconMap = {
-    visits: '访',
-    orders: '单',
-    revenue: '额',
-    alerts: '警',
+    visits: <UserOutlined />,
+    orders: <ShoppingOutlined />,
+    revenue: <DollarCircleOutlined />,
+    alerts: <AlertOutlined />,
   };
 
   return (
@@ -258,30 +271,69 @@ function NoticeQuickPanel({
   loading: boolean;
   errorMessage?: string;
 }) {
+  const [selectedNotice, setSelectedNotice] = useState<NoticeRecord>();
   const visibleNotices = useMemo(() => [...notices].sort(sortNotices).slice(0, 4), [notices]);
 
   return (
-    <Card className="dashboard-panel-card" title="系统公告">
-      {errorMessage ? <Alert message={errorMessage} type="warning" showIcon style={{ marginBottom: 16 }} /> : null}
-      <Skeleton loading={loading} active paragraph={{ rows: 5 }}>
-        <List
-          className="notice-quick-list"
-          locale={{ emptyText: '当前没有生效公告' }}
-          dataSource={visibleNotices}
-          renderItem={(notice) => (
-            <List.Item key={notice.id}>
-              <div className="notice-quick-item">
-                <div className="notice-quick-main">
-                  <span className="notice-quick-dot" />
-                  <Text ellipsis={{ tooltip: notice.title }}>{notice.title}</Text>
+    <>
+      <Card className="dashboard-panel-card" title="系统公告">
+        {errorMessage ? <Alert message={errorMessage} type="warning" showIcon style={{ marginBottom: 16 }} /> : null}
+        <Skeleton loading={loading} active paragraph={{ rows: 5 }}>
+          <List
+            className="notice-quick-list"
+            locale={{ emptyText: '当前没有生效公告' }}
+            dataSource={visibleNotices}
+            renderItem={(notice) => (
+              <List.Item key={notice.id} className="notice-quick-list-item" onClick={() => setSelectedNotice(notice)}>
+                <div className="notice-quick-item">
+                  <div className="notice-quick-main">
+                    <span className="notice-quick-dot" />
+                    <Text ellipsis={{ tooltip: notice.title }}>{notice.title}</Text>
+                  </div>
+                  <Text type="secondary">{notice.publishTime?.slice(5, 10)}</Text>
                 </div>
-                <Text type="secondary">{notice.publishTime?.slice(5, 10)}</Text>
-              </div>
-            </List.Item>
-          )}
-        />
-      </Skeleton>
-    </Card>
+              </List.Item>
+            )}
+          />
+        </Skeleton>
+      </Card>
+      <NoticeDetailModal notice={selectedNotice} onClose={() => setSelectedNotice(undefined)} />
+    </>
+  );
+}
+
+function NoticeDetailModal({
+  notice,
+  onClose,
+}: {
+  notice?: NoticeRecord;
+  onClose: () => void;
+}) {
+  return (
+    <Modal title="公告详情" open={!!notice} footer={null} onCancel={onClose}>
+      {notice ? (
+        <div className="notice-detail">
+          <Space size={8} wrap>
+            <Tag>{notice.noticeType}</Tag>
+          </Space>
+          <Title level={4}>{notice.title}</Title>
+          <Paragraph>{notice.content}</Paragraph>
+          <div className="notice-detail-meta">
+            <Text type="secondary">
+              <UserOutlined /> {notice.publisherName || '系统'}
+            </Text>
+            <Text type="secondary">
+              <CalendarOutlined /> {formatDateTime(notice.publishTime)}
+            </Text>
+            {notice.expireTime ? (
+              <Text type="secondary">
+                <ClockCircleOutlined /> 截止 {formatDateTime(notice.expireTime)}
+              </Text>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+    </Modal>
   );
 }
 
@@ -411,6 +463,10 @@ function renderTrendIcon(type: DashboardMetric['trendType']) {
 
 function sortNotices(prev: NoticeRecord, next: NoticeRecord) {
   return next.publishTime.localeCompare(prev.publishTime);
+}
+
+function formatDateTime(value?: string) {
+  return value || '未设置';
 }
 
 export default Dashboard;
