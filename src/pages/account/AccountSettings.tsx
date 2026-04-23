@@ -521,11 +521,6 @@ function AccountSettings() {
                   更换头像
                 </Button>
               )}
-              <Text type="secondary">
-                {fileUploadEnabled
-                  ? `新头像上传后会立即同步保存到当前资料，当前使用${activeStorageType === 'aliyun-oss' ? '阿里云 OSS 私有存储' : '本地存储'}。`
-                  : '文件上传服务暂不可用。'}
-              </Text>
             </div>
           </Col>
         </Row>
