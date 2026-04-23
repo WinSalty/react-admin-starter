@@ -138,7 +138,7 @@ function Dashboard() {
     <div className="page-stack dashboard-workbench">
       {errorMessage ? <Alert message={errorMessage} type="error" showIcon /> : null}
 
-      <Row gutter={[16, 16]}>
+      <Row gutter={[12, 12]}>
         {(overview?.metrics || []).map((metric) => (
           <Col xs={24} sm={12} xl={6} key={metric.key}>
             <MetricCard metric={metric} loading={loading} />
@@ -155,7 +155,7 @@ function Dashboard() {
           : null}
       </Row>
 
-      <Row gutter={[16, 16]}>
+      <Row gutter={[12, 12]}>
         <Col xs={24} xl={15}>
           <Card
             className="dashboard-panel-card"
@@ -163,13 +163,13 @@ function Dashboard() {
             extra={trendRange ? <Text type="secondary">{trendRange}</Text> : null}
             loading={loading && !trendOption}
           >
-            <ChartPanel option={trendOption} height={360} />
+            <ChartPanel option={trendOption} height={300} />
           </Card>
         </Col>
         <Col xs={24} xl={9}>
           <Card className="dashboard-panel-card" title="业务状态分布" loading={loading && !statusOption}>
             <div className="dashboard-panel-split">
-              <ChartPanel option={statusOption} height={320} />
+              <ChartPanel option={statusOption} height={256} />
               <div className="dashboard-source-legend">
                 {statusLegend.map((item) => (
                   <div key={item.name} className="source-legend-item">
@@ -186,7 +186,7 @@ function Dashboard() {
         </Col>
       </Row>
 
-      <Row gutter={[16, 16]}>
+      <Row gutter={[12, 12]}>
         <Col xs={24} xl={15}>
           <Card className="dashboard-panel-card" title="模块使用明细">
             <Table<DashboardTableRow>
@@ -196,6 +196,7 @@ function Dashboard() {
               loading={loading}
               pagination={false}
               rowKey="key"
+              size="small"
             />
           </Card>
         </Col>
@@ -257,7 +258,7 @@ function NoticeQuickPanel({
   loading: boolean;
   errorMessage?: string;
 }) {
-  const visibleNotices = useMemo(() => [...notices].sort(sortNotices).slice(0, 5), [notices]);
+  const visibleNotices = useMemo(() => [...notices].sort(sortNotices).slice(0, 4), [notices]);
 
   return (
     <Card className="dashboard-panel-card" title="系统公告">

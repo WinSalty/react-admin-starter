@@ -298,31 +298,31 @@ body {
 
 .metric-card .ant-card-body {
   height: 100%;
-  padding: 24px;
+  padding: 18px 20px;
 }
 
 .dashboard-workbench {
-  gap: 16px;
+  gap: 12px;
 }
 
 .metric-card-body {
   display: grid;
   height: 100%;
-  grid-template-columns: 104px minmax(0, 1fr);
+  grid-template-columns: 84px minmax(0, 1fr);
   align-items: center;
-  gap: 18px;
+  gap: 14px;
 }
 
 .metric-card-icon {
   display: inline-flex;
-  width: 104px;
-  height: 104px;
+  width: 84px;
+  height: 84px;
   align-items: center;
   justify-content: center;
-  border-radius: 24px;
+  border-radius: 20px;
   background: #f0f5ff;
   color: #1677ff;
-  font-size: 34px;
+  font-size: 28px;
   font-weight: 600;
 }
 
@@ -354,9 +354,9 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 12px;
+  margin-top: 8px;
   color: rgba(0, 0, 0, 0.45);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .metric-trend strong {
@@ -389,17 +389,17 @@ body {
 }
 
 .dashboard-panel-card .ant-card-head {
-  min-height: 60px;
+  min-height: 52px;
 }
 
 .dashboard-panel-card .ant-card-head-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
 }
 
 .dashboard-panel-card .ant-card-body {
-  height: calc(100% - 60px);
-  padding: 20px 24px 24px;
+  height: calc(100% - 52px);
+  padding: 14px 18px 16px;
 }
 
 .dashboard-panel-split {
@@ -412,7 +412,7 @@ body {
 .dashboard-source-legend {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .source-legend-item {
@@ -437,7 +437,7 @@ body {
 
 .source-legend-item strong {
   color: rgba(0, 0, 0, 0.88);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -537,14 +537,18 @@ body {
   background: #fafafa;
   color: rgba(0, 0, 0, 0.65);
   font-weight: 600;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .dashboard-data-table .ant-table-tbody > tr > td {
   border-bottom-color: rgba(5, 5, 5, 0.06);
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .notice-quick-list .ant-list-item {
-  padding: 14px 0;
+  padding: 10px 0;
 }
 
 .notice-quick-item {
@@ -1029,19 +1033,19 @@ body {
 
   .metric-card .ant-card-body,
   .dashboard-panel-card .ant-card-body {
-    padding: 16px;
+    padding: 14px;
   }
 
   .metric-card-body {
-    grid-template-columns: 72px minmax(0, 1fr);
-    gap: 14px;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 12px;
   }
 
   .metric-card-icon {
-    width: 72px;
-    height: 72px;
-    border-radius: 18px;
-    font-size: 24px;
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    font-size: 22px;
   }
 
   .dashboard-panel-split {
