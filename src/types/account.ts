@@ -46,7 +46,7 @@ export interface AccountAvatarUploadResult {
   id: string;
   originalName: string;
   storedName: string;
-  storageType: 'local' | 'qiniu';
+  storageType: 'local' | 'aliyun-oss';
   objectKey?: string;
   fileUrl?: string;
   contentType?: string;
@@ -56,4 +56,9 @@ export interface AccountAvatarUploadResult {
   createdBy?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface ObjectStorageStatus {
+  enabled: boolean;
+  provider: 'aliyun-oss';
 }

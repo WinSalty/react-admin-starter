@@ -5,6 +5,7 @@ import type {
   AccountPasswordUpdateParams,
   AccountProfile,
   AccountProfileUpdateParams,
+  ObjectStorageStatus,
 } from '@/types/account';
 import { request } from '@/services/request';
 
@@ -39,6 +40,13 @@ export async function updateAccountNotifications(
   const response = await request.put<ApiResponse<AccountProfile>>(
     '/api/auth/profile/notifications',
     params,
+  );
+  return response.data;
+}
+
+export async function fetchObjectStorageStatus(): Promise<ApiResponse<ObjectStorageStatus>> {
+  const response = await request.get<ApiResponse<ObjectStorageStatus>>(
+    '/api/file/object-storage/status',
   );
   return response.data;
 }

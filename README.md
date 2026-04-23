@@ -113,6 +113,7 @@
 | 刷新令牌 | `POST /api/auth/refresh-token` |
 | 当前用户资料 | `GET /api/auth/profile`、`PUT /api/auth/profile` |
 | 头像上传 | `POST /api/file/avatar/upload` |
+| 对象存储状态 | `GET /api/file/object-storage/status` |
 | 权限初始化 | `GET /api/permission/bootstrap` |
 | 工作台概览 | `GET /api/dashboard/overview` |
 | 查询管理 | `GET /api/query/list`、`GET /api/query/detail`、`POST /api/query/save` |
@@ -139,7 +140,8 @@
 
 1. 提供 JWT 登录与 refresh token 续签接口。
 2. 提供 `/api/permission/bootstrap` 返回菜单、路由码、按钮权限。
-3. 提供工作台、查询管理、系统管理、公告、文件上传和个人中心接口。
+3. 提供工作台、查询管理、系统管理、公告、文件上传、对象存储状态和个人中心接口。
+4. 若后端未开启对象存储，个人设置页禁用头像上传，头像统一使用用户名首字展示。
 4. 正确放开前端域名的 CORS，或通过反向代理统一同域访问。
 
 ## 配置说明

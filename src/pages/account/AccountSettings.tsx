@@ -30,6 +30,7 @@ import type { ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   fetchAccountProfile,
+  fetchObjectStorageStatus,
   uploadAccountAvatar,
   updateAccountNotifications,
   updateAccountPassword,
@@ -95,6 +96,7 @@ function AccountSettings() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [savingNotifications, setSavingNotifications] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [objectStorageEnabled, setObjectStorageEnabled] = useState(false);
   const setAccountProfile = useAuthStore((state) => state.setProfile);
   const [profileForm] = Form.useForm<AccountProfileUpdateParams & { region?: string[] }>();
   const [passwordForm] = Form.useForm<AccountPasswordUpdateParams & { confirmPassword: string }>();
@@ -116,11 +118,21 @@ function AccountSettings() {
     } finally {
       setLoading(false);
     }
-  }, [message, notificationForm, profileForm]);
+  }, [message, notificationForm, profileForm, setAccountProfile]);
 
   useEffect(() => {
     void loadProfile();
   }, [loadProfile]);
+
+  useEffect(() => {
+    void fetchObjectStorageStatus()
+      .then((response) => {
+        setObjectStorageEnabled(response.code === 0 && !!response.data?.enabled);
+      })
+      .catch(() => {
+        setObjectStorageEnabled(false);
+      });
+  }, []);
 
   const uploadProps = useMemo<UploadProps>(
     () => ({
@@ -128,6 +140,10 @@ function AccountSettings() {
       maxCount: 1,
       showUploadList: false,
       beforeUpload: (file) => {
+        if (!objectStorageEnabled) {
+          message.info('对象存储未开启，头像将显示用户名首字');
+          return Upload.LIST_IGNORE;
+        }
         const isImage = file.type.startsWith('image/');
         if (!isImage) {
           message.error('仅支持上传图片作为头像');
@@ -162,7 +178,7 @@ function AccountSettings() {
         }
       },
     }),
-    [message, profileForm],
+    [message, objectStorageEnabled, profileForm],
   );
 
   function syncForms(nextProfile: AccountProfile) {
@@ -192,7 +208,7 @@ function AccountSettings() {
         email: values.email,
         nickname: values.nickname,
         description: values.description,
-        avatarUrl: values.avatarUrl,
+        avatarUrl: objectStorageEnabled ? values.avatarUrl : undefined,
         country: values.country,
         province,
         city,
@@ -445,15 +461,25 @@ function AccountSettings() {
               <Text strong>头像</Text>
               <Avatar
                 size={120}
-                src={profileForm.getFieldValue('avatarUrl') || profile?.avatarUrl}
+                src={objectStorageEnabled ? profileForm.getFieldValue('avatarUrl') || profile?.avatarUrl : undefined}
                 icon={<UserOutlined />}
-              />
-              <Upload {...uploadProps}>
-                <Button icon={<UploadOutlined />} loading={uploadingAvatar}>
+              >
+                {(profile?.nickname || profile?.username || 'U').slice(0, 1).toUpperCase()}
+              </Avatar>
+              {objectStorageEnabled ? (
+                <Upload {...uploadProps}>
+                  <Button icon={<UploadOutlined />} loading={uploadingAvatar}>
+                    更换头像
+                  </Button>
+                </Upload>
+              ) : (
+                <Button icon={<UploadOutlined />} disabled>
                   更换头像
                 </Button>
-              </Upload>
-              <Text type="secondary">上传后会随基本信息一起保存。</Text>
+              )}
+              <Text type="secondary">
+                {objectStorageEnabled ? '上传后会随基本信息一起保存。' : '对象存储未开启，默认显示用户名首字。'}
+              </Text>
             </div>
           </Col>
         </Row>
