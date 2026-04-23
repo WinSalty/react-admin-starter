@@ -66,7 +66,7 @@
 头像能力依赖后端文件上传状态：
 
 1. 后端 `APP_OBJECT_STORAGE_ENABLED=false` 时，新头像写入本地存储，页面仍允许上传并展示后端返回的 `/api/file/public/**`。
-2. 后端 `APP_OBJECT_STORAGE_ENABLED=true` 时，新头像写入阿里云 OSS 公共 Bucket，页面展示后端返回的 OSS 或 CDN `fileUrl`。
+2. 后端 `APP_OBJECT_STORAGE_ENABLED=true` 时，新头像写入阿里云 OSS 私有 Bucket，页面展示后端返回的 `/api/file/avatar/{id}`。
 3. 前端不感知底层存储位置，只保存和展示后端返回的 `fileUrl`。
 
 ### 工作台与业务页

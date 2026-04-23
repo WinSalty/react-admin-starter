@@ -603,8 +603,6 @@ function normalizePersistentAvatarUrl(value?: string) {
     return undefined;
   }
   if (
-    value.startsWith('http://') ||
-    value.startsWith('https://') ||
     value.startsWith('/api/file/avatar/') ||
     value.startsWith('/api/file/public/')
   ) {
