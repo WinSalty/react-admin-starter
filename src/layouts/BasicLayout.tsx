@@ -142,14 +142,19 @@ function BasicLayout() {
         </div>
         <Menu
           mode="inline"
+          inlineCollapsed={collapsed}
           selectedKeys={activeMenuKeys}
-          openKeys={collapsed ? [] : openKeys}
+          openKeys={collapsed ? undefined : openKeys}
           items={visibleMenus.map(mapToMenuItem)}
-          onOpenChange={(keys) => {
-            const nextKeys = keys.map(String);
-            setOpenKeys(nextKeys);
-            saveOpenKeys(nextKeys);
-          }}
+          onOpenChange={
+            collapsed
+              ? undefined
+              : (keys) => {
+                  const nextKeys = keys.map(String);
+                  setOpenKeys(nextKeys);
+                  saveOpenKeys(nextKeys);
+                }
+          }
           onClick={({ key }) => {
             const target = findMenuByKey(visibleMenus, String(key));
             if (target?.externalLink) {
