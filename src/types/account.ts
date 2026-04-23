@@ -45,9 +45,7 @@ export interface AccountNotificationSettings {
 export interface AccountAvatarUploadResult {
   id: string;
   originalName: string;
-  storedName: string;
   storageType: 'local' | 'aliyun-oss';
-  objectKey?: string;
   fileUrl?: string;
   contentType?: string;
   extension: string;

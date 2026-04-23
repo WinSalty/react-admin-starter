@@ -168,7 +168,12 @@ function AccountSettings() {
             onError?.(new Error(response.message || '头像上传失败'));
             return;
           }
-          const avatarUrl = response.data.fileUrl || `/api/file/avatar/${response.data.id}`;
+          const avatarUrl = normalizePersistentAvatarUrl(response.data.fileUrl || `/api/file/avatar/${response.data.id}`);
+          if (!avatarUrl) {
+            message.error('头像地址返回异常');
+            onError?.(new Error('头像地址返回异常'));
+            return;
+          }
           profileForm.setFieldValue('avatarUrl', avatarUrl);
           const savedProfile = await saveProfileWithAvatar(avatarUrl);
           if (savedProfile) {
@@ -602,10 +607,7 @@ function normalizePersistentAvatarUrl(value?: string) {
   if (!value) {
     return undefined;
   }
-  if (
-    value.startsWith('/api/file/avatar/') ||
-    value.startsWith('/api/file/public/')
-  ) {
+  if (value.startsWith('/api/file/avatar/')) {
     return value;
   }
   return undefined;

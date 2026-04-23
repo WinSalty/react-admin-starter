@@ -15,7 +15,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { HeaderNoticeTicker } from '@/components/NoticeHighlights';
 import { appMenus, mapPermissionMenusToAppMenus, type AppMenuItem } from '@/config/menu';
 import { useActiveNotices } from '@/hooks/useActiveNotices';
-import { fetchAccountProfile, fetchObjectStorageStatus } from '@/services/account';
+import { fetchAccountProfile } from '@/services/account';
 import { useAuthStore } from '@/stores/auth';
 
 const { Header, Sider, Content } = Layout;
@@ -33,7 +33,6 @@ function BasicLayout() {
   const [openKeys, setOpenKeys] = useState<string[]>(() => getSavedOpenKeys());
   const [currentTime, setCurrentTime] = useState(() => dayjs().format('YYYY-MM-DD HH:mm'));
   const [tickerEnabled, setTickerEnabled] = useState(true);
-  const [objectStorageEnabled, setObjectStorageEnabled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = theme.useToken();
@@ -52,7 +51,7 @@ function BasicLayout() {
   const accountName = profile?.nickname || profile?.username || role || '未登录账号';
   const accountRoleName = profile?.roleName || (isAdmin ? '管理员' : '访客');
   const avatarText = accountName.slice(0, 1).toUpperCase();
-  const avatarUrl = objectStorageEnabled ? profile?.avatarUrl : undefined;
+  const avatarUrl = profile?.avatarUrl;
   const logout = useAuthStore((state) => state.logout);
 
   function handleLogout() {
@@ -104,16 +103,6 @@ function BasicLayout() {
         setProfile(undefined);
       });
   }, [setProfile]);
-
-  useEffect(() => {
-    void fetchObjectStorageStatus()
-      .then((response) => {
-        setObjectStorageEnabled(response.code === 0 && !!response.data?.enabled);
-      })
-      .catch(() => {
-        setObjectStorageEnabled(false);
-      });
-  }, []);
 
   const userDropdownItems: MenuProps['items'] = [
     {
