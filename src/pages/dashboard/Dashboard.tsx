@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertOutlined,
+  AppstoreOutlined,
   ArrowDownOutlined,
   ArrowUpOutlined,
   FundOutlined,
-  DollarCircleOutlined,
   MinusOutlined,
   ShoppingCartOutlined,
   TeamOutlined,
@@ -223,19 +223,13 @@ function Dashboard() {
  */
 function MetricCard({ metric, loading }: { metric: DashboardMetric; loading: boolean }) {
   const trendClassName = `metric-trend metric-trend-${metric.trendType}`;
-  const iconMap = {
-    visits: <TeamOutlined />,
-    orders: <ShoppingCartOutlined />,
-    revenue: <FundOutlined />,
-    alerts: <AlertOutlined />,
-  };
 
   return (
     <Card className="metric-card">
       <Skeleton loading={loading} active paragraph={false}>
         <div className="metric-card-body">
           <div className={`metric-card-icon metric-card-icon-${metric.key}`}>
-            {iconMap[metric.key as keyof typeof iconMap] || '数'}
+            {resolveMetricIcon(metric)}
           </div>
           <div className="metric-card-content">
             <Statistic
@@ -425,6 +419,30 @@ function renderTrendIcon(type: DashboardMetric['trendType']) {
 
 function sortNotices(prev: NoticeRecord, next: NoticeRecord) {
   return next.publishTime.localeCompare(prev.publishTime);
+}
+
+function resolveMetricIcon(metric: DashboardMetric) {
+  const normalizedKey = metric.key.toLowerCase();
+  const normalizedTitle = metric.title.toLowerCase();
+
+  if (normalizedKey.includes('visit') || normalizedTitle.includes('访问') || normalizedTitle.includes('用户')) {
+    return <TeamOutlined />;
+  }
+  if (normalizedKey.includes('order') || normalizedTitle.includes('订单')) {
+    return <ShoppingCartOutlined />;
+  }
+  if (
+    normalizedKey.includes('revenue') ||
+    normalizedKey.includes('amount') ||
+    normalizedTitle.includes('金额') ||
+    normalizedTitle.includes('销售')
+  ) {
+    return <FundOutlined />;
+  }
+  if (normalizedKey.includes('alert') || normalizedTitle.includes('告警')) {
+    return <AlertOutlined />;
+  }
+  return <AppstoreOutlined />;
 }
 
 export default Dashboard;
