@@ -63,10 +63,11 @@
 | 刷新令牌 | 401 后自动调用 `/api/auth/refresh-token` 续签 |
 | 个人设置 | 支持读取与维护当前用户资料、头像、密码、通知设置 |
 
-头像能力依赖后端对象存储状态：
+头像能力依赖后端文件上传状态：
 
-1. 后端 `APP_OBJECT_STORAGE_ENABLED=false` 时，页面禁用头像上传，所有头像展示用户名首字。
-2. 后端 `APP_OBJECT_STORAGE_ENABLED=true` 时，页面允许上传图片头像，并将后端返回的 `fileUrl` 随个人资料保存。
+1. 后端 `APP_OBJECT_STORAGE_ENABLED=false` 时，新头像写入本地存储，页面仍允许上传并展示后端返回的 `/api/file/public/**`。
+2. 后端 `APP_OBJECT_STORAGE_ENABLED=true` 时，新头像写入阿里云 OSS 公共 Bucket，页面展示后端返回的 OSS 或 CDN `fileUrl`。
+3. 前端不感知底层存储位置，只保存和展示后端返回的 `fileUrl`。
 
 ### 工作台与业务页
 
@@ -118,6 +119,7 @@
 | 刷新令牌 | `POST /api/auth/refresh-token` |
 | 当前用户资料 | `GET /api/auth/profile`、`PUT /api/auth/profile` |
 | 头像上传 | `POST /api/file/avatar/upload` |
+| 本地公共文件 | `GET /api/file/public/**` |
 | 对象存储状态 | `GET /api/file/object-storage/status` |
 | 权限初始化 | `GET /api/permission/bootstrap` |
 | 工作台概览 | `GET /api/dashboard/overview` |
@@ -146,7 +148,7 @@
 1. 提供 JWT 登录与 refresh token 续签接口。
 2. 提供 `/api/permission/bootstrap` 返回菜单、路由码、按钮权限。
 3. 提供工作台、查询管理、系统管理、公告、文件上传、对象存储状态和个人中心接口。
-4. 若后端未开启对象存储，个人设置页禁用头像上传，头像统一使用用户名首字展示。
+4. 若后端未开启对象存储，个人设置页仍可上传头像，文件由后端本地存储兜底。
 5. 正确放开前端域名的 CORS，或通过反向代理统一同域访问。
 
 ## 配置说明
@@ -303,7 +305,7 @@ server {
 2. 再启动当前前端项目，访问 `http://localhost:5173`。
 3. 使用后端初始化账号登录，例如 `admin / 123456`。
 4. 登录后检查工作台、权限目录、查询管理、用户管理、公告管理等页面是否能正常拉取数据。
-5. 进入个人设置，确认对象存储关闭时显示首字头像，开启时可上传头像并保存。
+5. 进入个人设置，分别确认本地存储和阿里云 OSS 模式下均可上传头像并保存。
 
 ## 交接建议
 

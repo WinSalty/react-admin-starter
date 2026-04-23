@@ -61,4 +61,6 @@ export interface AccountAvatarUploadResult {
 export interface ObjectStorageStatus {
   enabled: boolean;
   provider: 'aliyun-oss';
+  fileUploadEnabled: boolean;
+  activeStorageType: 'local' | 'aliyun-oss';
 }

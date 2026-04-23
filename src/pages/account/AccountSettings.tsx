@@ -96,7 +96,8 @@ function AccountSettings() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [savingNotifications, setSavingNotifications] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [objectStorageEnabled, setObjectStorageEnabled] = useState(false);
+  const [fileUploadEnabled, setFileUploadEnabled] = useState(true);
+  const [activeStorageType, setActiveStorageType] = useState<'local' | 'aliyun-oss'>('local');
   const setAccountProfile = useAuthStore((state) => state.setProfile);
   const [profileForm] = Form.useForm<AccountProfileUpdateParams & { region?: string[] }>();
   const [passwordForm] = Form.useForm<AccountPasswordUpdateParams & { confirmPassword: string }>();
@@ -127,10 +128,12 @@ function AccountSettings() {
   useEffect(() => {
     void fetchObjectStorageStatus()
       .then((response) => {
-        setObjectStorageEnabled(response.code === 0 && !!response.data?.enabled);
+        setFileUploadEnabled(response.code === 0 ? response.data?.fileUploadEnabled !== false : true);
+        setActiveStorageType(response.data?.activeStorageType || (response.data?.enabled ? 'aliyun-oss' : 'local'));
       })
       .catch(() => {
-        setObjectStorageEnabled(false);
+        setFileUploadEnabled(true);
+        setActiveStorageType('local');
       });
   }, []);
 
@@ -140,8 +143,8 @@ function AccountSettings() {
       maxCount: 1,
       showUploadList: false,
       beforeUpload: (file) => {
-        if (!objectStorageEnabled) {
-          message.info('对象存储未开启，头像将显示用户名首字');
+        if (!fileUploadEnabled) {
+          message.info('文件上传服务暂不可用');
           return Upload.LIST_IGNORE;
         }
         const isImage = file.type.startsWith('image/');
@@ -187,7 +190,7 @@ function AccountSettings() {
         }
       },
     }),
-    [message, objectStorageEnabled, profile, profileForm, setAccountProfile],
+    [message, fileUploadEnabled, profile, profileForm, setAccountProfile],
   );
 
   function syncForms(nextProfile: AccountProfile) {
@@ -218,7 +221,7 @@ function AccountSettings() {
         email: values.email,
         nickname: values.nickname,
         description: values.description,
-        avatarUrl: objectStorageEnabled ? normalizePersistentAvatarUrl(values.avatarUrl) : undefined,
+        avatarUrl: normalizePersistentAvatarUrl(values.avatarUrl),
         country: values.country,
         province,
         city,
@@ -496,15 +499,13 @@ function AccountSettings() {
               <Avatar
                 size={120}
                 src={
-                  objectStorageEnabled
-                    ? normalizePersistentAvatarUrl(profileForm.getFieldValue('avatarUrl') || profile?.avatarUrl)
-                    : undefined
+                  normalizePersistentAvatarUrl(profileForm.getFieldValue('avatarUrl') || profile?.avatarUrl)
                 }
                 icon={<UserOutlined />}
               >
                 {(profile?.nickname || profile?.username || 'U').slice(0, 1).toUpperCase()}
               </Avatar>
-              {objectStorageEnabled ? (
+              {fileUploadEnabled ? (
                 <Upload {...uploadProps}>
                   <Button icon={<UploadOutlined />} loading={uploadingAvatar}>
                     更换头像
@@ -516,7 +517,9 @@ function AccountSettings() {
                 </Button>
               )}
               <Text type="secondary">
-                {objectStorageEnabled ? '上传后会随基本信息一起保存。' : '对象存储未开启，默认显示用户名首字。'}
+                {fileUploadEnabled
+                  ? `上传后会随基本信息一起保存，当前使用${activeStorageType === 'aliyun-oss' ? '阿里云 OSS' : '本地存储'}。`
+                  : '文件上传服务暂不可用。'}
               </Text>
             </div>
           </Col>
@@ -599,7 +602,12 @@ function normalizePersistentAvatarUrl(value?: string) {
   if (!value) {
     return undefined;
   }
-  if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/api/file/avatar/')) {
+  if (
+    value.startsWith('http://') ||
+    value.startsWith('https://') ||
+    value.startsWith('/api/file/avatar/') ||
+    value.startsWith('/api/file/public/')
+  ) {
     return value;
   }
   return undefined;
