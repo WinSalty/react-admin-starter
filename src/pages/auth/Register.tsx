@@ -99,7 +99,7 @@ function Register() {
         <div className="auth-card-title">
           <span>Create account</span>
           <Title level={2}>注册账号</Title>
-          <Paragraph>创建账号后即可进入后台框架体验完整流程。</Paragraph>
+          <Paragraph>每个邮箱仅可注册一个账号，创建后即可进入后台框架体验完整流程。</Paragraph>
         </div>
         <Form form={form} layout="vertical" size="large" onFinish={onFinish}>
           <Form.Item

@@ -49,7 +49,7 @@ function Login() {
         <div className="auth-card-title">
           <span>Welcome back</span>
           <Title level={2}>登录后台</Title>
-          <Paragraph>输入账号密码，继续管理你的业务系统。</Paragraph>
+          <Paragraph>输入账号或邮箱与密码，继续管理你的业务系统。</Paragraph>
         </div>
         {registerSuccessState?.registerSuccess ? (
           <div className="auth-inline-feedback auth-inline-feedback-success">
@@ -69,13 +69,13 @@ function Login() {
         ) : null}
         <Form layout="vertical" size="large" onFinish={onFinish}>
           <Form.Item
-            label="账号"
+            label="账号或邮箱"
             name="username"
-            rules={[{ required: true, message: '请输入账号' }]}
+            rules={[{ required: true, message: '请输入账号或邮箱' }]}
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder="请输入账号"
+              placeholder="请输入账号或邮箱"
             />
           </Form.Item>
           <Form.Item
