@@ -110,6 +110,7 @@ export function DashboardNoticeCard({ notices, loading, errorMessage }: NoticeLi
  */
 export function HeaderNoticeTicker({ notices, loading, errorMessage }: NoticeListProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<NoticeRecord>();
   const visibleNotices = useMemo(() => sortNotices(notices).slice(0, 8), [notices]);
   const activeNotice = visibleNotices[activeIndex % Math.max(visibleNotices.length, 1)];
@@ -136,7 +137,13 @@ export function HeaderNoticeTicker({ notices, loading, errorMessage }: NoticeLis
           size="small"
           dataSource={visibleNotices}
           renderItem={(notice) => (
-            <List.Item key={notice.id} onClick={() => setSelectedNotice(notice)}>
+            <List.Item
+              key={notice.id}
+              onClick={() => {
+                setDropdownOpen(false);
+                setSelectedNotice(notice);
+              }}
+            >
               <List.Item.Meta
                 title={
                   <Space size={6}>
@@ -159,7 +166,13 @@ export function HeaderNoticeTicker({ notices, loading, errorMessage }: NoticeLis
 
   return (
     <>
-      <Dropdown dropdownRender={() => dropdownContent} trigger={['click']} placement="bottom">
+      <Dropdown
+        dropdownRender={() => dropdownContent}
+        trigger={['click']}
+        placement="bottom"
+        open={dropdownOpen}
+        onOpenChange={setDropdownOpen}
+      >
         <Button className="header-notice-ticker" type="text" loading={loading}>
           <BellOutlined />
           <span className="header-notice-window">
@@ -197,6 +210,7 @@ export function NoticeDetailModal({
       open={!!notice}
       footer={null}
       width={720}
+      destroyOnHidden
       onCancel={onClose}
     >
       {notice ? (
@@ -210,7 +224,7 @@ export function NoticeDetailModal({
             </div>
             <Title level={3}>{notice.title}</Title>
             <Paragraph className="notice-detail-summary">
-              {notice.content}
+              发布人：{notice.publisherName || '系统'} · 发布时间：{formatDateTime(notice.publishTime)}
             </Paragraph>
           </div>
           <div className="notice-detail-body">
