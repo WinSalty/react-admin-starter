@@ -61,7 +61,7 @@
 | 登录 | 调用 `/api/auth/login` 获取 access token 与 refresh token |
 | 注册 | 调用 `/api/auth/register`，支持邮箱验证码链路 |
 | 刷新令牌 | 401 后自动调用 `/api/auth/refresh-token` 续签 |
-| 个人设置 | 支持读取与维护当前用户资料、密码、通知设置 |
+| 个人设置 | 支持读取与维护当前用户资料、头像、密码、通知设置 |
 
 ### 工作台与业务页
 
@@ -111,6 +111,8 @@
 | 注册 | `POST /api/auth/register` |
 | 注册验证码 | `GET /api/auth/register/verify-code` |
 | 刷新令牌 | `POST /api/auth/refresh-token` |
+| 当前用户资料 | `GET /api/auth/profile`、`PUT /api/auth/profile` |
+| 头像上传 | `POST /api/file/avatar/upload` |
 | 权限初始化 | `GET /api/permission/bootstrap` |
 | 工作台概览 | `GET /api/dashboard/overview` |
 | 查询管理 | `GET /api/query/list`、`GET /api/query/detail`、`POST /api/query/save` |
@@ -137,7 +139,7 @@
 
 1. 提供 JWT 登录与 refresh token 续签接口。
 2. 提供 `/api/permission/bootstrap` 返回菜单、路由码、按钮权限。
-3. 提供工作台、查询管理、系统管理、公告和个人中心接口。
+3. 提供工作台、查询管理、系统管理、公告、文件上传和个人中心接口。
 4. 正确放开前端域名的 CORS，或通过反向代理统一同域访问。
 
 ## 配置说明

@@ -15,6 +15,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { HeaderNoticeTicker } from '@/components/NoticeHighlights';
 import { appMenus, mapPermissionMenusToAppMenus, type AppMenuItem } from '@/config/menu';
 import { useActiveNotices } from '@/hooks/useActiveNotices';
+import { fetchAccountProfile } from '@/services/account';
 import { useAuthStore } from '@/stores/auth';
 
 const { Header, Sider, Content } = Layout;
@@ -36,6 +37,8 @@ function BasicLayout() {
   const location = useLocation();
   const { token } = theme.useToken();
   const role = useAuthStore((state) => state.role);
+  const profile = useAuthStore((state) => state.profile);
+  const setProfile = useAuthStore((state) => state.setProfile);
   const permissionMenus = useAuthStore((state) => state.menus);
   const routeCodes = useAuthStore((state) => state.routeCodes);
   const {
@@ -45,7 +48,9 @@ function BasicLayout() {
   } = useActiveNotices();
 
   const isAdmin = role === 'admin';
-  const accountName = role || '未登录账号';
+  const accountName = profile?.nickname || profile?.username || role || '未登录账号';
+  const accountRoleName = profile?.roleName || (isAdmin ? '管理员' : '访客');
+  const avatarText = accountName.slice(0, 1).toUpperCase();
   const logout = useAuthStore((state) => state.logout);
 
   function handleLogout() {
@@ -86,18 +91,30 @@ function BasicLayout() {
     return () => window.clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    void fetchAccountProfile()
+      .then((response) => {
+        if (response.code === 0 && response.data) {
+          setProfile(response.data);
+        }
+      })
+      .catch(() => {
+        setProfile(undefined);
+      });
+  }, [setProfile]);
+
   const userDropdownItems: MenuProps['items'] = [
     {
       key: 'profile',
       disabled: true,
       label: (
         <div className="user-dropdown-profile">
-          <Avatar size={40} icon={<UserOutlined />}>
-            {isAdmin ? 'A' : 'V'}
+          <Avatar size={40} src={profile?.avatarUrl} icon={<UserOutlined />}>
+            {avatarText}
           </Avatar>
           <div>
             <strong>{accountName}</strong>
-            <span>{isAdmin ? '管理员' : '访客'}</span>
+            <span>{accountRoleName}</span>
           </div>
         </div>
       ),
@@ -201,7 +218,9 @@ function BasicLayout() {
           >
             <Button className="app-header-user" type="text">
               <Space size={8}>
-                <Avatar size="small">{isAdmin ? 'A' : 'V'}</Avatar>
+                <Avatar size="small" src={profile?.avatarUrl}>
+                  {avatarText}
+                </Avatar>
                 <span className="app-header-user-name">{accountName}</span>
                 <DownOutlined />
               </Space>

@@ -1,6 +1,7 @@
 import type { ApiResponse } from '@/types/api';
 import type {
   AccountNotificationSettings,
+  AccountAvatarUploadResult,
   AccountPasswordUpdateParams,
   AccountProfile,
   AccountProfileUpdateParams,
@@ -38,6 +39,21 @@ export async function updateAccountNotifications(
   const response = await request.put<ApiResponse<AccountProfile>>(
     '/api/auth/profile/notifications',
     params,
+  );
+  return response.data;
+}
+
+export async function uploadAccountAvatar(file: File): Promise<ApiResponse<AccountAvatarUploadResult>> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await request.post<ApiResponse<AccountAvatarUploadResult>>(
+    '/api/file/avatar/upload',
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
   );
   return response.data;
 }

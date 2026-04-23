@@ -14,6 +14,7 @@ import {
   getActions,
   setActions,
 } from '@/utils/token';
+import type { AccountProfile } from '@/types/account';
 import type { PermissionAction, PermissionMenu } from '@/types/permission';
 
 interface AuthState {
@@ -23,11 +24,13 @@ interface AuthState {
   menus: PermissionMenu[];
   routeCodes: string[];
   actions: PermissionAction[];
+  profile?: AccountProfile;
   permissionsLoaded: boolean;
   isAuthenticated: boolean;
   login: (token: string, refreshToken?: string, role?: string) => void;
   updateTokens: (token: string, refreshToken?: string) => void;
   logout: () => void;
+  setProfile: (profile?: AccountProfile) => void;
   setPermissions: (menus: PermissionMenu[], routeCodes: string[], actions: PermissionAction[]) => void;
 }
 
@@ -51,6 +54,7 @@ export const useAuthStore = create<AuthState>((set) => {
     menus: savedMenus,
     routeCodes: savedRouteCodes,
     actions: savedActions,
+    profile: undefined,
     permissionsLoaded: hasToken && savedMenus.length > 0 && savedRouteCodes.length > 0,
     isAuthenticated: hasToken,
     login: (token: string, refreshToken?: string, role?: string) => {
@@ -68,6 +72,7 @@ export const useAuthStore = create<AuthState>((set) => {
         menus: [],
         routeCodes: [],
         actions: [],
+        profile: undefined,
         permissionsLoaded: false,
       });
     },
@@ -93,8 +98,12 @@ export const useAuthStore = create<AuthState>((set) => {
         menus: [],
         routeCodes: [],
         actions: [],
+        profile: undefined,
         permissionsLoaded: false,
       });
+    },
+    setProfile: (profile?: AccountProfile) => {
+      set({ profile });
     },
     setPermissions: (menus: PermissionMenu[], routeCodes: string[], actions: PermissionAction[]) => {
       setMenus(menus);

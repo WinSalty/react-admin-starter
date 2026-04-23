@@ -41,3 +41,19 @@ export interface AccountNotificationSettings {
   notifySystem: boolean;
   notifyTodo: boolean;
 }
+
+export interface AccountAvatarUploadResult {
+  id: string;
+  originalName: string;
+  storedName: string;
+  storageType: 'local' | 'qiniu';
+  objectKey?: string;
+  fileUrl?: string;
+  contentType?: string;
+  extension: string;
+  sizeBytes: number;
+  status: string;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}

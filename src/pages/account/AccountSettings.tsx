@@ -30,10 +30,12 @@ import type { ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   fetchAccountProfile,
+  uploadAccountAvatar,
   updateAccountNotifications,
   updateAccountPassword,
   updateAccountProfile,
 } from '@/services/account';
+import { useAuthStore } from '@/stores/auth';
 import type {
   AccountNotificationSettings,
   AccountPasswordUpdateParams,
@@ -92,6 +94,8 @@ function AccountSettings() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [savingNotifications, setSavingNotifications] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const setAccountProfile = useAuthStore((state) => state.setProfile);
   const [profileForm] = Form.useForm<AccountProfileUpdateParams & { region?: string[] }>();
   const [passwordForm] = Form.useForm<AccountPasswordUpdateParams & { confirmPassword: string }>();
   const [notificationForm] = Form.useForm<AccountNotificationSettings>();
@@ -105,6 +109,7 @@ function AccountSettings() {
         return;
       }
       setProfile(response.data);
+      setAccountProfile(response.data);
       syncForms(response.data);
     } catch {
       message.error('个人设置获取失败，请稍后重试');
@@ -123,13 +128,41 @@ function AccountSettings() {
       maxCount: 1,
       showUploadList: false,
       beforeUpload: (file) => {
-        const previewUrl = URL.createObjectURL(file);
-        profileForm.setFieldValue('avatarUrl', previewUrl);
-        setProfile((prev) => (prev ? { ...prev, avatarUrl: previewUrl } : prev));
-        return false;
+        const isImage = file.type.startsWith('image/');
+        if (!isImage) {
+          message.error('仅支持上传图片作为头像');
+          return Upload.LIST_IGNORE;
+        }
+        const isAllowedSize = file.size <= 10 * 1024 * 1024;
+        if (!isAllowedSize) {
+          message.error('头像大小不能超过 10MB');
+          return Upload.LIST_IGNORE;
+        }
+        return true;
+      },
+      customRequest: async ({ file, onError, onSuccess }) => {
+        setUploadingAvatar(true);
+        try {
+          const response = await uploadAccountAvatar(file as File);
+          if (response.code !== 0 || !response.data) {
+            message.error(response.message || '头像上传失败');
+            onError?.(new Error(response.message || '头像上传失败'));
+            return;
+          }
+          const avatarUrl = response.data.fileUrl || `/api/file/avatar/${response.data.id}`;
+          profileForm.setFieldValue('avatarUrl', avatarUrl);
+          setProfile((prev) => (prev ? { ...prev, avatarUrl } : prev));
+          message.success(response.message || '头像上传成功');
+          onSuccess?.(response.data);
+        } catch (error) {
+          message.error('头像上传失败，请稍后重试');
+          onError?.(error as Error);
+        } finally {
+          setUploadingAvatar(false);
+        }
       },
     }),
-    [profileForm],
+    [message, profileForm],
   );
 
   function syncForms(nextProfile: AccountProfile) {
@@ -172,6 +205,7 @@ function AccountSettings() {
         return;
       }
       setProfile(response.data);
+      setAccountProfile(response.data);
       syncForms(response.data);
       message.success(response.message || '保存成功');
     } catch {
@@ -210,6 +244,7 @@ function AccountSettings() {
         return;
       }
       setProfile(response.data);
+      setAccountProfile(response.data);
       syncForms(response.data);
       message.success(response.message || '通知设置已保存');
     } catch {
@@ -414,9 +449,11 @@ function AccountSettings() {
                 icon={<UserOutlined />}
               />
               <Upload {...uploadProps}>
-                <Button icon={<UploadOutlined />}>更换头像</Button>
+                <Button icon={<UploadOutlined />} loading={uploadingAvatar}>
+                  更换头像
+                </Button>
               </Upload>
-              <Text type="secondary">头像会随基本信息一起保存。</Text>
+              <Text type="secondary">上传后会随基本信息一起保存。</Text>
             </div>
           </Col>
         </Row>

@@ -3,6 +3,7 @@ import type { TableProps } from 'antd';
 import {
   Alert,
   App,
+  Avatar,
   Button,
   Card,
   Descriptions,
@@ -252,6 +253,7 @@ function SystemModulePage({ moduleKey }: SystemModulePageProps) {
       status: record.status,
       owner: record.owner,
       description: record.description,
+      avatarUrl: String(record.avatarUrl || ''),
       extraValue: getExtraValue(moduleKey, record),
     });
     setModalOpen(true);
@@ -403,6 +405,11 @@ function SystemModulePage({ moduleKey }: SystemModulePageProps) {
           <Form.Item label={config.extraLabel} name="extraValue">
             <Input placeholder={config.extraPlaceholder} maxLength={60} />
           </Form.Item>
+          {moduleKey === 'users' && (
+            <Form.Item label="头像地址" name="avatarUrl">
+              <Input placeholder="请输入头像 URL，或由个人设置上传后自动维护" maxLength={500} />
+            </Form.Item>
+          )}
           <Form.Item label="描述" name="description" rules={[{ required: true, message: '请输入描述' }]}>
             <Input.TextArea placeholder="请输入用途说明" rows={4} maxLength={160} />
           </Form.Item>
@@ -423,6 +430,7 @@ const moduleConfigs: Record<SystemModuleKey, ModuleConfig> = {
     detailFields: [
       { key: 'name', label: '用户名称' },
       { key: 'code', label: '登录账号' },
+      { key: 'avatarUrl', label: '头像地址' },
       { key: 'department', label: '所属部门' },
       { key: 'roleNames', label: '角色' },
       { key: 'lastLoginAt', label: '最近登录' },
@@ -438,10 +446,15 @@ const moduleConfigs: Record<SystemModuleKey, ModuleConfig> = {
         dataIndex: 'name',
         width: 220,
         render: (_, record) => (
-          <div className="query-name-cell">
-            <strong>{record.name}</strong>
-            <span>{record.code}</span>
-          </div>
+          <Space size={12}>
+            <Avatar src={String(record.avatarUrl || '')}>
+              {record.name.slice(0, 1).toUpperCase()}
+            </Avatar>
+            <div className="query-name-cell">
+              <strong>{record.name}</strong>
+              <span>{record.code}</span>
+            </div>
+          </Space>
         ),
       },
       { title: '部门', dataIndex: 'department', width: 140 },

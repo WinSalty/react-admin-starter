@@ -24,6 +24,7 @@ export interface SystemRecord {
   code: string;
   status: SystemStatus;
   description: string;
+  avatarUrl?: string;
   owner: string;
   createdAt: string;
   updatedAt: string;
@@ -44,6 +45,7 @@ export interface SystemSaveParams {
   status: SystemStatus;
   owner: string;
   description: string;
+  avatarUrl?: string;
   extraValue?: string;
 }
 
