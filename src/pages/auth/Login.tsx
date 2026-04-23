@@ -1,6 +1,6 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Card, Form, Input, message, Typography } from 'antd';
-import { Link, useNavigate } from 'react-router-dom';
+import { Alert, Button, Card, Form, Input, message, Typography } from 'antd';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { login } from '@/services/auth';
 import { fetchPermissionBootstrap } from '@/services/permission';
 import { useAuthStore } from '@/stores/auth';
@@ -14,9 +14,13 @@ const { Paragraph, Title } = Typography;
  */
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const loginStore = useAuthStore((state) => state.login);
   const setPermissions = useAuthStore((state) => state.setPermissions);
   const [messageApi, contextHolder] = message.useMessage();
+  const registerSuccessState = location.state as
+    | { registerSuccess?: boolean; username?: string; email?: string }
+    | undefined;
 
   async function onFinish(values: { username: string; password: string }) {
     const res = await login(values);
@@ -46,6 +50,19 @@ function Login() {
           <Title level={2}>登录后台</Title>
           <Paragraph>输入账号密码，继续管理你的业务系统。</Paragraph>
         </div>
+        {registerSuccessState?.registerSuccess ? (
+          <Alert
+            type="success"
+            showIcon
+            style={{ marginBottom: 24, borderRadius: 10 }}
+            message="注册成功，账号已经创建"
+            description={
+              registerSuccessState.email
+                ? `注册邮箱 ${registerSuccessState.email} 已完成校验，现在可以直接登录。`
+                : '注册信息已经生效，现在可以直接登录。'
+            }
+          />
+        ) : null}
         <Form layout="vertical" size="large" onFinish={onFinish}>
           <Form.Item
             label="账号"

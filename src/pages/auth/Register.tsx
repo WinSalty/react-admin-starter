@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Card, Form, Input, message, Space, Typography } from 'antd';
+import { Button, Card, Form, Input, Space, Typography, message } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { register, sendRegisterVerifyCode } from '@/services/auth';
 
@@ -79,8 +79,14 @@ function Register() {
       password: values.password,
     });
     if (res.code === 0) {
-      messageApi.success('注册成功');
-      navigate('/login');
+      navigate('/login', {
+        replace: true,
+        state: {
+          registerSuccess: true,
+          username: values.username,
+          email: values.email,
+        },
+      });
     } else {
       messageApi.error(res.message || '注册失败');
     }
