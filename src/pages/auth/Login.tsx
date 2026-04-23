@@ -1,5 +1,6 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Form, Input, message, Typography } from 'antd';
+import { CheckCircleFilled } from '@ant-design/icons';
+import { Button, Card, Form, Input, message, Typography } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { login } from '@/services/auth';
 import { fetchPermissionBootstrap } from '@/services/permission';
@@ -51,17 +52,20 @@ function Login() {
           <Paragraph>输入账号密码，继续管理你的业务系统。</Paragraph>
         </div>
         {registerSuccessState?.registerSuccess ? (
-          <Alert
-            type="success"
-            showIcon
-            style={{ marginBottom: 24, borderRadius: 10 }}
-            message="注册成功，账号已经创建"
-            description={
-              registerSuccessState.email
-                ? `注册邮箱 ${registerSuccessState.email} 已完成校验，现在可以直接登录。`
-                : '注册信息已经生效，现在可以直接登录。'
-            }
-          />
+          <div className="auth-inline-feedback auth-inline-feedback-success">
+            <div className="auth-inline-feedback-icon">
+              <CheckCircleFilled />
+            </div>
+            <div className="auth-inline-feedback-content">
+              <span>Account ready</span>
+              <strong>注册成功，账号已经创建</strong>
+              <p>
+                {registerSuccessState.email
+                  ? `注册邮箱 ${registerSuccessState.email} 已完成校验，现在可以直接登录。`
+                  : '注册信息已经生效，现在可以直接登录。'}
+              </p>
+            </div>
+          </div>
         ) : null}
         <Form layout="vertical" size="large" onFinish={onFinish}>
           <Form.Item
