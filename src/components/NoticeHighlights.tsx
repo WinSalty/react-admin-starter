@@ -183,7 +183,7 @@ export function HeaderNoticeTicker({ notices, loading, errorMessage }: NoticeLis
   );
 }
 
-function NoticeDetailModal({
+export function NoticeDetailModal({
   notice,
   onClose,
 }: {
@@ -191,17 +191,34 @@ function NoticeDetailModal({
   onClose: () => void;
 }) {
   return (
-    <Modal title="公告详情" open={!!notice} footer={null} onCancel={onClose}>
+    <Modal
+      className="notice-detail-modal"
+      title={null}
+      open={!!notice}
+      footer={null}
+      width={720}
+      onCancel={onClose}
+    >
       {notice ? (
         <div className="notice-detail">
-          <Space size={8} wrap>
-            <Tag color={getPriorityMeta(notice.priority).color}>
-              {getPriorityMeta(notice.priority).label}
-            </Tag>
-            <Tag>{getNoticeTypeLabel(notice.noticeType)}</Tag>
-          </Space>
-          <Title level={4}>{notice.title}</Title>
-          <Paragraph>{notice.content}</Paragraph>
+          <div className="notice-detail-hero">
+            <div className="notice-detail-badges">
+              <Tag color={getPriorityMeta(notice.priority).color}>
+                {getPriorityMeta(notice.priority).label}
+              </Tag>
+              <Tag>{getNoticeTypeLabel(notice.noticeType)}</Tag>
+            </div>
+            <Title level={3}>{notice.title}</Title>
+            <Paragraph className="notice-detail-summary">
+              {notice.content}
+            </Paragraph>
+          </div>
+          <div className="notice-detail-body">
+            <div className="notice-detail-section">
+              <Text className="notice-detail-section-label">公告内容</Text>
+              <Paragraph>{notice.content}</Paragraph>
+            </div>
+          </div>
           <div className="notice-detail-meta">
             <Text type="secondary">
               <UserOutlined /> {notice.publisherName || '系统'}

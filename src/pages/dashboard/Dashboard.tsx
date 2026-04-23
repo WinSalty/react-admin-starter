@@ -3,8 +3,6 @@ import {
   AlertOutlined,
   ArrowDownOutlined,
   ArrowUpOutlined,
-  CalendarOutlined,
-  ClockCircleOutlined,
   DollarCircleOutlined,
   MinusOutlined,
   ShoppingOutlined,
@@ -15,17 +13,15 @@ import {
   Card,
   Col,
   List,
-  Modal,
   Row,
   Skeleton,
-  Space,
   Statistic,
   Table,
-  Tag,
   Typography,
 } from 'antd';
 import type { TableProps } from 'antd';
 import * as echarts from 'echarts';
+import { NoticeDetailModal } from '@/components/NoticeHighlights';
 import { useActiveNotices } from '@/hooks/useActiveNotices';
 import type { EChartsOption } from 'echarts';
 import { fetchDashboardOverview } from '@/services/dashboard';
@@ -38,7 +34,7 @@ import type {
 } from '@/types/dashboard';
 import type { NoticeRecord } from '@/types/notice';
 
-const { Paragraph, Text, Title } = Typography;
+const { Text } = Typography;
 
 interface DashboardTableRow {
   key: string;
@@ -302,41 +298,6 @@ function NoticeQuickPanel({
   );
 }
 
-function NoticeDetailModal({
-  notice,
-  onClose,
-}: {
-  notice?: NoticeRecord;
-  onClose: () => void;
-}) {
-  return (
-    <Modal title="公告详情" open={!!notice} footer={null} onCancel={onClose}>
-      {notice ? (
-        <div className="notice-detail">
-          <Space size={8} wrap>
-            <Tag>{notice.noticeType}</Tag>
-          </Space>
-          <Title level={4}>{notice.title}</Title>
-          <Paragraph>{notice.content}</Paragraph>
-          <div className="notice-detail-meta">
-            <Text type="secondary">
-              <UserOutlined /> {notice.publisherName || '系统'}
-            </Text>
-            <Text type="secondary">
-              <CalendarOutlined /> {formatDateTime(notice.publishTime)}
-            </Text>
-            {notice.expireTime ? (
-              <Text type="secondary">
-                <ClockCircleOutlined /> 截止 {formatDateTime(notice.expireTime)}
-              </Text>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-    </Modal>
-  );
-}
-
 /**
  * ECharts 容器组件，负责初始化、更新和销毁图表实例。
  */
@@ -463,10 +424,6 @@ function renderTrendIcon(type: DashboardMetric['trendType']) {
 
 function sortNotices(prev: NoticeRecord, next: NoticeRecord) {
   return next.publishTime.localeCompare(prev.publishTime);
-}
-
-function formatDateTime(value?: string) {
-  return value || '未设置';
 }
 
 export default Dashboard;

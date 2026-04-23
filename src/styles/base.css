@@ -482,7 +482,75 @@ body {
 .notice-detail {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
+}
+
+.notice-detail-modal .ant-modal-content {
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 0;
+}
+
+.notice-detail-modal .ant-modal-close {
+  top: 18px;
+  right: 18px;
+}
+
+.notice-detail-modal .ant-modal-body {
+  padding: 0;
+}
+
+.notice-detail-hero {
+  padding: 28px 28px 20px;
+  background:
+    linear-gradient(180deg, rgba(22, 119, 255, 0.08) 0%, rgba(22, 119, 255, 0.02) 100%),
+    #ffffff;
+}
+
+.notice-detail-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.notice-detail-hero h3.ant-typography {
+  margin: 0 0 10px;
+  color: rgba(0, 0, 0, 0.92);
+  font-size: 26px;
+  line-height: 1.3;
+}
+
+.notice-detail-summary {
+  margin-bottom: 0 !important;
+  color: rgba(0, 0, 0, 0.58);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.notice-detail-body {
+  padding: 0 28px;
+}
+
+.notice-detail-section {
+  border: 1px solid rgba(5, 5, 5, 0.06);
+  border-radius: 16px;
+  background: #fafcff;
+  padding: 18px 20px;
+}
+
+.notice-detail-section-label {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #1677ff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.notice-detail-section .ant-typography {
+  margin-bottom: 0;
+  color: rgba(0, 0, 0, 0.76);
+  line-height: 1.9;
 }
 
 .notice-detail h4.ant-typography {
@@ -497,9 +565,11 @@ body {
 .notice-detail-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 18px;
   border-top: 1px solid rgba(5, 5, 5, 0.06);
-  padding-top: 12px;
+  padding: 0 28px 24px;
+  padding-top: 18px;
+  background: #ffffff;
 }
 
 .dashboard-summary-grid {
