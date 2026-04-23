@@ -111,12 +111,13 @@ export function DashboardNoticeCard({ notices, loading, errorMessage }: NoticeLi
 export function HeaderNoticeTicker({ notices, loading, errorMessage }: NoticeListProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [tickerEnabled, setTickerEnabled] = useState(true);
   const [selectedNotice, setSelectedNotice] = useState<NoticeRecord>();
   const visibleNotices = useMemo(() => sortNotices(notices).slice(0, 8), [notices]);
   const activeNotice = visibleNotices[activeIndex % Math.max(visibleNotices.length, 1)];
 
   useEffect(() => {
-    if (visibleNotices.length <= 1) {
+    if (visibleNotices.length <= 1 || !tickerEnabled) {
       setActiveIndex(0);
       return undefined;
     }
@@ -124,7 +125,7 @@ export function HeaderNoticeTicker({ notices, loading, errorMessage }: NoticeLis
       setActiveIndex((value) => (value + 1) % visibleNotices.length);
     }, 4000);
     return () => window.clearInterval(timer);
-  }, [visibleNotices.length]);
+  }, [tickerEnabled, visibleNotices.length]);
 
   const dropdownContent = (
     <div className="header-notice-dropdown">
@@ -166,31 +167,46 @@ export function HeaderNoticeTicker({ notices, loading, errorMessage }: NoticeLis
 
   return (
     <>
-      <Dropdown
-        dropdownRender={() => dropdownContent}
-        trigger={['click']}
-        placement="bottom"
-        open={dropdownOpen}
-        onOpenChange={setDropdownOpen}
-      >
-        <Button className="header-notice-ticker" type="text" loading={loading}>
+      <div className="header-notice-ticker">
+        <Button
+          className={`header-notice-bell ${tickerEnabled ? 'is-active' : 'is-paused'}`}
+          type="text"
+          loading={loading}
+          onClick={(event) => {
+            event.stopPropagation();
+            setTickerEnabled((value) => !value);
+          }}
+        >
           <BellOutlined />
-          <span className="header-notice-window">
-            {activeNotice ? (
-              <span key={activeNotice.id} className="header-notice-line">
-                <Tag bordered={false} color={getPriorityMeta(activeNotice.priority).color}>
-                  {getPriorityMeta(activeNotice.priority).label}
-                </Tag>
-                <span>{activeNotice.title}</span>
-              </span>
-            ) : (
-              <span className="header-notice-line">
-                {errorMessage || '暂无生效公告'}
-              </span>
-            )}
-          </span>
         </Button>
-      </Dropdown>
+        <Dropdown
+          dropdownRender={() => dropdownContent}
+          trigger={['click']}
+          placement="bottom"
+          open={dropdownOpen}
+          onOpenChange={setDropdownOpen}
+        >
+          <Button className="header-notice-trigger" type="text" loading={loading}>
+            <span className="header-notice-window">
+              {activeNotice ? (
+                <span
+                  key={activeNotice.id}
+                  className={`header-notice-line ${tickerEnabled ? 'is-running' : 'is-paused'}`}
+                >
+                  <Tag bordered={false} color={getPriorityMeta(activeNotice.priority).color}>
+                    {getPriorityMeta(activeNotice.priority).label}
+                  </Tag>
+                  <span>{activeNotice.title}</span>
+                </span>
+              ) : (
+                <span className="header-notice-line is-paused">
+                  {errorMessage || '暂无生效公告'}
+                </span>
+              )}
+            </span>
+          </Button>
+        </Dropdown>
+      </div>
       <NoticeDetailModal notice={selectedNotice} onClose={() => setSelectedNotice(undefined)} />
     </>
   );

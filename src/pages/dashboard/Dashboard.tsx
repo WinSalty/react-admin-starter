@@ -3,10 +3,11 @@ import {
   AlertOutlined,
   ArrowDownOutlined,
   ArrowUpOutlined,
+  FundOutlined,
   DollarCircleOutlined,
   MinusOutlined,
-  ShoppingOutlined,
-  UserOutlined,
+  ShoppingCartOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import {
   Alert,
@@ -223,9 +224,9 @@ function Dashboard() {
 function MetricCard({ metric, loading }: { metric: DashboardMetric; loading: boolean }) {
   const trendClassName = `metric-trend metric-trend-${metric.trendType}`;
   const iconMap = {
-    visits: <UserOutlined />,
-    orders: <ShoppingOutlined />,
-    revenue: <DollarCircleOutlined />,
+    visits: <TeamOutlined />,
+    orders: <ShoppingCartOutlined />,
+    revenue: <FundOutlined />,
     alerts: <AlertOutlined />,
   };
 

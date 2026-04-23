@@ -71,22 +71,53 @@ body {
   flex: 1 1 auto;
   max-width: 460px;
   min-width: 180px;
+  gap: 4px;
+}
+
+.header-notice-bell,
+.header-notice-trigger {
+  height: 36px;
+  border-radius: 8px;
+}
+
+.header-notice-bell {
+  flex: 0 0 auto;
+  width: 36px;
+  color: rgba(0, 0, 0, 0.58);
+}
+
+.header-notice-bell.is-active {
+  color: #1677ff;
+}
+
+.header-notice-bell.is-paused {
+  color: rgba(0, 0, 0, 0.34);
+}
+
+.header-notice-trigger {
+  display: flex;
+  flex: 1 1 auto;
   height: 36px;
   align-items: center;
   justify-content: flex-start;
   overflow: hidden;
-  border-radius: 8px;
   color: rgba(0, 0, 0, 0.58);
   padding: 0 8px;
 }
 
-.header-notice-ticker:hover {
+.header-notice-bell:hover,
+.header-notice-trigger:hover {
   background: rgba(5, 5, 5, 0.04);
   color: rgba(0, 0, 0, 0.78);
 }
 
-.header-notice-ticker .anticon {
+.header-notice-bell .anticon,
+.header-notice-trigger .anticon {
   color: rgba(0, 0, 0, 0.36);
+}
+
+.header-notice-bell.is-active .anticon {
+  color: #1677ff;
 }
 
 .header-notice-window {
@@ -106,7 +137,14 @@ body {
   align-items: center;
   gap: 8px;
   overflow: hidden;
+}
+
+.header-notice-line.is-running {
   animation: header-notice-slide 4s ease-in-out;
+}
+
+.header-notice-line.is-paused {
+  animation: none;
 }
 
 .header-notice-line .ant-tag {
@@ -327,7 +365,16 @@ body {
 }
 
 .metric-card-icon .anticon {
-  font-size: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.metric-card-icon .anticon svg {
+  width: 34px;
+  height: 34px;
+  display: block;
 }
 
 .metric-card-icon-visits {
