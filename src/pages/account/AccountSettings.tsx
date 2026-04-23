@@ -167,8 +167,17 @@ function AccountSettings() {
           }
           const avatarUrl = response.data.fileUrl || `/api/file/avatar/${response.data.id}`;
           profileForm.setFieldValue('avatarUrl', avatarUrl);
-          setProfile((prev) => (prev ? { ...prev, avatarUrl } : prev));
-          message.success(response.message || '头像上传成功');
+          const savedProfile = await saveProfileWithAvatar(avatarUrl);
+          if (savedProfile) {
+            setProfile(savedProfile);
+            setAccountProfile(savedProfile);
+            syncForms(savedProfile);
+            message.success('头像已上传并保存');
+          } else {
+            setProfile((prev) => (prev ? { ...prev, avatarUrl } : prev));
+            setAccountProfile(profile ? { ...profile, avatarUrl } : undefined);
+            message.warning('头像已上传，请保存基本信息后生效');
+          }
           onSuccess?.(response.data);
         } catch (error) {
           message.error('头像上传失败，请稍后重试');
@@ -178,15 +187,16 @@ function AccountSettings() {
         }
       },
     }),
-    [message, objectStorageEnabled, profileForm],
+    [message, objectStorageEnabled, profile, profileForm, setAccountProfile],
   );
 
   function syncForms(nextProfile: AccountProfile) {
+    const avatarUrl = normalizePersistentAvatarUrl(nextProfile.avatarUrl);
     profileForm.setFieldsValue({
       email: nextProfile.email,
       nickname: nextProfile.nickname,
       description: nextProfile.description,
-      avatarUrl: nextProfile.avatarUrl,
+      avatarUrl,
       country: nextProfile.country || '中国',
       region: [nextProfile.province, nextProfile.city].filter(Boolean) as string[],
       streetAddress: nextProfile.streetAddress,
@@ -208,7 +218,7 @@ function AccountSettings() {
         email: values.email,
         nickname: values.nickname,
         description: values.description,
-        avatarUrl: objectStorageEnabled ? values.avatarUrl : undefined,
+        avatarUrl: objectStorageEnabled ? normalizePersistentAvatarUrl(values.avatarUrl) : undefined,
         country: values.country,
         province,
         city,
@@ -229,6 +239,30 @@ function AccountSettings() {
     } finally {
       setSavingProfile(false);
     }
+  }
+
+  async function saveProfileWithAvatar(avatarUrl: string) {
+    const values = profileForm.getFieldsValue();
+    if (!values.email || !values.nickname) {
+      return undefined;
+    }
+    const [province, city] = values.region || [];
+    const response = await updateAccountProfile({
+      email: values.email,
+      nickname: values.nickname,
+      description: values.description,
+      avatarUrl,
+      country: values.country,
+      province,
+      city,
+      streetAddress: values.streetAddress,
+      phonePrefix: values.phonePrefix,
+      phoneNumber: values.phoneNumber,
+    });
+    if (response.code !== 0 || !response.data) {
+      return undefined;
+    }
+    return response.data;
   }
 
   async function handlePasswordSubmit(values: AccountPasswordUpdateParams) {
@@ -461,7 +495,11 @@ function AccountSettings() {
               <Text strong>头像</Text>
               <Avatar
                 size={120}
-                src={objectStorageEnabled ? profileForm.getFieldValue('avatarUrl') || profile?.avatarUrl : undefined}
+                src={
+                  objectStorageEnabled
+                    ? normalizePersistentAvatarUrl(profileForm.getFieldValue('avatarUrl') || profile?.avatarUrl)
+                    : undefined
+                }
                 icon={<UserOutlined />}
               >
                 {(profile?.nickname || profile?.username || 'U').slice(0, 1).toUpperCase()}
@@ -555,6 +593,16 @@ function NotificationItem({
       </Form.Item>
     </div>
   );
+}
+
+function normalizePersistentAvatarUrl(value?: string) {
+  if (!value) {
+    return undefined;
+  }
+  if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/api/file/avatar/')) {
+    return value;
+  }
+  return undefined;
 }
 
 export default AccountSettings;
