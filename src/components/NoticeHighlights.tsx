@@ -186,12 +186,20 @@ export function HeaderNoticeTicker({ notices, loading, errorMessage }: NoticeLis
           open={dropdownOpen}
           onOpenChange={setDropdownOpen}
         >
-          <Button className="header-notice-trigger" type="text" loading={loading}>
+          <Button
+            className={`header-notice-trigger ${tickerEnabled ? 'is-active' : 'is-paused'}`}
+            type="text"
+            loading={loading}
+          >
             <span className="header-notice-window">
-              {activeNotice ? (
+              {!tickerEnabled ? (
+                <span className="header-notice-line is-paused">
+                  <span className="header-notice-status">公告滚动已关闭</span>
+                </span>
+              ) : activeNotice ? (
                 <span
                   key={activeNotice.id}
-                  className={`header-notice-line ${tickerEnabled ? 'is-running' : 'is-paused'}`}
+                  className="header-notice-line is-running"
                 >
                   <Tag bordered={false} color={getPriorityMeta(activeNotice.priority).color}>
                     {getPriorityMeta(activeNotice.priority).label}
