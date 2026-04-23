@@ -1,11 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  BellOutlined,
-  CalendarOutlined,
-  ClockCircleOutlined,
-  NotificationOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
+import { CalendarOutlined, ClockCircleOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Dropdown, Empty, List, Modal, Skeleton, Space, Tag, Typography } from 'antd';
 import dayjs from 'dayjs';
 import type { NoticePriority, NoticeRecord } from '@/types/notice';
@@ -16,6 +10,10 @@ interface NoticeListProps {
   notices: NoticeRecord[];
   loading: boolean;
   errorMessage?: string;
+}
+
+interface HeaderNoticeTickerProps extends NoticeListProps {
+  tickerEnabled: boolean;
 }
 
 const priorityMeta: Record<NoticePriority, { label: string; color: string; weight: number }> = {
@@ -108,10 +106,14 @@ export function DashboardNoticeCard({ notices, loading, errorMessage }: NoticeLi
 /**
  * 顶栏公告滚动条，定时轮播生效公告并支持展开查看。
  */
-export function HeaderNoticeTicker({ notices, loading, errorMessage }: NoticeListProps) {
+export function HeaderNoticeTicker({
+  notices,
+  loading,
+  errorMessage,
+  tickerEnabled,
+}: HeaderNoticeTickerProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [tickerEnabled, setTickerEnabled] = useState(true);
   const [selectedNotice, setSelectedNotice] = useState<NoticeRecord>();
   const visibleNotices = useMemo(() => sortNotices(notices).slice(0, 8), [notices]);
   const activeNotice = visibleNotices[activeIndex % Math.max(visibleNotices.length, 1)];
@@ -167,54 +169,34 @@ export function HeaderNoticeTicker({ notices, loading, errorMessage }: NoticeLis
 
   return (
     <>
-      <div className="header-notice-ticker">
+      <Dropdown
+        dropdownRender={() => dropdownContent}
+        trigger={['click']}
+        placement="bottom"
+        open={dropdownOpen}
+        onOpenChange={setDropdownOpen}
+      >
         <Button
-          className={`header-notice-bell ${tickerEnabled ? 'is-active' : 'is-paused'}`}
+          className={`header-notice-trigger ${tickerEnabled ? 'is-active' : 'is-paused'}`}
           type="text"
           loading={loading}
-          onClick={(event) => {
-            event.stopPropagation();
-            setTickerEnabled((value) => !value);
-          }}
         >
-          <BellOutlined />
+          <span className="header-notice-window">
+            {tickerEnabled && activeNotice ? (
+              <span key={activeNotice.id} className="header-notice-line is-running">
+                <Tag bordered={false} color={getPriorityMeta(activeNotice.priority).color}>
+                  {getPriorityMeta(activeNotice.priority).label}
+                </Tag>
+                <span>{activeNotice.title}</span>
+              </span>
+            ) : tickerEnabled ? (
+              <span className="header-notice-line is-paused">
+                {errorMessage || '暂无生效公告'}
+              </span>
+            ) : null}
+          </span>
         </Button>
-        <Dropdown
-          dropdownRender={() => dropdownContent}
-          trigger={['click']}
-          placement="bottom"
-          open={dropdownOpen}
-          onOpenChange={setDropdownOpen}
-        >
-          <Button
-            className={`header-notice-trigger ${tickerEnabled ? 'is-active' : 'is-paused'}`}
-            type="text"
-            loading={loading}
-          >
-            <span className="header-notice-window">
-              {!tickerEnabled ? (
-                <span className="header-notice-line is-paused">
-                  <span className="header-notice-status">公告滚动已关闭</span>
-                </span>
-              ) : activeNotice ? (
-                <span
-                  key={activeNotice.id}
-                  className="header-notice-line is-running"
-                >
-                  <Tag bordered={false} color={getPriorityMeta(activeNotice.priority).color}>
-                    {getPriorityMeta(activeNotice.priority).label}
-                  </Tag>
-                  <span>{activeNotice.title}</span>
-                </span>
-              ) : (
-                <span className="header-notice-line is-paused">
-                  {errorMessage || '暂无生效公告'}
-                </span>
-              )}
-            </span>
-          </Button>
-        </Dropdown>
-      </div>
+      </Dropdown>
       <NoticeDetailModal notice={selectedNotice} onClose={() => setSelectedNotice(undefined)} />
     </>
   );

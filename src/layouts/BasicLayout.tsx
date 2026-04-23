@@ -1,4 +1,5 @@
 import {
+  BellOutlined,
   ClockCircleOutlined,
   DownOutlined,
   LogoutOutlined,
@@ -30,6 +31,7 @@ function BasicLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [openKeys, setOpenKeys] = useState<string[]>(() => getSavedOpenKeys());
   const [currentTime, setCurrentTime] = useState(() => dayjs().format('YYYY-MM-DD HH:mm'));
+  const [tickerEnabled, setTickerEnabled] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = theme.useToken();
@@ -176,7 +178,17 @@ function BasicLayout() {
             notices={notices}
             loading={noticesLoading}
             errorMessage={noticesErrorMessage}
+            tickerEnabled={tickerEnabled}
           />
+          <Button
+            aria-label={tickerEnabled ? '关闭公告滚动' : '开启公告滚动'}
+            className={`app-header-bell ${tickerEnabled ? 'is-active' : 'is-paused'}`}
+            type="text"
+            onClick={() => setTickerEnabled((value) => !value)}
+          >
+            <BellOutlined />
+            <span className="app-header-bell-slash" />
+          </Button>
           <Dropdown
             menu={{ items: userDropdownItems }}
             placement="bottomRight"

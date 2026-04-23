@@ -71,30 +71,6 @@ body {
   flex: 1 1 auto;
   max-width: 460px;
   min-width: 180px;
-  gap: 4px;
-}
-
-.header-notice-bell,
-.header-notice-trigger {
-  height: 36px;
-  border-radius: 8px;
-}
-
-.header-notice-bell {
-  flex: 0 0 auto;
-  width: 36px;
-  color: rgba(0, 0, 0, 0.58);
-}
-
-.header-notice-bell.is-active {
-  background: rgba(22, 119, 255, 0.10);
-  color: #1677ff;
-}
-
-.header-notice-bell.is-paused {
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(0, 0, 0, 0.03);
-  color: rgba(0, 0, 0, 0.34);
 }
 
 .header-notice-trigger {
@@ -108,25 +84,13 @@ body {
   padding: 0 8px;
 }
 
-.header-notice-trigger.is-paused {
-  border: 1px dashed rgba(0, 0, 0, 0.12);
-  background: rgba(0, 0, 0, 0.02);
-  color: rgba(0, 0, 0, 0.42);
-}
-
-.header-notice-bell:hover,
 .header-notice-trigger:hover {
   background: rgba(5, 5, 5, 0.04);
   color: rgba(0, 0, 0, 0.78);
 }
 
-.header-notice-bell .anticon,
 .header-notice-trigger .anticon {
   color: rgba(0, 0, 0, 0.36);
-}
-
-.header-notice-bell.is-active .anticon {
-  color: #1677ff;
 }
 
 .header-notice-window {
@@ -154,22 +118,6 @@ body {
 
 .header-notice-line.is-paused {
   animation: none;
-}
-
-.header-notice-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: rgba(0, 0, 0, 0.42);
-  font-size: 12px;
-}
-
-.header-notice-status::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.24);
 }
 
 .header-notice-line .ant-tag {
@@ -232,6 +180,52 @@ body {
   flex: 0 0 auto;
   height: 40px;
   padding: 0 10px;
+}
+
+.app-header-bell {
+  position: relative;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.app-header-bell:hover {
+  color: rgba(0, 0, 0, 0.82);
+}
+
+.app-header-bell .anticon {
+  font-size: 18px;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.app-header-bell.is-active .anticon {
+  color: #1677ff;
+}
+
+.app-header-bell-slash {
+  position: absolute;
+  top: 9px;
+  left: 18px;
+  width: 2px;
+  height: 18px;
+  border-radius: 999px;
+  background: #ff4d4f;
+  opacity: 0;
+  transform: rotate(-42deg) scaleY(0.2);
+  transform-origin: center;
+  transition: opacity 0.24s ease, transform 0.24s ease;
+  pointer-events: none;
+}
+
+.app-header-bell.is-paused .anticon {
+  color: rgba(0, 0, 0, 0.3);
+  transform: scale(0.92);
+}
+
+.app-header-bell.is-paused .app-header-bell-slash {
+  opacity: 1;
+  transform: rotate(-42deg) scaleY(1);
 }
 
 .app-header-user-name {
