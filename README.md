@@ -46,7 +46,7 @@
 ### 关键架构说明
 
 1. 路由采用 `createBrowserRouter`，页面通过 `lazy + Suspense` 做懒加载，避免所有业务页面一次进入首屏主包。
-2. `BasicLayout` 负责后台主框架，基于权限 bootstrap 结果动态过滤左侧菜单和按钮能力。
+2. `BasicLayout` 负责后台主框架，基于权限 bootstrap 结果动态过滤左侧菜单和按钮能力，菜单过滤优先使用后端 `routeCode` 与本地路径白名单映射。
 3. `RouteGuard`、`AuthGuard`、`GuestGuard` 分别处理登录态保护、登录页保护和页面级权限控制。
 4. `request.ts` 基于 Axios 统一处理鉴权头、业务错误提示、401 自动刷新 token 和串行 refresh token 续签。
 5. 认证信息当前写入 `sessionStorage`，并兼容迁移旧的 `localStorage` 数据，降低长期落盘 token 被复用的风险。
@@ -74,10 +74,10 @@
 
 | 模块 | 说明 |
 | --- | --- |
-| 工作台 `Dashboard` | 展示概览指标、趋势图、状态分布、模块明细与系统公告的组合工作台 |
+| 工作台 `Dashboard` | 展示钱包余额卡、系统公告和预留图表位；钱包余额卡可进入积分明细 |
 | 查询管理 `QueryList` | 通用分页检索、详情查看、新增编辑、状态切换 |
 | 数据统计 `Statistics` | 统计分析视图，基于 ECharts 展示 |
-| 积分钱包 `WalletPage` | 展示当前用户可用积分、冻结积分、累计收支、CDK 兑换入口和积分记录 |
+| 积分钱包 `WalletPage` | 挂载在个人中心子菜单，展示当前用户可用积分、冻结积分、累计收支、CDK 兑换入口和积分记录 |
 
 ### 系统管理
 

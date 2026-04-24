@@ -15,6 +15,7 @@ export interface PermissionMenu {
   icon?: string;
   orderNo: number;
   type?: 'catalog' | 'menu' | 'hidden' | 'external';
+  routeCode?: string;
   permissionCode?: string;
   hiddenInMenu?: boolean;
   redirect?: string;

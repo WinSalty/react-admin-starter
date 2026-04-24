@@ -13,7 +13,7 @@ import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { HeaderNoticeTicker } from '@/components/NoticeHighlights';
-import { appMenus, mapPermissionMenusToAppMenus, type AppMenuItem } from '@/config/menu';
+import { appMenus, mapPermissionMenusToAppMenus, resolveRouteCodeByPath, type AppMenuItem } from '@/config/menu';
 import { useActiveNotices } from '@/hooks/useActiveNotices';
 import { fetchAccountProfile } from '@/services/account';
 import { useAuthStore } from '@/stores/auth';
@@ -317,7 +317,7 @@ function findParentKeys(
 }
 
 function getRouteCode(menu: AppMenuItem): string {
-  return menu.permissionCode?.split(':')[0] || menu.key;
+  return menu.routeCode || resolveRouteCodeByPath(menu.path) || menu.permissionCode?.split(':')[0] || menu.key;
 }
 
 function getSavedOpenKeys(): string[] {

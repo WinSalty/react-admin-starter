@@ -27,6 +27,7 @@ export interface AppMenuItem {
   icon?: ReactNode;
   orderNo: number;
   type?: 'catalog' | 'menu' | 'hidden' | 'external';
+  routeCode?: string;
   permissionCode?: string;
   hiddenInMenu?: boolean;
   redirect?: string;
@@ -59,6 +60,13 @@ const menuIconMap: Record<string, ReactNode> = {
 const supportedInternalPaths: Set<string> = new Set(
   Object.values(dynamicRouteMap).map((route) => route.path),
 );
+
+export function resolveRouteCodeByPath(path?: string): string | undefined {
+  if (!path) {
+    return undefined;
+  }
+  return Object.values(dynamicRouteMap).find((route) => route.path === path)?.routeCode;
+}
 
 export const appMenus: AppMenuItem[] = [
   {
@@ -94,15 +102,6 @@ export const appMenus: AppMenuItem[] = [
         orderNo: 2,
         type: 'menu',
         permissionCode: 'statistics:view',
-      },
-      {
-        key: 'points-wallet',
-        path: '/points/wallet',
-        label: '积分钱包',
-        icon: <WalletOutlined />,
-        orderNo: 3,
-        type: 'menu',
-        permissionCode: 'points:wallet:view',
       },
     ],
   },
@@ -230,6 +229,15 @@ export const appMenus: AppMenuItem[] = [
         type: 'menu',
         permissionCode: 'account_settings:view',
       },
+      {
+        key: 'points-wallet',
+        path: '/points/wallet',
+        label: '积分钱包',
+        icon: <WalletOutlined />,
+        orderNo: 2,
+        type: 'menu',
+        permissionCode: 'points:wallet:view',
+      },
     ],
   },
 ];
@@ -245,6 +253,7 @@ export function mapPermissionMenusToAppMenus(menus: PermissionMenu[]): AppMenuIt
         icon: menu.icon ? menuIconMap[menu.icon] : undefined,
         orderNo: menu.orderNo,
         type: menu.type,
+        routeCode: menu.routeCode || resolveRouteCodeByPath(menu.path),
         permissionCode: menu.permissionCode,
         hiddenInMenu: menu.hiddenInMenu,
         redirect: menu.redirect,
