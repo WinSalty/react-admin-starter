@@ -12,9 +12,11 @@ import {
   NotificationOutlined,
   SearchOutlined,
   SettingOutlined,
+  ShopOutlined,
   TeamOutlined,
   UserOutlined,
   WalletOutlined,
+  WarningOutlined,
 } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { dynamicRouteMap } from '@/access/routeMap';
@@ -55,6 +57,8 @@ const menuIconMap: Record<string, ReactNode> = {
   NotificationOutlined: <NotificationOutlined />,
   GiftOutlined: <GiftOutlined />,
   WalletOutlined: <WalletOutlined />,
+  ShopOutlined: <ShopOutlined />,
+  WarningOutlined: <WarningOutlined />,
 };
 
 const supportedInternalPaths: Set<string> = new Set(
@@ -211,6 +215,24 @@ export const appMenus: AppMenuItem[] = [
         type: 'menu',
         permissionCode: 'points:ledger:view',
       },
+      {
+        key: 'benefit-products',
+        path: '/system/benefits/products',
+        label: '权益商品',
+        icon: <ShopOutlined />,
+        orderNo: 12,
+        type: 'menu',
+        permissionCode: 'benefit:product:view',
+      },
+      {
+        key: 'risk-alerts',
+        path: '/system/risk-alerts',
+        label: '风控告警',
+        icon: <WarningOutlined />,
+        orderNo: 13,
+        type: 'menu',
+        permissionCode: 'risk:alert:view',
+      },
     ],
   },
   {
@@ -237,6 +259,15 @@ export const appMenus: AppMenuItem[] = [
         orderNo: 2,
         type: 'menu',
         permissionCode: 'points:wallet:view',
+      },
+      {
+        key: 'benefit-center',
+        path: '/points/benefits',
+        label: '权益兑换',
+        icon: <ShopOutlined />,
+        orderNo: 3,
+        type: 'menu',
+        permissionCode: 'benefit:center:view',
       },
     ],
   },

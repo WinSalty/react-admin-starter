@@ -25,6 +25,11 @@ export const dynamicRouteMap = {
     componentKey: 'WalletPage',
     routeCode: 'points_wallet',
   },
+  benefitCenter: {
+    path: '/points/benefits',
+    componentKey: 'BenefitCenterPage',
+    routeCode: 'benefit_center',
+  },
   permission: {
     path: '/permission',
     componentKey: 'PermissionPage',
@@ -79,6 +84,16 @@ export const dynamicRouteMap = {
     path: '/system/points/audit',
     componentKey: 'PointAuditPage',
     routeCode: 'points_admin_ledger',
+  },
+  benefitProducts: {
+    path: '/system/benefits/products',
+    componentKey: 'BenefitProductPage',
+    routeCode: 'benefit_product_admin',
+  },
+  riskAlerts: {
+    path: '/system/risk-alerts',
+    componentKey: 'RiskAlertPage',
+    routeCode: 'risk_alert_admin',
   },
   accountSettings: {
     path: '/account/settings',

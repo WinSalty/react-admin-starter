@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { App, Button, Card, Col, Empty, Form, Input, Row, Statistic, Table, Tabs, Tag } from 'antd';
+import { App, Button, Card, Col, Empty, Form, Input, InputNumber, Row, Space, Statistic, Table, Tabs, Tag } from 'antd';
 import type { TableProps, TabsProps } from 'antd';
 import {
   fetchPointAccount,
@@ -9,10 +9,15 @@ import {
   fetchPointRechargeOrders,
 } from '@/services/points';
 import { redeemCdk } from '@/services/cdk';
+import { createOnlineRecharge } from '@/services/trade';
 import type { PointAccount, PointFreezeOrder, PointLedgerRecord, PointRechargeOrder } from '@/types/points';
 
 interface RedeemForm {
   cdk: string;
+}
+
+interface OnlineRechargeForm {
+  amount: number;
 }
 
 /**
@@ -24,6 +29,7 @@ interface RedeemForm {
 function WalletPage() {
   const { message } = App.useApp();
   const [redeemForm] = Form.useForm<RedeemForm>();
+  const [onlineRechargeForm] = Form.useForm<OnlineRechargeForm>();
   const [account, setAccount] = useState<PointAccount>();
   const [ledgerRecords, setLedgerRecords] = useState<PointLedgerRecord[]>([]);
   const [rechargeRecords, setRechargeRecords] = useState<PointRechargeOrder[]>([]);
@@ -31,6 +37,7 @@ function WalletPage() {
   const [freezeRecords, setFreezeRecords] = useState<PointFreezeOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [redeeming, setRedeeming] = useState(false);
+  const [recharging, setRecharging] = useState(false);
 
   const loadWallet = useCallback(async () => {
     setLoading(true);
@@ -153,6 +160,23 @@ function WalletPage() {
     }
   };
 
+  const handleOnlineRecharge = async () => {
+    const values = await onlineRechargeForm.validateFields();
+    setRecharging(true);
+    try {
+      const response = await createOnlineRecharge(values.amount, createClientIdempotencyKey('online'));
+      if (response.code !== 0) {
+        message.error(response.message || '创建充值单失败');
+        return;
+      }
+      message.success(`充值单已创建：${response.data.rechargeNo}`);
+      onlineRechargeForm.resetFields();
+      void loadWallet();
+    } finally {
+      setRecharging(false);
+    }
+  };
+
   return (
     <div className="page-stack points-wallet-page">
       <Row gutter={[12, 12]}>
@@ -178,18 +202,38 @@ function WalletPage() {
         </Col>
       </Row>
 
-      <Card title="CDK 兑换">
-        <Form form={redeemForm} layout="inline" className="query-form" onFinish={() => void handleRedeem()}>
-          <Form.Item name="cdk" rules={[{ required: true, message: '请输入 CDK' }]}>
-            <Input className="wallet-cdk-input" placeholder="WSA-202604-XXXX-XXXX-XXXX-XXXX" allowClear />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={redeeming}>
-              兑换
-            </Button>
-          </Form.Item>
-        </Form>
-      </Card>
+      <Row gutter={[12, 12]}>
+        <Col xs={24} lg={14}>
+          <Card title="CDK 兑换">
+            <Form form={redeemForm} layout="inline" className="query-form" onFinish={() => void handleRedeem()}>
+              <Form.Item name="cdk" rules={[{ required: true, message: '请输入 CDK' }]}>
+                <Input className="wallet-cdk-input" placeholder="WSA-202604-XXXX-XXXX-XXXX-XXXX" allowClear />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit" loading={redeeming}>
+                  兑换
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Col>
+        <Col xs={24} lg={10}>
+          <Card title="在线充值">
+            <Form form={onlineRechargeForm} layout="inline" className="query-form" onFinish={() => void handleOnlineRecharge()}>
+              <Form.Item name="amount" rules={[{ required: true, message: '请输入充值积分' }]}>
+                <InputNumber min={1} precision={0} placeholder="充值积分" style={{ width: 180 }} />
+              </Form.Item>
+              <Form.Item>
+                <Space>
+                  <Button type="primary" htmlType="submit" loading={recharging}>
+                    创建充值单
+                  </Button>
+                </Space>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Col>
+      </Row>
 
       <Card title="积分记录">
         <Tabs items={tabItems} />
@@ -244,8 +288,8 @@ function directionLabel(direction: string) {
   return labels[direction] || direction;
 }
 
-function createClientIdempotencyKey() {
-  return `cdk-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+function createClientIdempotencyKey(prefix = 'cdk') {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 export default WalletPage;

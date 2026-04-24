@@ -14,6 +14,8 @@ export interface CdkBatch {
   createdBy: string;
   approvedBy?: string;
   approvedAt?: string;
+  secondApprovedBy?: string;
+  secondApprovedAt?: string;
   exportCount: number;
   createdAt: string;
   updatedAt: string;
@@ -42,7 +44,10 @@ export interface CdkExportResult {
   batchNo: string;
   count: number;
   fingerprint: string;
-  codes: string[];
+  fileName: string;
+  fileType: string;
+  encryptionAlgorithm: string;
+  encryptedPackageBase64: string;
 }
 
 export interface CdkRedeemRecord {

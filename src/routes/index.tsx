@@ -12,13 +12,16 @@ const EmailVerificationPending = lazy(() => import('@/pages/auth/EmailVerificati
 const Login = lazy(() => import('@/pages/auth/Login'));
 const Register = lazy(() => import('@/pages/auth/Register'));
 const AccountSettings = lazy(() => import('@/pages/account/AccountSettings'));
+const BenefitProductPage = lazy(() => import('@/pages/benefit/BenefitProductPage'));
 const CdkBatchPage = lazy(() => import('@/pages/cdk/CdkBatchPage'));
 const CdkRedeemRecordPage = lazy(() => import('@/pages/cdk/CdkRedeemRecordPage'));
 const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
 const PermissionPage = lazy(() => import('@/pages/permission/PermissionPage'));
 const PointAuditPage = lazy(() => import('@/pages/points/PointAuditPage'));
+const BenefitCenterPage = lazy(() => import('@/pages/points/BenefitCenterPage'));
 const WalletPage = lazy(() => import('@/pages/points/WalletPage'));
 const QueryList = lazy(() => import('@/pages/query/QueryList'));
+const RiskAlertPage = lazy(() => import('@/pages/risk/RiskAlertPage'));
 const Statistics = lazy(() => import('@/pages/statistics/Statistics'));
 const Forbidden = lazy(() => import('@/pages/system/Forbidden'));
 const MenuManagementPage = lazy(() => import('@/pages/system/MenuManagementPage'));
@@ -101,6 +104,16 @@ export const router = createBrowserRouter(
             <LazyRoute>
               <RouteGuard permissionCode={dynamicRouteMap.pointsWallet.routeCode}>
                 <WalletPage />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: dynamicRouteMap.benefitCenter.path,
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode={dynamicRouteMap.benefitCenter.routeCode}>
+                <BenefitCenterPage />
               </RouteGuard>
             </LazyRoute>
           ),
@@ -211,6 +224,26 @@ export const router = createBrowserRouter(
             <LazyRoute>
               <RouteGuard permissionCode={dynamicRouteMap.pointsAudit.routeCode}>
                 <PointAuditPage />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: dynamicRouteMap.benefitProducts.path,
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode={dynamicRouteMap.benefitProducts.routeCode}>
+                <BenefitProductPage />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: dynamicRouteMap.riskAlerts.path,
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode={dynamicRouteMap.riskAlerts.routeCode}>
+                <RiskAlertPage />
               </RouteGuard>
             </LazyRoute>
           ),

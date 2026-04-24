@@ -35,6 +35,11 @@ export async function approveCdkBatch(id: string): Promise<ApiResponse<CdkBatch>
   return response.data;
 }
 
+export async function secondApproveCdkBatch(id: string): Promise<ApiResponse<CdkBatch>> {
+  const response = await request.post<ApiResponse<CdkBatch>>(`/api/admin/cdk/batches/${id}/second-approve`);
+  return response.data;
+}
+
 export async function pauseCdkBatch(id: string): Promise<ApiResponse<CdkBatch>> {
   const response = await request.post<ApiResponse<CdkBatch>>(`/api/admin/cdk/batches/${id}/pause`);
   return response.data;
@@ -45,8 +50,10 @@ export async function voidCdkBatch(id: string): Promise<ApiResponse<CdkBatch>> {
   return response.data;
 }
 
-export async function exportCdkBatch(id: string): Promise<ApiResponse<CdkExportResult>> {
-  const response = await request.post<ApiResponse<CdkExportResult>>(`/api/admin/cdk/batches/${id}/export`);
+export async function exportCdkBatch(id: string, exportPassword: string): Promise<ApiResponse<CdkExportResult>> {
+  const response = await request.post<ApiResponse<CdkExportResult>>(`/api/admin/cdk/batches/${id}/export`, {
+    exportPassword,
+  });
   return response.data;
 }
 
