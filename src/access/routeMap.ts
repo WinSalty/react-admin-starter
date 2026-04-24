@@ -20,6 +20,11 @@ export const dynamicRouteMap = {
     componentKey: 'Statistics',
     routeCode: 'statistics',
   },
+  pointsWallet: {
+    path: '/points/wallet',
+    componentKey: 'WalletPage',
+    routeCode: 'points_wallet',
+  },
   permission: {
     path: '/permission',
     componentKey: 'PermissionPage',
@@ -59,6 +64,21 @@ export const dynamicRouteMap = {
     path: '/system/configs',
     componentKey: 'SystemConfigPage',
     routeCode: 'configs',
+  },
+  cdkBatches: {
+    path: '/system/cdk/batches',
+    componentKey: 'CdkBatchPage',
+    routeCode: 'cdk_batch',
+  },
+  cdkRedeemRecords: {
+    path: '/system/cdk/redeem-records',
+    componentKey: 'CdkRedeemRecordPage',
+    routeCode: 'cdk_redeem_record',
+  },
+  pointsAudit: {
+    path: '/system/points/audit',
+    componentKey: 'PointAuditPage',
+    routeCode: 'points_admin_ledger',
   },
   accountSettings: {
     path: '/account/settings',

@@ -8,6 +8,7 @@ import {
   MinusOutlined,
   ShoppingCartOutlined,
   TeamOutlined,
+  WalletOutlined,
 } from '@ant-design/icons';
 import {
   Alert,
@@ -22,10 +23,12 @@ import {
 } from 'antd';
 import type { TableProps } from 'antd';
 import * as echarts from 'echarts';
+import { useNavigate } from 'react-router-dom';
 import { NoticeDetailModal } from '@/components/NoticeHighlights';
 import { useActiveNotices } from '@/hooks/useActiveNotices';
 import type { EChartsOption } from 'echarts';
 import { fetchDashboardOverview } from '@/services/dashboard';
+import { fetchPointAccount } from '@/services/points';
 import type {
   CategoryBarItem,
   DashboardMetric,
@@ -34,6 +37,7 @@ import type {
   TrendPoint,
 } from '@/types/dashboard';
 import type { NoticeRecord } from '@/types/notice';
+import type { PointAccount } from '@/types/points';
 
 const { Text } = Typography;
 
@@ -52,8 +56,11 @@ interface DashboardTableRow {
  * author: sunshengxian
  */
 function Dashboard() {
+  const navigate = useNavigate();
   const [overview, setOverview] = useState<DashboardOverview>();
+  const [pointAccount, setPointAccount] = useState<PointAccount>();
   const [loading, setLoading] = useState(true);
+  const [walletLoading, setWalletLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const {
     notices,
@@ -87,6 +94,25 @@ function Dashboard() {
         }
       });
 
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    setWalletLoading(true);
+    fetchPointAccount()
+      .then((response) => {
+        if (mounted && response.code === 0) {
+          setPointAccount(response.data);
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          setWalletLoading(false);
+        }
+      });
     return () => {
       mounted = false;
     };
@@ -149,6 +175,13 @@ function Dashboard() {
       {errorMessage ? <Alert message={errorMessage} type="error" showIcon /> : null}
 
       <Row gutter={[12, 12]}>
+        <Col xs={24} sm={12} xl={6}>
+          <WalletSummaryCard
+            account={pointAccount}
+            loading={walletLoading}
+            onClick={() => navigate('/points/wallet')}
+          />
+        </Col>
         {(overview?.metrics || []).map((metric) => (
           <Col xs={24} sm={12} xl={6} key={metric.key}>
             <MetricCard metric={metric} loading={loading} />
@@ -215,6 +248,39 @@ function Dashboard() {
         </Col>
       </Row>
     </div>
+  );
+}
+
+/**
+ * 工作台积分钱包摘要卡片，点击进入钱包详情页。
+ */
+function WalletSummaryCard({
+  account,
+  loading,
+  onClick,
+}: {
+  account?: PointAccount;
+  loading: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <Card className="metric-card wallet-summary-card" hoverable onClick={onClick}>
+      <Skeleton loading={loading} active paragraph={false}>
+        <div className="metric-card-body">
+          <div className="metric-card-icon metric-card-icon-wallet">
+            <WalletOutlined />
+          </div>
+          <div className="metric-card-content">
+            <Statistic title="可用积分" value={account?.availablePoints || 0} />
+            <div className="metric-trend metric-trend-stable">
+              <MinusOutlined />
+              <span>冻结积分</span>
+              <strong>{account?.frozenPoints || 0}</strong>
+            </div>
+          </div>
+        </div>
+      </Skeleton>
+    </Card>
   );
 }
 

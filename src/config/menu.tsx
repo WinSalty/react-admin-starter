@@ -1,9 +1,11 @@
 import {
   ApartmentOutlined,
+  AuditOutlined,
   AppstoreOutlined,
   BookOutlined,
   DashboardOutlined,
   FileSearchOutlined,
+  GiftOutlined,
   KeyOutlined,
   LineChartOutlined,
   MenuOutlined,
@@ -12,6 +14,7 @@ import {
   SettingOutlined,
   TeamOutlined,
   UserOutlined,
+  WalletOutlined,
 } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { dynamicRouteMap } from '@/access/routeMap';
@@ -36,6 +39,7 @@ export interface AppMenuItem {
 
 const menuIconMap: Record<string, ReactNode> = {
   ApartmentOutlined: <ApartmentOutlined />,
+  AuditOutlined: <AuditOutlined />,
   AppstoreOutlined: <AppstoreOutlined />,
   BookOutlined: <BookOutlined />,
   DashboardOutlined: <DashboardOutlined />,
@@ -48,6 +52,8 @@ const menuIconMap: Record<string, ReactNode> = {
   UserOutlined: <UserOutlined />,
   FileSearchOutlined: <FileSearchOutlined />,
   NotificationOutlined: <NotificationOutlined />,
+  GiftOutlined: <GiftOutlined />,
+  WalletOutlined: <WalletOutlined />,
 };
 
 const supportedInternalPaths: Set<string> = new Set(
@@ -88,6 +94,15 @@ export const appMenus: AppMenuItem[] = [
         orderNo: 2,
         type: 'menu',
         permissionCode: 'statistics:view',
+      },
+      {
+        key: 'points-wallet',
+        path: '/points/wallet',
+        label: '积分钱包',
+        icon: <WalletOutlined />,
+        orderNo: 3,
+        type: 'menu',
+        permissionCode: 'points:wallet:view',
       },
     ],
   },
@@ -169,6 +184,33 @@ export const appMenus: AppMenuItem[] = [
         orderNo: 8,
         type: 'menu',
         permissionCode: 'system:config:view',
+      },
+      {
+        key: 'cdk-batches',
+        path: '/system/cdk/batches',
+        label: 'CDK批次',
+        icon: <GiftOutlined />,
+        orderNo: 9,
+        type: 'menu',
+        permissionCode: 'cdk:batch:view',
+      },
+      {
+        key: 'cdk-redeem-records',
+        path: '/system/cdk/redeem-records',
+        label: 'CDK兑换记录',
+        icon: <FileSearchOutlined />,
+        orderNo: 10,
+        type: 'menu',
+        permissionCode: 'cdk:redeem:view',
+      },
+      {
+        key: 'points-audit',
+        path: '/system/points/audit',
+        label: '积分审计',
+        icon: <AuditOutlined />,
+        orderNo: 11,
+        type: 'menu',
+        permissionCode: 'points:ledger:view',
       },
     ],
   },

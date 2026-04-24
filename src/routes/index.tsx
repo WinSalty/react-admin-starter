@@ -12,8 +12,12 @@ const EmailVerificationPending = lazy(() => import('@/pages/auth/EmailVerificati
 const Login = lazy(() => import('@/pages/auth/Login'));
 const Register = lazy(() => import('@/pages/auth/Register'));
 const AccountSettings = lazy(() => import('@/pages/account/AccountSettings'));
+const CdkBatchPage = lazy(() => import('@/pages/cdk/CdkBatchPage'));
+const CdkRedeemRecordPage = lazy(() => import('@/pages/cdk/CdkRedeemRecordPage'));
 const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
 const PermissionPage = lazy(() => import('@/pages/permission/PermissionPage'));
+const PointAuditPage = lazy(() => import('@/pages/points/PointAuditPage'));
+const WalletPage = lazy(() => import('@/pages/points/WalletPage'));
 const QueryList = lazy(() => import('@/pages/query/QueryList'));
 const Statistics = lazy(() => import('@/pages/statistics/Statistics'));
 const Forbidden = lazy(() => import('@/pages/system/Forbidden'));
@@ -87,6 +91,16 @@ export const router = createBrowserRouter(
             <LazyRoute>
               <RouteGuard permissionCode={dynamicRouteMap.statistics.routeCode}>
                 <Statistics />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: dynamicRouteMap.pointsWallet.path,
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode={dynamicRouteMap.pointsWallet.routeCode}>
+                <WalletPage />
               </RouteGuard>
             </LazyRoute>
           ),
@@ -167,6 +181,36 @@ export const router = createBrowserRouter(
             <LazyRoute>
               <RouteGuard permissionCode={dynamicRouteMap.configs.routeCode}>
                 <SystemConfigPage />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: dynamicRouteMap.cdkBatches.path,
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode={dynamicRouteMap.cdkBatches.routeCode}>
+                <CdkBatchPage />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: dynamicRouteMap.cdkRedeemRecords.path,
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode={dynamicRouteMap.cdkRedeemRecords.routeCode}>
+                <CdkRedeemRecordPage />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: dynamicRouteMap.pointsAudit.path,
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode={dynamicRouteMap.pointsAudit.routeCode}>
+                <PointAuditPage />
               </RouteGuard>
             </LazyRoute>
           ),

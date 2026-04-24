@@ -77,6 +77,7 @@
 | 工作台 `Dashboard` | 展示概览指标、趋势图、状态分布、模块明细与系统公告的组合工作台 |
 | 查询管理 `QueryList` | 通用分页检索、详情查看、新增编辑、状态切换 |
 | 数据统计 `Statistics` | 统计分析视图，基于 ECharts 展示 |
+| 积分钱包 `WalletPage` | 展示当前用户可用积分、冻结积分、累计收支、CDK 兑换入口和积分记录 |
 
 ### 系统管理
 
@@ -90,6 +91,9 @@
 | 日志管理 | 查看登录、操作、接口日志 |
 | 公告管理 | 公告分页、详情、编辑、发布状态控制 |
 | 系统配置 | 查看和维护系统配置项 |
+| CDK 批次 | 批次创建、提交审批、审批生成、一次性导出、暂停、作废 |
+| CDK 兑换记录 | 按用户、批次、状态查询兑换审计记录 |
+| 积分审计 | 管理端积分账户、流水、对账结果和人工调整入口 |
 
 ### 权限模型
 
@@ -131,6 +135,10 @@
 | 权限分配 | `GET /api/permission/assignment`、`POST /api/permission/assignment` |
 | 公告管理 | `GET /api/system/notices/list`、`GET /api/system/notices/detail`、`POST /api/system/notices/save`、`POST /api/system/notices/status` |
 | 系统配置 | `GET /api/system/configs`、`POST /api/system/configs/save` |
+| 积分账户 | `GET /api/points/account`、`GET /api/points/ledger`、`GET /api/points/recharge/orders`、`GET /api/points/consume/orders`、`GET /api/points/freeze/orders` |
+| CDK 兑换 | `POST /api/points/cdk/redeem` |
+| 管理端 CDK | `GET/POST /api/admin/cdk/batches`、`POST /api/admin/cdk/batches/{id}/submit`、`/approve`、`/pause`、`/void`、`/export`、`GET /api/admin/cdk/redeem-records` |
+| 积分审计 | `GET /api/admin/points/accounts`、`GET /api/admin/points/ledger`、`POST /api/admin/points/adjustments`、`POST /api/admin/points/adjustments/{id}/approve`、`GET /api/admin/points/reconciliation` |
 
 ## 配套环境说明
 
