@@ -1,4 +1,4 @@
-export type SystemStatus = 'active' | 'disabled';
+export type SystemStatus = 'active' | 'disabled' | 'pending';
 
 export type SystemModuleKey = 'users' | 'roles' | 'menus' | 'dicts' | 'logs';
 

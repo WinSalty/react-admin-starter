@@ -61,6 +61,12 @@ interface ModuleConfig {
 const statusOptions = [
   { label: '启用', value: 'active' },
   { label: '停用', value: 'disabled' },
+  { label: '待激活', value: 'pending' },
+];
+
+const editableStatusOptions = [
+  { label: '启用', value: 'active' },
+  { label: '停用', value: 'disabled' },
 ];
 
 const logTypeOptions = [
@@ -398,7 +404,7 @@ function SystemModulePage({ moduleKey }: SystemModulePageProps) {
             <Input placeholder="请输入唯一编码" maxLength={60} />
           </Form.Item>
           <Form.Item label="状态" name="status" rules={[{ required: true, message: '请选择状态' }]}>
-            <Select options={statusOptions} />
+            <Select options={editableStatusOptions} />
           </Form.Item>
           <Form.Item label="负责人" name="owner" rules={[{ required: true, message: '请输入负责人' }]}>
             <Input placeholder="请输入负责人或负责团队" maxLength={30} />
@@ -615,7 +621,13 @@ const moduleConfigs: Record<SystemModuleKey, ModuleConfig> = {
  * 渲染启停状态。
  */
 function renderStatusTag(status: SystemStatus) {
-  return status === 'active' ? <Tag color="success">启用</Tag> : <Tag>停用</Tag>;
+  if (status === 'active') {
+    return <Tag color="success">启用</Tag>;
+  }
+  if (status === 'pending') {
+    return <Tag color="processing">待激活</Tag>;
+  }
+  return <Tag>停用</Tag>;
 }
 
 /**

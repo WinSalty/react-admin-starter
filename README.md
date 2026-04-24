@@ -59,7 +59,7 @@
 | 模块 | 说明 |
 | --- | --- |
 | 登录 | 调用 `/api/auth/login` 获取 access token 与 refresh token |
-| 注册 | 发送邮箱验证邮件，点击邮件链接完成验证后调用 `/api/auth/register` |
+| 注册 | 调用 `/api/auth/register` 创建待激活账号并发送激活邮件，点击邮件链接后才能登录 |
 | 刷新令牌 | 401 后自动调用 `/api/auth/refresh-token` 续签 |
 | 个人设置 | 支持读取与维护当前用户资料、头像、密码、通知设置 |
 
@@ -114,8 +114,8 @@
 | 能力 | 接口 |
 | --- | --- |
 | 登录 | `POST /api/auth/login` |
-| 注册 | `POST /api/auth/register` |
-| 注册邮箱验证 | `POST /api/auth/register/verify-code` 发送验证邮件，`POST /api/auth/register/verify-link` 校验邮件链接 |
+| 注册 | `POST /api/auth/register` 创建待激活账号并发送激活邮件 |
+| 注册账号激活 | `POST /api/auth/register/verify-link` 校验邮件链接并激活账号 |
 | 刷新令牌 | `POST /api/auth/refresh-token` |
 | 当前用户资料 | `GET /api/auth/profile`、`PUT /api/auth/profile` |
 | 头像上传 | `POST /api/file/avatar/upload` |

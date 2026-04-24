@@ -1,5 +1,4 @@
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { CheckCircleFilled } from '@ant-design/icons';
+import { CheckCircleFilled, LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Input, message, Typography } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { login } from '@/services/auth';
@@ -19,8 +18,13 @@ function Login() {
   const loginStore = useAuthStore((state) => state.login);
   const setPermissions = useAuthStore((state) => state.setPermissions);
   const [messageApi, contextHolder] = message.useMessage();
-  const registerSuccessState = location.state as
-    | { registerSuccess?: boolean; username?: string; email?: string }
+  const authNoticeState = location.state as
+    | {
+        activationMailSent?: boolean;
+        accountActivated?: boolean;
+        username?: string;
+        email?: string;
+      }
     | undefined;
 
   async function onFinish(values: { username: string; password: string }) {
@@ -51,22 +55,7 @@ function Login() {
           <Title level={2}>登录后台</Title>
           <Paragraph>输入账号或邮箱与密码，继续管理你的业务系统。</Paragraph>
         </div>
-        {registerSuccessState?.registerSuccess ? (
-          <div className="auth-inline-feedback auth-inline-feedback-success">
-            <div className="auth-inline-feedback-icon">
-              <CheckCircleFilled />
-            </div>
-            <div className="auth-inline-feedback-content">
-              <span>Account ready</span>
-              <strong>注册成功，账号已经创建</strong>
-              <p>
-                {registerSuccessState.email
-                  ? `注册邮箱 ${registerSuccessState.email} 已完成校验，现在可以直接登录。`
-                  : '注册信息已经生效，现在可以直接登录。'}
-              </p>
-            </div>
-          </div>
-        ) : null}
+        {renderAuthNotice(authNoticeState)}
         <Form layout="vertical" size="large" onFinish={onFinish}>
           <Form.Item
             label="账号或邮箱"
@@ -100,6 +89,50 @@ function Login() {
       </Card>
     </div>
   );
+}
+
+function renderAuthNotice(
+  state:
+    | {
+        activationMailSent?: boolean;
+        accountActivated?: boolean;
+        email?: string;
+      }
+    | undefined,
+) {
+  if (state?.activationMailSent) {
+    return (
+      <div className="auth-inline-feedback auth-inline-feedback-pending">
+        <div className="auth-inline-feedback-icon">
+          <MailOutlined />
+        </div>
+        <div className="auth-inline-feedback-content">
+          <span>Check inbox</span>
+          <strong>激活邮件已发送</strong>
+          <p>
+            {state.email
+              ? `请打开 ${state.email} 收到的邮件，点击激活按钮后再登录。`
+              : '请打开注册邮箱收到的邮件，点击激活按钮后再登录。'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+  if (state?.accountActivated) {
+    return (
+      <div className="auth-inline-feedback auth-inline-feedback-success">
+        <div className="auth-inline-feedback-icon">
+          <CheckCircleFilled />
+        </div>
+        <div className="auth-inline-feedback-content">
+          <span>Account activated</span>
+          <strong>账号已激活</strong>
+          <p>{state.email ? `${state.email} 已完成激活，现在可以登录。` : '账号已完成激活，现在可以登录。'}</p>
+        </div>
+      </div>
+    );
+  }
+  return null;
 }
 
 export default Login;

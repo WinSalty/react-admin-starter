@@ -64,7 +64,7 @@ export async function mockRegister(params: {
   mockUsers.push({ username: params.username, password: params.password });
   return {
     code: 0,
-    message: '注册成功',
+    message: '注册申请已提交，激活邮件已发送',
     data: undefined,
   };
 }
