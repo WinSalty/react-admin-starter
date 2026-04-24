@@ -32,6 +32,7 @@ import type {
   SystemSaveParams,
   SystemStatus,
 } from '@/types/system';
+import { resolveAvatarDisplayUrl } from '@/utils/avatar';
 
 interface SystemModulePageProps {
   moduleKey: SystemModuleKey;
@@ -447,7 +448,7 @@ const moduleConfigs: Record<SystemModuleKey, ModuleConfig> = {
         width: 220,
         render: (_, record) => (
           <Space size={12}>
-            <Avatar src={String(record.avatarUrl || '')}>
+            <Avatar src={resolveAvatarDisplayUrl(record.avatarUrl)}>
               {record.name.slice(0, 1).toUpperCase()}
             </Avatar>
             <div className="query-name-cell">

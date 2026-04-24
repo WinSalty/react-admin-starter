@@ -43,6 +43,7 @@ import type {
   AccountProfile,
   AccountProfileUpdateParams,
 } from '@/types/account';
+import { normalizePersistentAvatarUrl, resolveAvatarDisplayUrl } from '@/utils/avatar';
 
 const { Text, Title } = Typography;
 
@@ -504,7 +505,7 @@ function AccountSettings() {
               <Avatar
                 size={120}
                 src={
-                  normalizePersistentAvatarUrl(profileForm.getFieldValue('avatarUrl') || profile?.avatarUrl)
+                  resolveAvatarDisplayUrl(profileForm.getFieldValue('avatarUrl') || profile?.avatarUrl)
                 }
                 icon={<UserOutlined />}
               >
@@ -596,16 +597,6 @@ function NotificationItem({
       </Form.Item>
     </div>
   );
-}
-
-function normalizePersistentAvatarUrl(value?: string) {
-  if (!value) {
-    return undefined;
-  }
-  if (value.startsWith('/api/file/avatar/')) {
-    return value;
-  }
-  return undefined;
 }
 
 export default AccountSettings;

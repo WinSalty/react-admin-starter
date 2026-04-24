@@ -17,6 +17,7 @@ import { appMenus, mapPermissionMenusToAppMenus, type AppMenuItem } from '@/conf
 import { useActiveNotices } from '@/hooks/useActiveNotices';
 import { fetchAccountProfile } from '@/services/account';
 import { useAuthStore } from '@/stores/auth';
+import { resolveAvatarDisplayUrl } from '@/utils/avatar';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -51,7 +52,7 @@ function BasicLayout() {
   const accountName = profile?.nickname || profile?.username || role || '未登录账号';
   const accountRoleName = profile?.roleName || (isAdmin ? '管理员' : '访客');
   const avatarText = accountName.slice(0, 1).toUpperCase();
-  const avatarUrl = profile?.avatarUrl;
+  const avatarUrl = resolveAvatarDisplayUrl(profile?.avatarUrl);
   const logout = useAuthStore((state) => state.logout);
 
   function handleLogout() {
