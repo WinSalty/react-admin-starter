@@ -1,5 +1,6 @@
 import { Layout } from 'antd';
 import { Outlet } from 'react-router-dom';
+import brandLogo from '@/assets/brand-logo.svg';
 
 /**
  * 认证页面布局，登录和注册页面共用。
@@ -12,12 +13,12 @@ function AuthLayout() {
       <div className="auth-shell">
         <section className="auth-brand-panel">
           <div className="auth-brand-copy">
-            <div className="auth-brand-mark">RA</div>
-            <div>
+            <div className="auth-brand-heading">
+              <img className="auth-brand-mark" src={brandLogo} alt="" aria-hidden="true" />
               <span className="auth-brand-eyebrow">React Admin Starter</span>
-              <h1>让后台系统从第一屏就进入状态</h1>
-              <p>多级菜单、权限控制、数据看板和管理模板已经准备好。</p>
             </div>
+            <h1>让后台系统从第一屏就进入状态</h1>
+            <p>多级菜单、权限控制、数据看板和管理模板已经准备好。</p>
           </div>
           <div className="auth-product-preview" aria-hidden="true">
             <div className="auth-preview-sidebar">

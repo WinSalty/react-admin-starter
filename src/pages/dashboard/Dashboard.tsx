@@ -78,7 +78,7 @@ function Dashboard() {
     <div className="page-stack dashboard-workbench dashboard-workbench-v2">
       {walletErrorMessage ? <Alert message={walletErrorMessage} type="error" showIcon /> : null}
 
-      <Row gutter={[16, 16]} align="stretch">
+      <Row gutter={[16, 16]} align="top">
         <Col xs={24} xl={16}>
           <WalletBalanceCard
             loading={walletLoading}
@@ -237,13 +237,13 @@ function NoticeQuickPanel({
   errorMessage?: string;
 }) {
   const [selectedNotice, setSelectedNotice] = useState<NoticeRecord>();
-  const visibleNotices = useMemo(() => [...notices].sort(sortNotices).slice(0, 5), [notices]);
+  const visibleNotices = useMemo(() => [...notices].sort(sortNotices).slice(0, 4), [notices]);
 
   return (
     <>
       <Card className="dashboard-notice-card" title="系统公告">
         {errorMessage ? <Alert message={errorMessage} type="warning" showIcon style={{ marginBottom: 12 }} /> : null}
-        <Skeleton loading={loading} active paragraph={{ rows: 5 }}>
+        <Skeleton loading={loading} active paragraph={{ rows: 4 }}>
           <List
             className="notice-quick-list"
             locale={{ emptyText: '当前没有生效公告' }}

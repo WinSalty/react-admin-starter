@@ -12,6 +12,7 @@ import type { MenuProps } from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import brandLogo from '@/assets/brand-logo.svg';
 import { HeaderNoticeTicker } from '@/components/NoticeHighlights';
 import { appMenus, mapPermissionMenusToAppMenus, resolveRouteCodeByPath, type AppMenuItem } from '@/config/menu';
 import { useActiveNotices } from '@/hooks/useActiveNotices';
@@ -156,7 +157,7 @@ function BasicLayout() {
         width={232}
       >
         <div className="app-logo">
-          <span>RA</span>
+          <img src={brandLogo} alt="" aria-hidden="true" />
           {!collapsed && <strong>React Admin</strong>}
         </div>
         <Menu

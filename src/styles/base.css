@@ -31,17 +31,12 @@ body {
   padding: 0 16px;
 }
 
-.app-logo span {
-  display: inline-flex;
+.app-logo img {
+  display: block;
   width: 32px;
   height: 32px;
-  align-items: center;
-  justify-content: center;
   border-radius: 8px;
-  background: #1677ff;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 700;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.2);
 }
 
 .app-logo strong {
@@ -367,26 +362,29 @@ body {
 }
 
 .dashboard-wallet-card,
-.dashboard-notice-card,
 .dashboard-reserved-card {
   height: 100%;
   overflow: hidden;
 }
 
+.dashboard-notice-card {
+  overflow: hidden;
+}
+
 .dashboard-wallet-header {
   display: flex;
-  min-height: 104px;
+  min-height: 68px;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid rgba(5, 5, 5, 0.06);
-  padding: 20px 24px;
+  padding: 12px 20px;
 }
 
 .dashboard-wallet-title {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .dashboard-wallet-title div {
@@ -398,36 +396,36 @@ body {
 
 .dashboard-wallet-title strong {
   color: #1f2937;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .dashboard-wallet-title span:last-child {
   color: #667085;
-  font-size: 15px;
+  font-size: 13px;
 }
 
 .dashboard-wallet-logo {
   display: inline-flex;
-  width: 56px;
-  height: 56px;
+  width: 44px;
+  height: 44px;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
   background: #4f7cff;
   color: #fff;
-  font-size: 28px;
+  font-size: 22px;
 }
 
 .dashboard-wallet-main {
   display: grid;
-  min-height: 240px;
+  min-height: 132px;
   grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
   align-items: center;
   border-bottom: 1px solid rgba(5, 5, 5, 0.06);
-  padding: 28px 36px 30px;
+  padding: 14px 28px 16px;
 }
 
 .dashboard-wallet-balance {
@@ -437,9 +435,9 @@ body {
 .dashboard-wallet-label {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   color: #1f2937;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -449,41 +447,41 @@ body {
 
 .dashboard-wallet-balance > strong {
   display: block;
-  margin-top: 16px;
+  margin-top: 10px;
   color: #111827;
-  font-size: 54px;
+  font-size: 38px;
   font-weight: 700;
   line-height: 1.05;
 }
 
 .dashboard-wallet-total {
   display: flex;
-  margin-top: 24px;
+  margin-top: 12px;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   color: #667085;
-  font-size: 15px;
+  font-size: 13px;
 }
 
 .dashboard-wallet-total em {
   color: #4b5563;
   font-style: normal;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 600;
 }
 
 .dashboard-wallet-visual {
   position: relative;
-  height: 210px;
+  height: 118px;
   min-width: 280px;
 }
 
 .wallet-visual-card-back {
   position: absolute;
-  top: 28px;
-  right: 82px;
-  width: 190px;
-  height: 108px;
+  top: 6px;
+  right: 72px;
+  width: 150px;
+  height: 84px;
   border-radius: 8px;
   background: #dfe9ff;
   transform: rotate(-31deg);
@@ -491,10 +489,10 @@ body {
 
 .wallet-visual-card-front {
   position: absolute;
-  top: 54px;
-  right: 58px;
-  width: 248px;
-  height: 122px;
+  top: 22px;
+  right: 46px;
+  width: 198px;
+  height: 92px;
   border-radius: 8px;
   background: #5d8bff;
   opacity: 0.86;
@@ -502,10 +500,10 @@ body {
 
 .wallet-visual-pocket {
   position: absolute;
-  top: 82px;
-  right: 86px;
-  width: 232px;
-  height: 116px;
+  top: 38px;
+  right: 74px;
+  width: 184px;
+  height: 86px;
   border-radius: 8px;
   background: linear-gradient(135deg, rgba(183, 207, 255, 0.98), rgba(125, 167, 255, 0.92));
   box-shadow: 0 18px 38px rgba(79, 124, 255, 0.18);
@@ -513,10 +511,10 @@ body {
 
 .wallet-visual-pocket span {
   position: absolute;
-  top: 42px;
-  right: -22px;
-  width: 92px;
-  height: 40px;
+  top: 30px;
+  right: -18px;
+  width: 76px;
+  height: 32px;
   border-radius: 999px;
   background: rgba(238, 244, 255, 0.8);
 }
@@ -524,10 +522,10 @@ body {
 .wallet-visual-pocket span::after {
   content: '';
   position: absolute;
-  top: 13px;
-  left: 18px;
-  width: 14px;
-  height: 14px;
+  top: 10px;
+  left: 15px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: #fff;
   opacity: 0.75;
@@ -535,27 +533,27 @@ body {
 
 .wallet-visual-coin {
   position: absolute;
-  right: 244px;
-  bottom: 18px;
+  right: 200px;
+  bottom: -2px;
   display: flex;
-  width: 72px;
-  height: 72px;
+  width: 52px;
+  height: 52px;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   background: #8cb2ff;
   color: #fff;
-  font-size: 34px;
+  font-size: 24px;
   font-weight: 700;
   box-shadow: 0 12px 24px rgba(79, 124, 255, 0.18);
 }
 
 .wallet-visual-shadow {
   position: absolute;
-  right: 210px;
-  bottom: 4px;
-  width: 140px;
-  height: 18px;
+  right: 162px;
+  bottom: -5px;
+  width: 112px;
+  height: 14px;
   border-radius: 50%;
   background: rgba(79, 124, 255, 0.08);
 }
@@ -564,16 +562,16 @@ body {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   border-bottom: 1px solid rgba(5, 5, 5, 0.06);
-  padding: 22px 24px;
+  padding: 14px 20px;
 }
 
 .dashboard-wallet-metric {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   border-right: 1px solid rgba(5, 5, 5, 0.08);
-  padding: 0 20px;
+  padding: 0 14px;
 }
 
 .dashboard-wallet-metric:first-child {
@@ -587,14 +585,14 @@ body {
 
 .dashboard-wallet-metric-icon {
   display: inline-flex;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   color: #fff;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .dashboard-wallet-metric-icon.is-blue {
@@ -622,13 +620,13 @@ body {
 
 .dashboard-wallet-metric span {
   color: #667085;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .dashboard-wallet-metric strong {
   overflow: hidden;
   color: #1f2937;
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -636,11 +634,11 @@ body {
 
 .dashboard-wallet-footer {
   display: flex;
-  min-height: 76px;
+  min-height: 48px;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 16px 24px;
+  padding: 10px 20px;
 }
 
 .dashboard-wallet-footer > span {
@@ -649,17 +647,28 @@ body {
   align-items: center;
   gap: 8px;
   color: #667085;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .dashboard-wallet-footer .ant-btn {
-  height: 40px;
+  height: 34px;
   border-radius: 8px;
   font-weight: 600;
 }
 
+.dashboard-notice-card .ant-card-head {
+  min-height: 48px;
+  padding: 0 18px;
+}
+
+.dashboard-notice-card .ant-card-head-title {
+  padding: 12px 0;
+  font-size: 15px;
+}
+
 .dashboard-notice-card .ant-card-body {
-  min-height: 422px;
+  min-height: 286px;
+  padding: 12px 18px 16px;
 }
 
 .dashboard-reserved-card .ant-card-body {
@@ -1105,7 +1114,7 @@ body {
 }
 
 .notice-quick-list .ant-list-item {
-  padding: 10px 0;
+  padding: 8px 0;
 }
 
 .notice-quick-list-item {
@@ -1122,14 +1131,19 @@ body {
   width: 100%;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
 }
 
 .notice-quick-main {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+}
+
+.notice-quick-main .ant-tag {
+  margin-inline-end: 0;
+  line-height: 20px;
 }
 
 .notice-quick-main .ant-typography {
@@ -1201,22 +1215,21 @@ body {
   max-width: 500px;
 }
 
+.auth-brand-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .auth-brand-mark {
-  display: flex;
   width: 52px;
   height: 52px;
-  align-items: center;
-  justify-content: center;
   border-radius: 14px;
-  background: linear-gradient(135deg, #1677ff, #4096ff);
-  box-shadow: 0 18px 36px rgba(22, 119, 255, 0.24);
-  color: #fff;
-  font-weight: 700;
+  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.22);
 }
 
 .auth-brand-eyebrow {
   display: inline-flex;
-  margin-top: 28px;
   border: 1px solid rgba(22, 119, 255, 0.18);
   border-radius: 999px;
   background: rgba(22, 119, 255, 0.08);
@@ -1706,56 +1719,26 @@ body {
   }
 
   .dashboard-wallet-title strong {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .dashboard-wallet-main {
     grid-template-columns: 1fr;
-    gap: 18px;
+    gap: 8px;
   }
 
   .dashboard-wallet-balance > strong {
-    font-size: 42px;
+    font-size: 36px;
   }
 
   .dashboard-wallet-visual {
-    height: 160px;
-    min-width: 0;
-  }
-
-  .wallet-visual-card-back {
-    right: 76px;
-    width: 138px;
-    height: 82px;
-  }
-
-  .wallet-visual-card-front {
-    right: 34px;
-    width: 190px;
-    height: 96px;
-  }
-
-  .wallet-visual-pocket {
-    right: 28px;
-    width: 196px;
-    height: 92px;
-  }
-
-  .wallet-visual-coin {
-    right: 178px;
-    width: 58px;
-    height: 58px;
-    font-size: 26px;
-  }
-
-  .wallet-visual-shadow {
-    right: 138px;
+    display: none;
   }
 
   .dashboard-wallet-metrics {
-    grid-template-columns: 1fr;
-    gap: 14px;
-    padding: 18px 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 12px 16px;
   }
 
   .dashboard-wallet-metric,
@@ -1768,6 +1751,11 @@ body {
   .dashboard-wallet-footer {
     align-items: flex-start;
     flex-direction: column;
+    gap: 10px;
+  }
+
+  .dashboard-notice-card .ant-card-body {
+    min-height: auto;
   }
 
   .reserved-structure-chart {
