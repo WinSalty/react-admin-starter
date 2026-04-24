@@ -8,6 +8,7 @@ import { AuthGuard, GuestGuard, RouteGuard } from '@/components/RouteGuard';
 
 const AuthLayout = lazy(() => import('@/layouts/AuthLayout'));
 const BasicLayout = lazy(() => import('@/layouts/BasicLayout'));
+const EmailVerificationPending = lazy(() => import('@/pages/auth/EmailVerificationPending'));
 const Login = lazy(() => import('@/pages/auth/Login'));
 const Register = lazy(() => import('@/pages/auth/Register'));
 const AccountSettings = lazy(() => import('@/pages/account/AccountSettings'));
@@ -212,6 +213,14 @@ export const router = createBrowserRouter(
           element: (
             <LazyRoute>
               <Register />
+            </LazyRoute>
+          ),
+        },
+        {
+          path: '/register/verify-email',
+          element: (
+            <LazyRoute>
+              <EmailVerificationPending />
             </LazyRoute>
           ),
         },

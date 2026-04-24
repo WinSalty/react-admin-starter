@@ -6,6 +6,10 @@ import { fetchPermissionBootstrap } from '@/services/permission';
 import { useAuthStore } from '@/stores/auth';
 
 const { Paragraph, Title } = Typography;
+const ACCOUNT_UNAVAILABLE_CODE = 4005;
+const EMAIL_SEPARATOR = '@';
+const VERIFY_EMAIL_PATH = '/register/verify-email';
+const PENDING_ACCOUNT_KEYWORD = '尚未激活';
 
 /**
  * 登录页面，接入认证服务和表单校验。
@@ -41,6 +45,23 @@ function Login() {
       } else {
         messageApi.error('获取权限失败');
       }
+    } else if (isPendingAccountResponse(res.code, res.message)) {
+      const email = resolveLoginEmail(values.username);
+      navigate(
+        email
+          ? {
+              pathname: VERIFY_EMAIL_PATH,
+              search: buildVerifyEmailSearch(email),
+            }
+          : VERIFY_EMAIL_PATH,
+        {
+          state: {
+            activationMailSent: true,
+            email,
+            username: values.username,
+          },
+        },
+      );
     } else {
       messageApi.error(res.message || '登录失败');
     }
@@ -89,6 +110,21 @@ function Login() {
       </Card>
     </div>
   );
+}
+
+function isPendingAccountResponse(code: number, responseMessage?: string) {
+  return code === ACCOUNT_UNAVAILABLE_CODE && !!responseMessage?.includes(PENDING_ACCOUNT_KEYWORD);
+}
+
+function resolveLoginEmail(username: string) {
+  const account = username.trim();
+  return account.includes(EMAIL_SEPARATOR) ? account.toLowerCase() : undefined;
+}
+
+function buildVerifyEmailSearch(email: string) {
+  const params = new URLSearchParams();
+  params.set('email', email);
+  return `?${params.toString()}`;
 }
 
 function renderAuthNotice(

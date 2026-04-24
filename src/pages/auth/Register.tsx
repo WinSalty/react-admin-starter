@@ -1,16 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-import {
-  ExclamationCircleFilled,
-  LoadingOutlined,
-  LockOutlined,
-  MailOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
+import { useEffect, useState } from 'react';
+import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Input, Typography, message } from 'antd';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { register, verifyRegisterEmail } from '@/services/auth';
+import { register } from '@/services/auth';
 
 const { Paragraph, Title } = Typography;
+const VERIFY_EMAIL_PATH = '/register/verify-email';
 
 interface RegisterFormValues {
   username: string;
@@ -19,8 +14,6 @@ interface RegisterFormValues {
   confirmPassword: string;
 }
 
-type ActivationState = 'idle' | 'verifying' | 'failed';
-
 /**
  * 注册页面，提交注册后发送账号激活邮件，邮件链接回跳后完成账号激活。
  * author: sunshengxian
@@ -28,57 +21,25 @@ type ActivationState = 'idle' | 'verifying' | 'failed';
  */
 function Register() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm<RegisterFormValues>();
-  const activationHandledRef = useRef(false);
-  const [activationState, setActivationState] = useState<ActivationState>('idle');
-  const [activationError, setActivationError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const email = searchParams.get('email');
     const token = searchParams.get('token');
-    if (!email || !token || activationHandledRef.current) {
-      return undefined;
+    if (!email || !token) {
+      return;
     }
-    activationHandledRef.current = true;
-    let active = true;
-    setActivationState('verifying');
-    setActivationError('');
-    void verifyRegisterEmail({ email, token })
-      .then((response) => {
-        if (!active) {
-          return;
-        }
-        if (response.code !== 0) {
-          setActivationState('failed');
-          setActivationError(response.message || '账号激活失败，请重新提交注册获取新的激活邮件');
-          return;
-        }
-        navigate('/login', {
-          replace: true,
-          state: {
-            accountActivated: true,
-            email,
-          },
-        });
-      })
-      .catch(() => {
-        if (active) {
-          setActivationState('failed');
-          setActivationError('账号激活失败，请重新提交注册获取新的激活邮件');
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setSearchParams({}, { replace: true });
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, [messageApi, navigate, searchParams, setSearchParams]);
+    navigate(
+      {
+        pathname: VERIFY_EMAIL_PATH,
+        search: buildVerifyEmailSearch(email, token),
+      },
+      { replace: true },
+    );
+  }, [navigate, searchParams]);
 
   async function onFinish(values: RegisterFormValues) {
     if (values.password !== values.confirmPassword) {
@@ -93,14 +54,20 @@ function Register() {
         password: values.password,
       });
       if (response.code === 0) {
-        navigate('/login', {
-          replace: true,
-          state: {
-            activationMailSent: true,
-            username: values.username,
-            email: values.email,
+        navigate(
+          {
+            pathname: VERIFY_EMAIL_PATH,
+            search: buildVerifyEmailSearch(values.email),
           },
-        });
+          {
+            replace: true,
+            state: {
+              activationMailSent: true,
+              username: values.username,
+              email: values.email,
+            },
+          },
+        );
       } else {
         messageApi.error(response.message || '注册失败');
       }
@@ -109,38 +76,6 @@ function Register() {
     } finally {
       setSubmitting(false);
     }
-  }
-
-  function renderActivationStatus() {
-    if (activationState === 'verifying') {
-      return (
-        <div className="auth-inline-feedback auth-inline-feedback-pending">
-          <div className="auth-inline-feedback-icon">
-            <LoadingOutlined />
-          </div>
-          <div className="auth-inline-feedback-content">
-            <span>Activating account</span>
-            <strong>正在激活账号</strong>
-            <p>激活完成后会自动进入登录页。</p>
-          </div>
-        </div>
-      );
-    }
-    if (activationState === 'failed') {
-      return (
-        <div className="auth-inline-feedback auth-inline-feedback-pending">
-          <div className="auth-inline-feedback-icon">
-            <ExclamationCircleFilled />
-          </div>
-          <div className="auth-inline-feedback-content">
-            <span>Activation failed</span>
-            <strong>账号激活失败</strong>
-            <p>{activationError}</p>
-          </div>
-        </div>
-      );
-    }
-    return null;
   }
 
   return (
@@ -152,14 +87,13 @@ function Register() {
           <Title level={2}>注册账号</Title>
           <Paragraph>填写账号信息后，系统会发送激活邮件。账号激活后即可登录后台。</Paragraph>
         </div>
-        {renderActivationStatus()}
         <Form form={form} layout="vertical" size="large" onFinish={onFinish}>
           <Form.Item
             label="用户名"
             name="username"
             rules={[{ required: true, message: '请输入用户名' }]}
           >
-            <Input prefix={<UserOutlined />} placeholder="请输入用户名" disabled={activationState === 'verifying'} />
+            <Input prefix={<UserOutlined />} placeholder="请输入用户名" />
           </Form.Item>
           <Form.Item
             label="邮箱"
@@ -169,7 +103,7 @@ function Register() {
               { type: 'email', message: '请输入有效的邮箱地址' },
             ]}
           >
-            <Input prefix={<MailOutlined />} placeholder="请输入邮箱" disabled={activationState === 'verifying'} />
+            <Input prefix={<MailOutlined />} placeholder="请输入邮箱" />
           </Form.Item>
           <Form.Item
             label="密码"
@@ -179,7 +113,6 @@ function Register() {
             <Input.Password
               prefix={<LockOutlined />}
               placeholder="请输入密码"
-              disabled={activationState === 'verifying'}
             />
           </Form.Item>
           <Form.Item
@@ -201,7 +134,6 @@ function Register() {
             <Input.Password
               prefix={<LockOutlined />}
               placeholder="请再次输入密码"
-              disabled={activationState === 'verifying'}
             />
           </Form.Item>
           <Form.Item>
@@ -209,7 +141,7 @@ function Register() {
               block
               htmlType="submit"
               type="primary"
-              loading={submitting || activationState === 'verifying'}
+              loading={submitting}
             >
               注册并发送激活邮件
             </Button>
@@ -221,6 +153,15 @@ function Register() {
       </Card>
     </div>
   );
+}
+
+function buildVerifyEmailSearch(email: string, token?: string) {
+  const params = new URLSearchParams();
+  params.set('email', email);
+  if (token) {
+    params.set('token', token);
+  }
+  return `?${params.toString()}`;
 }
 
 export default Register;
