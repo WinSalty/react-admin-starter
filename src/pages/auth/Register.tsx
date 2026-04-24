@@ -35,19 +35,24 @@ function Register() {
   }, [countdown]);
 
   async function handleSendVerifyCode() {
+    const username = form.getFieldValue('username');
     const email = form.getFieldValue('email');
+    if (!username) {
+      messageApi.error('请先输入用户名');
+      return;
+    }
     if (!email) {
       messageApi.error('请先输入邮箱');
       return;
     }
     try {
-      await form.validateFields(['email']);
+      await form.validateFields(['username', 'email']);
     } catch {
       return;
     }
     setSendingCode(true);
     try {
-      const res = await sendRegisterVerifyCode(email);
+      const res = await sendRegisterVerifyCode({ username, email });
       if (res.code !== 0) {
         messageApi.error(res.message || '验证码发送失败');
         return;

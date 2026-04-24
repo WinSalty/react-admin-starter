@@ -115,7 +115,7 @@
 | --- | --- |
 | 登录 | `POST /api/auth/login` |
 | 注册 | `POST /api/auth/register` |
-| 注册验证码 | `GET /api/auth/register/verify-code` |
+| 注册验证码 | `POST /api/auth/register/verify-code`，请求体包含 `username` 和 `email` |
 | 刷新令牌 | `POST /api/auth/refresh-token` |
 | 当前用户资料 | `GET /api/auth/profile`、`PUT /api/auth/profile` |
 | 头像上传 | `POST /api/file/avatar/upload` |

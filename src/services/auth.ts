@@ -13,6 +13,11 @@ export interface RegisterParams {
   password: string;
 }
 
+export interface RegisterVerifyCodeParams {
+  username: string;
+  email: string;
+}
+
 export interface LoginResult {
   token: string;
   accessToken?: string;
@@ -60,9 +65,9 @@ export async function register(params: RegisterParams): Promise<ApiResponse<void
 /**
  * 发送注册邮箱验证码。
  */
-export async function sendRegisterVerifyCode(email: string): Promise<ApiResponse<void>> {
-  const response = await request.get<ApiResponse<void>>('/api/auth/register/verify-code', {
-    params: { email },
-  });
+export async function sendRegisterVerifyCode(
+  params: RegisterVerifyCodeParams,
+): Promise<ApiResponse<void>> {
+  const response = await request.post<ApiResponse<void>>('/api/auth/register/verify-code', params);
   return response.data;
 }
