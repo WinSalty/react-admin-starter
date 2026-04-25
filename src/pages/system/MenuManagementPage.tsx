@@ -5,13 +5,10 @@ import {
   App,
   Button,
   Card,
-  Descriptions,
-  Drawer,
   Empty,
   Form,
   Input,
   InputNumber,
-  Modal,
   Popconfirm,
   Select,
   Space,
@@ -20,6 +17,8 @@ import {
   TreeSelect,
 } from 'antd';
 import { Access } from '@/components/Access';
+import EntityDetailDrawer, { type DetailField } from '@/components/admin/EntityDetailDrawer';
+import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
   fetchSystemMenuTree,
   saveSystemMenu,
@@ -62,6 +61,21 @@ const iconOptions = [
   'FileSearchOutlined',
   'SettingOutlined',
 ].map((icon) => ({ label: icon, value: icon }));
+
+const detailFields: Array<DetailField<SystemMenuRecord>> = [
+  { key: 'name', label: '菜单名称', render: (record) => record.name },
+  { key: 'code', label: '菜单编码', render: (record) => record.code },
+  { key: 'parentId', label: '父级菜单', render: (record) => record.parentId || '根目录' },
+  { key: 'menuType', label: '菜单类型', render: (record) => renderMenuTypeTag(record.menuType) },
+  { key: 'icon', label: '图标', render: (record) => record.icon || '-' },
+  { key: 'orderNo', label: '排序', render: (record) => record.orderNo },
+  { key: 'routePath', label: '路由路径', render: (record) => record.routePath || '-' },
+  { key: 'permissionCode', label: '权限编码', render: (record) => record.permissionCode || '-' },
+  { key: 'externalLink', label: '外链地址', render: (record) => record.externalLink || '-' },
+  { key: 'status', label: '状态', render: (record) => renderStatusTag(record.status) },
+  { key: 'updatedAt', label: '更新时间', render: (record) => record.updatedAt },
+  { key: 'description', label: '描述', render: (record) => record.description },
+];
 
 /**
  * 菜单管理页面。
@@ -226,8 +240,7 @@ function MenuManagementPage() {
     setModalOpen(true);
   }
 
-  async function handleSave() {
-    const values = await saveForm.validateFields();
+  async function handleSave(values: SystemMenuSaveParams) {
     setSaving(true);
     try {
       const response = await saveSystemMenu({ ...values, id: editingRecord?.id });
@@ -304,60 +317,58 @@ function MenuManagementPage() {
         />
       </Card>
 
-      <Drawer title="菜单详情" width={560} open={detailOpen} onClose={() => setDetailOpen(false)}>
-        <Descriptions bordered column={1} size="small" items={buildDetailItems(detailRecord)} />
-      </Drawer>
+      <EntityDetailDrawer<SystemMenuRecord>
+        title="菜单详情"
+        width={560}
+        open={detailOpen}
+        record={detailRecord}
+        fields={detailFields}
+        onClose={() => setDetailOpen(false)}
+      />
 
-      <Modal
+      <SubmitModalForm<SystemMenuSaveParams>
         title={modalMode === 'create' ? '新增菜单' : '编辑菜单'}
         open={modalOpen}
-        confirmLoading={saving}
-        destroyOnHidden
-        forceRender
+        form={saveForm}
+        loading={saving}
+        className="query-save-form"
         onCancel={() => setModalOpen(false)}
-        onOk={() => void handleSave()}
+        onFinish={handleSave}
       >
-        <Form form={saveForm} layout="vertical" className="query-save-form">
-          <Form.Item label="父级菜单" name="parentId">
-            <TreeSelect
-              allowClear
-              placeholder="请选择父级菜单"
-              treeDefaultExpandAll
-              treeData={parentTreeData}
-            />
-          </Form.Item>
-          <Form.Item label="菜单名称" name="name" rules={[{ required: true, message: '请输入菜单名称' }]}>
-            <Input placeholder="请输入菜单名称" maxLength={40} />
-          </Form.Item>
-          <Form.Item label="菜单编码" name="code" rules={[{ required: true, message: '请输入菜单编码' }]}>
-            <Input placeholder="如 system_menu" maxLength={60} />
-          </Form.Item>
-          <Form.Item label="菜单类型" name="menuType" rules={[{ required: true, message: '请选择菜单类型' }]}>
-            <Select options={menuTypeOptions} />
-          </Form.Item>
-          <Form.Item label="图标" name="icon">
-            <Select allowClear showSearch placeholder="选择 Ant Design Icon 名称" options={iconOptions} />
-          </Form.Item>
-          <Form.Item label="排序" name="orderNo" rules={[{ required: true, message: '请输入排序值' }]}>
-            <InputNumber min={1} precision={0} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item label="路由路径" name="routePath">
-            <Input placeholder="如 /system/menus，目录可留空" maxLength={120} />
-          </Form.Item>
-          <Form.Item label="权限编码" name="permissionCode">
-            <Input placeholder="如 system:menu:view" maxLength={120} />
-          </Form.Item>
-          <Form.Item label="外链地址" name="externalLink">
-            <Input placeholder="外链类型填写 https://..." maxLength={180} />
-          </Form.Item>
-          <Form.Item label="状态" name="status" rules={[{ required: true, message: '请选择状态' }]}>
-            <Select options={statusOptions} />
-          </Form.Item>
-          <Form.Item label="描述" name="description" rules={[{ required: true, message: '请输入描述' }]}>
-            <Input.TextArea placeholder="请输入用途说明" rows={4} maxLength={160} />
-          </Form.Item>
-        </Form>
-      </Modal>
+        <Form.Item label="父级菜单" name="parentId">
+          <TreeSelect allowClear placeholder="请选择父级菜单" treeDefaultExpandAll treeData={parentTreeData} />
+        </Form.Item>
+        <Form.Item label="菜单名称" name="name" rules={[{ required: true, message: '请输入菜单名称' }]}>
+          <Input placeholder="请输入菜单名称" maxLength={40} />
+        </Form.Item>
+        <Form.Item label="菜单编码" name="code" rules={[{ required: true, message: '请输入菜单编码' }]}>
+          <Input placeholder="如 system_menu" maxLength={60} />
+        </Form.Item>
+        <Form.Item label="菜单类型" name="menuType" rules={[{ required: true, message: '请选择菜单类型' }]}>
+          <Select options={menuTypeOptions} />
+        </Form.Item>
+        <Form.Item label="图标" name="icon">
+          <Select allowClear showSearch placeholder="选择 Ant Design Icon 名称" options={iconOptions} />
+        </Form.Item>
+        <Form.Item label="排序" name="orderNo" rules={[{ required: true, message: '请输入排序值' }]}>
+          <InputNumber min={1} precision={0} style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item label="路由路径" name="routePath">
+          <Input placeholder="如 /system/menus，目录可留空" maxLength={120} />
+        </Form.Item>
+        <Form.Item label="权限编码" name="permissionCode">
+          <Input placeholder="如 system:menu:view" maxLength={120} />
+        </Form.Item>
+        <Form.Item label="外链地址" name="externalLink">
+          <Input placeholder="外链类型填写 https://..." maxLength={180} />
+        </Form.Item>
+        <Form.Item label="状态" name="status" rules={[{ required: true, message: '请选择状态' }]}>
+          <Select options={statusOptions} />
+        </Form.Item>
+        <Form.Item label="描述" name="description" rules={[{ required: true, message: '请输入描述' }]}>
+          <Input.TextArea placeholder="请输入用途说明" rows={4} maxLength={160} />
+        </Form.Item>
+      </SubmitModalForm>
     </div>
   );
 }
@@ -373,26 +384,6 @@ function buildParentTreeData(
     disabled: menu.id === editingId,
     children: menu.children ? buildParentTreeData(menu.children, editingId) : undefined,
   }));
-}
-
-function buildDetailItems(record?: SystemMenuRecord) {
-  if (!record) {
-    return [{ key: 'empty', label: '加载状态', children: '暂无详情' }];
-  }
-  return [
-    { key: 'name', label: '菜单名称', children: record.name },
-    { key: 'code', label: '菜单编码', children: record.code },
-    { key: 'parentId', label: '父级菜单', children: record.parentId || '根目录' },
-    { key: 'menuType', label: '菜单类型', children: renderMenuTypeTag(record.menuType) },
-    { key: 'icon', label: '图标', children: record.icon || '-' },
-    { key: 'orderNo', label: '排序', children: record.orderNo },
-    { key: 'routePath', label: '路由路径', children: record.routePath || '-' },
-    { key: 'permissionCode', label: '权限编码', children: record.permissionCode || '-' },
-    { key: 'externalLink', label: '外链地址', children: record.externalLink || '-' },
-    { key: 'status', label: '状态', children: renderStatusTag(record.status) },
-    { key: 'updatedAt', label: '更新时间', children: record.updatedAt },
-    { key: 'description', label: '描述', children: record.description },
-  ];
 }
 
 function renderMenuTypeTag(type: SystemMenuType) {

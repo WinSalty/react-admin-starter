@@ -6,12 +6,9 @@ import {
   Avatar,
   Button,
   Card,
-  Descriptions,
-  Drawer,
   Empty,
   Form,
   Input,
-  Modal,
   Popconfirm,
   Select,
   Space,
@@ -19,6 +16,8 @@ import {
   Tag,
 } from 'antd';
 import { Access } from '@/components/Access';
+import EntityDetailDrawer, { type DetailField } from '@/components/admin/EntityDetailDrawer';
+import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
   fetchSystemDetail,
   fetchSystemPage,
@@ -99,6 +98,8 @@ function SystemModulePage({ moduleKey }: SystemModulePageProps) {
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [editingRecord, setEditingRecord] = useState<SystemRecord>();
   const [saving, setSaving] = useState(false);
+
+  const detailFields = useMemo(() => buildDetailFields(config), [config]);
 
   /**
    * 加载系统管理分页数据。
@@ -269,8 +270,7 @@ function SystemModulePage({ moduleKey }: SystemModulePageProps) {
   /**
    * 保存新增或编辑表单。
    */
-  const handleSave = async () => {
-    const values = await saveForm.validateFields();
+  const handleSave = async (values: SystemSaveForm) => {
     if (moduleKey === 'logs') {
       return;
     }
@@ -280,7 +280,7 @@ function SystemModulePage({ moduleKey }: SystemModulePageProps) {
         ...values,
         moduleKey,
         id: editingRecord?.id,
-      });
+      } as SystemSaveParams);
       if (response.code !== 0) {
         message.error(response.message || `${config.title}保存失败`);
         return;
@@ -378,50 +378,49 @@ function SystemModulePage({ moduleKey }: SystemModulePageProps) {
         />
       </Card>
 
-      <Drawer title={`${config.title}详情`} width={560} open={detailOpen} onClose={() => setDetailOpen(false)}>
-        <Descriptions
-          bordered
-          column={1}
-          size="small"
-          items={buildDetailItems(config, detailRecord, detailLoading)}
-        />
-      </Drawer>
+      <EntityDetailDrawer<SystemRecord>
+        title={`${config.title}详情`}
+        width={560}
+        open={detailOpen}
+        record={detailRecord}
+        loading={detailLoading}
+        fields={detailFields}
+        onClose={() => setDetailOpen(false)}
+      />
 
-      <Modal
+      <SubmitModalForm<SystemSaveForm>
         title={modalMode === 'create' ? config.createText || `新增${config.title}` : `编辑${config.title}`}
         open={modalOpen}
-        confirmLoading={saving}
-        destroyOnHidden
-        forceRender
+        form={saveForm}
+        loading={saving}
+        className="query-save-form"
         onCancel={() => setModalOpen(false)}
-        onOk={() => void handleSave()}
+        onFinish={handleSave}
       >
-        <Form form={saveForm} layout="vertical" className="query-save-form">
-          <Form.Item label="名称" name="name" rules={[{ required: true, message: '请输入名称' }]}>
-            <Input placeholder="请输入名称" maxLength={40} />
+        <Form.Item label="名称" name="name" rules={[{ required: true, message: '请输入名称' }]}>
+          <Input placeholder="请输入名称" maxLength={40} />
+        </Form.Item>
+        <Form.Item label="编码" name="code" rules={[{ required: true, message: '请输入编码' }]}>
+          <Input placeholder="请输入唯一编码" maxLength={60} />
+        </Form.Item>
+        <Form.Item label="状态" name="status" rules={[{ required: true, message: '请选择状态' }]}>
+          <Select options={editableStatusOptions} />
+        </Form.Item>
+        <Form.Item label="负责人" name="owner" rules={[{ required: true, message: '请输入负责人' }]}>
+          <Input placeholder="请输入负责人或负责团队" maxLength={30} />
+        </Form.Item>
+        <Form.Item label={config.extraLabel} name="extraValue">
+          <Input placeholder={config.extraPlaceholder} maxLength={60} />
+        </Form.Item>
+        {moduleKey === 'users' && (
+          <Form.Item label="头像地址" name="avatarUrl">
+            <Input placeholder="请输入头像 URL，或由个人设置上传后自动维护" maxLength={500} />
           </Form.Item>
-          <Form.Item label="编码" name="code" rules={[{ required: true, message: '请输入编码' }]}>
-            <Input placeholder="请输入唯一编码" maxLength={60} />
-          </Form.Item>
-          <Form.Item label="状态" name="status" rules={[{ required: true, message: '请选择状态' }]}>
-            <Select options={editableStatusOptions} />
-          </Form.Item>
-          <Form.Item label="负责人" name="owner" rules={[{ required: true, message: '请输入负责人' }]}>
-            <Input placeholder="请输入负责人或负责团队" maxLength={30} />
-          </Form.Item>
-          <Form.Item label={config.extraLabel} name="extraValue">
-            <Input placeholder={config.extraPlaceholder} maxLength={60} />
-          </Form.Item>
-          {moduleKey === 'users' && (
-            <Form.Item label="头像地址" name="avatarUrl">
-              <Input placeholder="请输入头像 URL，或由个人设置上传后自动维护" maxLength={500} />
-            </Form.Item>
-          )}
-          <Form.Item label="描述" name="description" rules={[{ required: true, message: '请输入描述' }]}>
-            <Input.TextArea placeholder="请输入用途说明" rows={4} maxLength={160} />
-          </Form.Item>
-        </Form>
-      </Modal>
+        )}
+        <Form.Item label="描述" name="description" rules={[{ required: true, message: '请输入描述' }]}>
+          <Input.TextArea placeholder="请输入用途说明" rows={4} maxLength={160} />
+        </Form.Item>
+      </SubmitModalForm>
     </div>
   );
 }
@@ -631,19 +630,13 @@ function renderStatusTag(status: SystemStatus) {
 }
 
 /**
- * 构建详情抽屉描述项。
+ * 构建系统模块详情字段。
  */
-function buildDetailItems(config: ModuleConfig, record?: SystemRecord, loading?: boolean) {
-  if (loading) {
-    return [{ key: 'loading', label: '加载状态', children: '加载中' }];
-  }
-  if (!record) {
-    return [{ key: 'empty', label: '加载状态', children: '暂无详情' }];
-  }
+function buildDetailFields(config: ModuleConfig): Array<DetailField<SystemRecord>> {
   return config.detailFields.map((field) => ({
     key: field.key,
     label: field.label,
-    children: field.key === 'status' ? renderStatusTag(record.status) : String(record[field.key] || '-'),
+    render: (record) => (field.key === 'status' ? renderStatusTag(record.status) : String(record[field.key] || '-')),
   }));
 }
 

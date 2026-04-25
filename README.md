@@ -51,6 +51,7 @@
 4. `request.ts` 基于 Axios 统一处理鉴权头、业务错误提示、401 自动刷新 token 和串行 refresh token 续签。
 5. 认证信息当前写入 `sessionStorage`，并兼容迁移旧的 `localStorage` 数据，降低长期落盘 token 被复用的风险。
 6. 构建层通过 `manualChunks` 拆分 `react`、`echarts` 等依赖，降低首屏包体积并减少 chunk 警告。
+7. 列表类页面的新增、编辑、导出等提交型弹窗统一使用 `SubmitModalForm` 承载表单提交生命周期；查询、系统、公告、菜单、CDK、权益等详情抽屉统一使用 `EntityDetailDrawer` 渲染加载态、空态和字段描述。
 
 ## 模块能力
 

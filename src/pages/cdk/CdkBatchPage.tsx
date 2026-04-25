@@ -3,6 +3,8 @@ import type { TableProps } from 'antd';
 import { App, Button, Card, DatePicker, Empty, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
 import { Access } from '@/components/Access';
+import EntityDetailDrawer, { type DetailField } from '@/components/admin/EntityDetailDrawer';
+import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
   approveCdkBatch,
   createCdkBatch,
@@ -48,6 +50,27 @@ const riskOptions = [
   { label: '关键', value: 'critical' },
 ];
 
+const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+
+const detailFields: Array<DetailField<CdkBatch>> = [
+  { key: 'batchName', label: '批次名称', render: (record) => record.batchName },
+  { key: 'batchNo', label: '批次号', render: (record) => record.batchNo },
+  { key: 'benefitConfig', label: '权益', render: (record) => renderBenefitConfig(record.benefitConfig) },
+  { key: 'totalCount', label: '总数', render: (record) => record.totalCount },
+  { key: 'generatedCount', label: '已生成', render: (record) => record.generatedCount },
+  { key: 'redeemedCount', label: '已兑换', render: (record) => record.redeemedCount },
+  { key: 'valid', label: '有效期', render: (record) => `${record.validFrom} 至 ${record.validTo}` },
+  { key: 'status', label: '状态', render: (record) => renderBatchStatus(record.status) },
+  { key: 'riskLevel', label: '风险等级', render: (record) => renderRiskTag(record.riskLevel) },
+  { key: 'approvedBy', label: '审批人', render: (record) => record.approvedBy || '-' },
+  { key: 'approvedAt', label: '审批时间', render: (record) => record.approvedAt || '-' },
+  { key: 'secondApprovedBy', label: '复核人', render: (record) => record.secondApprovedBy || '-' },
+  { key: 'secondApprovedAt', label: '复核时间', render: (record) => record.secondApprovedAt || '-' },
+  { key: 'exportCount', label: '导出次数', render: (record) => record.exportCount },
+  { key: 'createdAt', label: '创建时间', render: (record) => record.createdAt },
+  { key: 'updatedAt', label: '更新时间', render: (record) => record.updatedAt },
+];
+
 /**
  * CDK 批次管理页面。
  * 支持批次创建、提交审批、审批生成、一次性导出、暂停和作废。
@@ -64,6 +87,8 @@ function CdkBatchPage() {
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailRecord, setDetailRecord] = useState<CdkBatch>();
   const [modalOpen, setModalOpen] = useState(false);
   const [exportingRecord, setExportingRecord] = useState<CdkBatch>();
   const [saving, setSaving] = useState(false);
@@ -138,6 +163,9 @@ function CdkBatchPage() {
         width: 300,
         render: (_, record) => (
           <Space size={4}>
+            <Button type="link" onClick={() => openDetail(record)}>
+              详情
+            </Button>
             <Access action="cdk:batch:approve">
               <Button type="link" disabled={record.status !== 'draft'} onClick={() => void handleSubmit(record)}>
                 提交
@@ -179,6 +207,11 @@ function CdkBatchPage() {
     [],
   );
 
+  const openDetail = (record: CdkBatch) => {
+    setDetailRecord(record);
+    setDetailOpen(true);
+  };
+
   const handleSearch = () => {
     void loadRecords(1, pageSize);
   };
@@ -200,8 +233,7 @@ function CdkBatchPage() {
     setModalOpen(true);
   };
 
-  const handleCreate = async () => {
-    const values = await createForm.validateFields();
+  const handleCreate = async (values: BatchCreateForm) => {
     setSaving(true);
     try {
       const params: CdkBatchCreateParams = {
@@ -209,8 +241,8 @@ function CdkBatchPage() {
         benefitType: 'points',
         points: values.points,
         totalCount: values.totalCount,
-        validFrom: values.validFrom.format('YYYY-MM-DD HH:mm:ss'),
-        validTo: values.validTo.format('YYYY-MM-DD HH:mm:ss'),
+        validFrom: values.validFrom.format(DATE_TIME_FORMAT),
+        validTo: values.validTo.format(DATE_TIME_FORMAT),
         riskLevel: values.riskLevel,
         remark: values.remark,
       };
@@ -252,11 +284,10 @@ function CdkBatchPage() {
     setExportingRecord(record);
   };
 
-  const handleExport = async () => {
+  const handleExport = async (values: BatchExportForm) => {
     if (!exportingRecord) {
       return;
     }
-    const values = await exportForm.validateFields();
     const response = await exportCdkBatch(exportingRecord.id, values.exportPassword);
     if (response.code !== 0) {
       message.error(response.message || '导出失败');
@@ -321,54 +352,61 @@ function CdkBatchPage() {
         />
       </Card>
 
-      <Modal
+      <EntityDetailDrawer<CdkBatch>
+        title="CDK 批次详情"
+        width={640}
+        open={detailOpen}
+        record={detailRecord}
+        fields={detailFields}
+        onClose={() => setDetailOpen(false)}
+      />
+
+      <SubmitModalForm<BatchCreateForm>
         title="新建 CDK 批次"
         open={modalOpen}
-        confirmLoading={saving}
+        form={createForm}
+        loading={saving}
         onCancel={() => setModalOpen(false)}
-        onOk={() => void handleCreate()}
+        onFinish={handleCreate}
       >
-        <Form form={createForm} layout="vertical">
-          <Form.Item label="批次名称" name="batchName" rules={[{ required: true, message: '请输入批次名称' }]}>
-            <Input maxLength={80} />
-          </Form.Item>
-          <Form.Item label="积分数量" name="points" rules={[{ required: true, message: '请输入积分数量' }]}>
-            <InputNumber min={1} precision={0} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item label="生成数量" name="totalCount" rules={[{ required: true, message: '请输入生成数量' }]}>
-            <InputNumber min={1} precision={0} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item label="生效时间" name="validFrom" rules={[{ required: true, message: '请选择生效时间' }]}>
-            <DatePicker showTime style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item label="失效时间" name="validTo" rules={[{ required: true, message: '请选择失效时间' }]}>
-            <DatePicker showTime style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item label="风险等级" name="riskLevel" rules={[{ required: true, message: '请选择风险等级' }]}>
-            <Select options={riskOptions} />
-          </Form.Item>
-          <Form.Item label="备注" name="remark">
-            <Input.TextArea rows={3} maxLength={200} />
-          </Form.Item>
-        </Form>
-      </Modal>
+        <Form.Item label="批次名称" name="batchName" rules={[{ required: true, message: '请输入批次名称' }]}>
+          <Input maxLength={80} />
+        </Form.Item>
+        <Form.Item label="积分数量" name="points" rules={[{ required: true, message: '请输入积分数量' }]}>
+          <InputNumber min={1} precision={0} style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item label="生成数量" name="totalCount" rules={[{ required: true, message: '请输入生成数量' }]}>
+          <InputNumber min={1} precision={0} style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item label="生效时间" name="validFrom" rules={[{ required: true, message: '请选择生效时间' }]}>
+          <DatePicker showTime style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item label="失效时间" name="validTo" rules={[{ required: true, message: '请选择失效时间' }]}>
+          <DatePicker showTime style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item label="风险等级" name="riskLevel" rules={[{ required: true, message: '请选择风险等级' }]}>
+          <Select options={riskOptions} />
+        </Form.Item>
+        <Form.Item label="备注" name="remark">
+          <Input.TextArea rows={3} maxLength={200} />
+        </Form.Item>
+      </SubmitModalForm>
 
-      <Modal
+      <SubmitModalForm<BatchExportForm>
         title="加密导出 CDK"
         open={!!exportingRecord}
+        form={exportForm}
         onCancel={() => setExportingRecord(undefined)}
-        onOk={() => void handleExport()}
+        onFinish={handleExport}
       >
-        <Form form={exportForm} layout="vertical">
-          <Form.Item
-            label="导出密码"
-            name="exportPassword"
-            rules={[{ required: true, min: 12, message: '请输入至少 12 位导出密码' }]}
-          >
-            <Input.Password maxLength={128} />
-          </Form.Item>
-        </Form>
-      </Modal>
+        <Form.Item
+          label="导出密码"
+          name="exportPassword"
+          rules={[{ required: true, min: 12, message: '请输入至少 12 位导出密码' }]}
+        >
+          <Input.Password maxLength={128} />
+        </Form.Item>
+      </SubmitModalForm>
 
       <Modal
         title="CDK 一次性导出"

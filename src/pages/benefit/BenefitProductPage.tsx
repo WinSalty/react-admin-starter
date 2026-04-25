@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TableProps } from 'antd';
-import { App, Button, Card, DatePicker, Empty, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag } from 'antd';
+import { App, Button, Card, DatePicker, Empty, Form, Input, InputNumber, Popconfirm, Select, Space, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
 import { Access } from '@/components/Access';
+import EntityDetailDrawer, { type DetailField } from '@/components/admin/EntityDetailDrawer';
+import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import { fetchAdminBenefitProducts, saveBenefitProduct, updateBenefitProductStatus } from '@/services/benefit';
 import type { BenefitProduct, BenefitProductSaveParams } from '@/types/benefit';
 
@@ -18,6 +20,23 @@ interface BenefitProductForm {
   validTo: dayjs.Dayjs;
 }
 
+const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+
+const detailFields: Array<DetailField<BenefitProduct>> = [
+  { key: 'productName', label: '商品名称', render: (record) => record.productName },
+  { key: 'productNo', label: '商品编号', render: (record) => record.productNo },
+  { key: 'benefitType', label: '权益类型', render: (record) => record.benefitType },
+  { key: 'benefitCode', label: '权益编码', render: (record) => record.benefitCode },
+  { key: 'benefitName', label: '权益名称', render: (record) => record.benefitName },
+  { key: 'benefitConfig', label: '权益配置', render: (record) => record.benefitConfig || '-' },
+  { key: 'costPoints', label: '消耗积分', render: (record) => record.costPoints },
+  { key: 'stock', label: '库存', render: (record) => formatStock(record) },
+  { key: 'valid', label: '有效期', render: (record) => `${record.validFrom} 至 ${record.validTo}` },
+  { key: 'status', label: '状态', render: (record) => renderStatusTag(record.status) },
+  { key: 'createdBy', label: '创建人', render: (record) => record.createdBy || '-' },
+  { key: 'updatedAt', label: '更新时间', render: (record) => record.updatedAt },
+];
+
 /**
  * 权益商品管理页面。
  * 管理积分可兑换的权限、服务包和后续业务权益商品。
@@ -29,8 +48,11 @@ function BenefitProductPage() {
   const [form] = Form.useForm<BenefitProductForm>();
   const [records, setRecords] = useState<BenefitProduct[]>([]);
   const [loading, setLoading] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailRecord, setDetailRecord] = useState<BenefitProduct>();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<BenefitProduct>();
+  const [saving, setSaving] = useState(false);
 
   const loadRecords = useCallback(async () => {
     setLoading(true);
@@ -66,16 +88,19 @@ function BenefitProductPage() {
       { title: '权益类型', dataIndex: 'benefitType', width: 120 },
       { title: '权益编码', dataIndex: 'benefitCode', width: 180 },
       { title: '积分', dataIndex: 'costPoints', width: 100, align: 'right' },
-      { title: '库存', key: 'stock', width: 120, render: (_, record) => (record.stockTotal < 0 ? '不限' : `${record.stockUsed}/${record.stockTotal}`) },
+      { title: '库存', key: 'stock', width: 120, render: (_, record) => formatStock(record) },
       { title: '状态', dataIndex: 'status', width: 110, render: renderStatusTag },
       { title: '有效期', key: 'valid', width: 300, render: (_, record) => `${record.validFrom} 至 ${record.validTo}` },
       {
         title: '操作',
         key: 'action',
         fixed: 'right',
-        width: 180,
+        width: 230,
         render: (_, record) => (
           <Space size={4}>
+            <Button type="link" onClick={() => openDetail(record)}>
+              详情
+            </Button>
             <Access action="benefit:product:update">
               <Button type="link" onClick={() => openEditModal(record)}>
                 编辑
@@ -92,6 +117,11 @@ function BenefitProductPage() {
     ],
     [],
   );
+
+  const openDetail = (record: BenefitProduct) => {
+    setDetailRecord(record);
+    setDetailOpen(true);
+  };
 
   const openCreateModal = () => {
     setEditingRecord(undefined);
@@ -122,21 +152,25 @@ function BenefitProductPage() {
     setModalOpen(true);
   };
 
-  const handleSave = async () => {
-    const values = await form.validateFields();
+  const handleSave = async (values: BenefitProductForm) => {
     const params: BenefitProductSaveParams = {
       ...values,
-      validFrom: values.validFrom.format('YYYY-MM-DD HH:mm:ss'),
-      validTo: values.validTo.format('YYYY-MM-DD HH:mm:ss'),
+      validFrom: values.validFrom.format(DATE_TIME_FORMAT),
+      validTo: values.validTo.format(DATE_TIME_FORMAT),
     };
-    const response = await saveBenefitProduct(params, editingRecord?.id);
-    if (response.code !== 0) {
-      message.error(response.message || '保存失败');
-      return;
+    setSaving(true);
+    try {
+      const response = await saveBenefitProduct(params, editingRecord?.id);
+      if (response.code !== 0) {
+        message.error(response.message || '保存失败');
+        return;
+      }
+      message.success(response.message || '保存成功');
+      setModalOpen(false);
+      void loadRecords();
+    } finally {
+      setSaving(false);
     }
-    message.success(response.message || '保存成功');
-    setModalOpen(false);
-    void loadRecords();
   };
 
   const handleStatus = async (record: BenefitProduct) => {
@@ -173,48 +207,61 @@ function BenefitProductPage() {
         />
       </Card>
 
-      <Modal
+      <EntityDetailDrawer<BenefitProduct>
+        title="权益商品详情"
+        width={640}
+        open={detailOpen}
+        record={detailRecord}
+        fields={detailFields}
+        onClose={() => setDetailOpen(false)}
+      />
+
+      <SubmitModalForm<BenefitProductForm>
         title={editingRecord ? '编辑权益商品' : '新建权益商品'}
         open={modalOpen}
+        form={form}
+        loading={saving}
         onCancel={() => setModalOpen(false)}
-        onOk={() => void handleSave()}
+        onFinish={handleSave}
       >
-        <Form form={form} layout="vertical">
-          <Form.Item label="商品名称" name="productName" rules={[{ required: true, message: '请输入商品名称' }]}>
-            <Input maxLength={128} />
-          </Form.Item>
-          <Form.Item label="权益类型" name="benefitType" rules={[{ required: true, message: '请选择权益类型' }]}>
-            <Select options={[{ label: '权限', value: 'permission' }, { label: '服务包', value: 'service_package' }]} />
-          </Form.Item>
-          <Form.Item label="权益编码" name="benefitCode" rules={[{ required: true, message: '请输入权益编码' }]}>
-            <Input maxLength={128} />
-          </Form.Item>
-          <Form.Item label="权益名称" name="benefitName" rules={[{ required: true, message: '请输入权益名称' }]}>
-            <Input maxLength={128} />
-          </Form.Item>
-          <Form.Item label="权益配置" name="benefitConfig">
-            <Input.TextArea rows={3} maxLength={500} />
-          </Form.Item>
-          <Form.Item label="消耗积分" name="costPoints" rules={[{ required: true, message: '请输入消耗积分' }]}>
-            <InputNumber min={1} precision={0} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item label="总库存" name="stockTotal" rules={[{ required: true, message: '请输入总库存' }]}>
-            <InputNumber min={-1} precision={0} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item label="生效时间" name="validFrom" rules={[{ required: true, message: '请选择生效时间' }]}>
-            <DatePicker showTime style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item label="失效时间" name="validTo" rules={[{ required: true, message: '请选择失效时间' }]}>
-            <DatePicker showTime style={{ width: '100%' }} />
-          </Form.Item>
-        </Form>
-      </Modal>
+        <Form.Item label="商品名称" name="productName" rules={[{ required: true, message: '请输入商品名称' }]}>
+          <Input maxLength={128} />
+        </Form.Item>
+        <Form.Item label="权益类型" name="benefitType" rules={[{ required: true, message: '请选择权益类型' }]}>
+          <Select options={[{ label: '权限', value: 'permission' }, { label: '服务包', value: 'service_package' }]} />
+        </Form.Item>
+        <Form.Item label="权益编码" name="benefitCode" rules={[{ required: true, message: '请输入权益编码' }]}>
+          <Input maxLength={128} />
+        </Form.Item>
+        <Form.Item label="权益名称" name="benefitName" rules={[{ required: true, message: '请输入权益名称' }]}>
+          <Input maxLength={128} />
+        </Form.Item>
+        <Form.Item label="权益配置" name="benefitConfig">
+          <Input.TextArea rows={3} maxLength={500} />
+        </Form.Item>
+        <Form.Item label="消耗积分" name="costPoints" rules={[{ required: true, message: '请输入消耗积分' }]}>
+          <InputNumber min={1} precision={0} style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item label="总库存" name="stockTotal" rules={[{ required: true, message: '请输入总库存' }]}>
+          <InputNumber min={-1} precision={0} style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item label="生效时间" name="validFrom" rules={[{ required: true, message: '请选择生效时间' }]}>
+          <DatePicker showTime style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item label="失效时间" name="validTo" rules={[{ required: true, message: '请选择失效时间' }]}>
+          <DatePicker showTime style={{ width: '100%' }} />
+        </Form.Item>
+      </SubmitModalForm>
     </div>
   );
 }
 
 function renderStatusTag(status: string) {
   return <Tag color={status === 'active' ? 'success' : 'default'}>{status}</Tag>;
+}
+
+function formatStock(record: BenefitProduct) {
+  return record.stockTotal < 0 ? '不限' : `${record.stockUsed}/${record.stockTotal}`;
 }
 
 export default BenefitProductPage;

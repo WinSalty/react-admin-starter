@@ -101,8 +101,7 @@ function EmailVerificationPending() {
     };
   }, [navigate, queryEmail, setSearchParams, token]);
 
-  async function handleResend() {
-    const values = await form.validateFields();
+  async function handleResend(values: VerifyEmailFormValues) {
     const nextEmail = normalizeEmail(values.email);
     setResending(true);
     try {

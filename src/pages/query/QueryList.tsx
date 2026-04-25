@@ -5,18 +5,17 @@ import {
   App,
   Button,
   Card,
-  Descriptions,
-  Drawer,
   Empty,
   Form,
   Input,
-  Modal,
   Select,
   Space,
   Table,
   Tag,
 } from 'antd';
 import { Access } from '@/components/Access';
+import EntityDetailDrawer, { type DetailField } from '@/components/admin/EntityDetailDrawer';
+import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
   fetchQueryDetail,
   fetchQueryPage,
@@ -34,6 +33,17 @@ type QuerySaveForm = Omit<QuerySaveParams, 'id'>;
 const statusOptions = [
   { label: '启用', value: 'active' },
   { label: '停用', value: 'disabled' },
+];
+
+const detailFields: Array<DetailField<QueryRecord>> = [
+  { key: 'name', label: '名称', render: (record) => record.name },
+  { key: 'code', label: '编码', render: (record) => record.code },
+  { key: 'status', label: '状态', render: (record) => renderStatusTag(record.status) },
+  { key: 'owner', label: '负责人', render: (record) => record.owner },
+  { key: 'callCount', label: '调用次数', render: (record) => record.callCount },
+  { key: 'createdAt', label: '创建时间', render: (record) => record.createdAt },
+  { key: 'updatedAt', label: '更新时间', render: (record) => record.updatedAt },
+  { key: 'description', label: '描述', render: (record) => record.description },
 ];
 
 /**
@@ -231,8 +241,7 @@ function QueryList() {
   /**
    * 保存新增或编辑表单。
    */
-  const handleSave = async () => {
-    const values = await saveForm.validateFields();
+  const handleSave = async (values: QuerySaveForm) => {
     setSaving(true);
     try {
       const response = await saveQueryRecord({
@@ -309,67 +318,41 @@ function QueryList() {
         />
       </Card>
 
-      <Drawer
+      <EntityDetailDrawer<QueryRecord>
         title="查询配置详情"
-        width={520}
         open={detailOpen}
+        width={520}
+        record={detailRecord}
+        loading={detailLoading}
+        fields={detailFields}
         onClose={() => setDetailOpen(false)}
-      >
-        <Descriptions
-          bordered
-          column={1}
-          size="small"
-          items={buildDetailItems(detailRecord, detailLoading)}
-        />
-      </Drawer>
+      />
 
-      <Modal
+      <SubmitModalForm<QuerySaveForm>
         title={modalMode === 'create' ? '新增查询配置' : '编辑查询配置'}
         open={modalOpen}
-        confirmLoading={saving}
-        destroyOnHidden
-        forceRender
+        form={saveForm}
+        loading={saving}
+        className="query-save-form"
         onCancel={() => setModalOpen(false)}
-        onOk={() => void handleSave()}
+        onFinish={handleSave}
       >
-        <Form form={saveForm} layout="vertical" className="query-save-form">
-          <Form.Item
-            label="名称"
-            name="name"
-            rules={[{ required: true, message: '请输入名称' }]}
-          >
-            <Input placeholder="请输入查询配置名称" maxLength={40} />
-          </Form.Item>
-          <Form.Item
-            label="编码"
-            name="code"
-            rules={[{ required: true, message: '请输入编码' }]}
-          >
-            <Input placeholder="请输入唯一编码" maxLength={60} />
-          </Form.Item>
-          <Form.Item
-            label="状态"
-            name="status"
-            rules={[{ required: true, message: '请选择状态' }]}
-          >
-            <Select options={statusOptions} />
-          </Form.Item>
-          <Form.Item
-            label="负责人"
-            name="owner"
-            rules={[{ required: true, message: '请输入负责人' }]}
-          >
-            <Input placeholder="请输入负责人或负责团队" maxLength={30} />
-          </Form.Item>
-          <Form.Item
-            label="描述"
-            name="description"
-            rules={[{ required: true, message: '请输入描述' }]}
-          >
-            <Input.TextArea placeholder="请输入查询配置用途" rows={4} maxLength={160} />
-          </Form.Item>
-        </Form>
-      </Modal>
+        <Form.Item label="名称" name="name" rules={[{ required: true, message: '请输入名称' }]}>
+          <Input placeholder="请输入查询配置名称" maxLength={40} />
+        </Form.Item>
+        <Form.Item label="编码" name="code" rules={[{ required: true, message: '请输入编码' }]}>
+          <Input placeholder="请输入唯一编码" maxLength={60} />
+        </Form.Item>
+        <Form.Item label="状态" name="status" rules={[{ required: true, message: '请选择状态' }]}>
+          <Select options={statusOptions} />
+        </Form.Item>
+        <Form.Item label="负责人" name="owner" rules={[{ required: true, message: '请输入负责人' }]}>
+          <Input placeholder="请输入负责人或负责团队" maxLength={30} />
+        </Form.Item>
+        <Form.Item label="描述" name="description" rules={[{ required: true, message: '请输入描述' }]}>
+          <Input.TextArea placeholder="请输入查询配置用途" rows={4} maxLength={160} />
+        </Form.Item>
+      </SubmitModalForm>
     </div>
   );
 }
@@ -379,28 +362,6 @@ function QueryList() {
  */
 function renderStatusTag(status: QueryStatus) {
   return status === 'active' ? <Tag color="success">启用</Tag> : <Tag>停用</Tag>;
-}
-
-/**
- * 构建详情抽屉描述项。
- */
-function buildDetailItems(record?: QueryRecord, loading?: boolean) {
-  if (loading) {
-    return [{ key: 'loading', label: '加载状态', children: '加载中' }];
-  }
-  if (!record) {
-    return [{ key: 'empty', label: '加载状态', children: '暂无详情' }];
-  }
-  return [
-    { key: 'name', label: '名称', children: record.name },
-    { key: 'code', label: '编码', children: record.code },
-    { key: 'status', label: '状态', children: renderStatusTag(record.status) },
-    { key: 'owner', label: '负责人', children: record.owner },
-    { key: 'callCount', label: '调用次数', children: record.callCount },
-    { key: 'createdAt', label: '创建时间', children: record.createdAt },
-    { key: 'updatedAt', label: '更新时间', children: record.updatedAt },
-    { key: 'description', label: '描述', children: record.description },
-  ];
 }
 
 export default QueryList;

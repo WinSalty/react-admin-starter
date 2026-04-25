@@ -143,8 +143,7 @@ function WalletPage() {
     [consumeRecords, freezeColumns, freezeRecords, ledgerColumns, ledgerRecords, loading, rechargeColumns, rechargeRecords],
   );
 
-  const handleRedeem = async () => {
-    const values = await redeemForm.validateFields();
+  const handleRedeem = async (values: RedeemForm) => {
     setRedeeming(true);
     try {
       const response = await redeemCdk(values.cdk, createClientIdempotencyKey());
@@ -160,8 +159,7 @@ function WalletPage() {
     }
   };
 
-  const handleOnlineRecharge = async () => {
-    const values = await onlineRechargeForm.validateFields();
+  const handleOnlineRecharge = async (values: OnlineRechargeForm) => {
     setRecharging(true);
     try {
       const response = await createOnlineRecharge(values.amount, createClientIdempotencyKey('online'));
@@ -205,7 +203,7 @@ function WalletPage() {
       <Row gutter={[12, 12]}>
         <Col xs={24} lg={14}>
           <Card title="CDK 兑换">
-            <Form form={redeemForm} layout="inline" className="query-form" onFinish={() => void handleRedeem()}>
+            <Form form={redeemForm} layout="inline" className="query-form" onFinish={(values) => void handleRedeem(values)}>
               <Form.Item name="cdk" rules={[{ required: true, message: '请输入 CDK' }]}>
                 <Input className="wallet-cdk-input" placeholder="WSA-202604-XXXX-XXXX-XXXX-XXXX" allowClear />
               </Form.Item>
@@ -219,7 +217,12 @@ function WalletPage() {
         </Col>
         <Col xs={24} lg={10}>
           <Card title="在线充值">
-            <Form form={onlineRechargeForm} layout="inline" className="query-form" onFinish={() => void handleOnlineRecharge()}>
+            <Form
+              form={onlineRechargeForm}
+              layout="inline"
+              className="query-form"
+              onFinish={(values) => void handleOnlineRecharge(values)}
+            >
               <Form.Item name="amount" rules={[{ required: true, message: '请输入充值积分' }]}>
                 <InputNumber min={1} precision={0} placeholder="充值积分" style={{ width: 180 }} />
               </Form.Item>

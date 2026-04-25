@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TableProps, TabsProps } from 'antd';
 import { App, Button, Card, Empty, Form, Input, InputNumber, Modal, Select, Space, Table, Tabs, Tag } from 'antd';
 import { Access } from '@/components/Access';
+import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
   approvePointAdjustment,
   createPointAdjustment,
@@ -302,8 +303,7 @@ function PointAuditPage() {
     setAdjustmentOpen(true);
   };
 
-  const handleCreateAdjustment = async () => {
-    const values = await adjustmentForm.validateFields();
+  const handleCreateAdjustment = async (values: AdjustmentForm) => {
     setSavingAdjustment(true);
     try {
       const response = await createPointAdjustment({
@@ -353,31 +353,30 @@ function PointAuditPage() {
         <Tabs items={tabItems} />
       </Card>
 
-      <Modal
+      <SubmitModalForm<AdjustmentForm>
         title="积分人工调整"
         open={adjustmentOpen}
-        confirmLoading={savingAdjustment}
+        form={adjustmentForm}
+        loading={savingAdjustment}
         onCancel={() => setAdjustmentOpen(false)}
-        onOk={() => void handleCreateAdjustment()}
+        onFinish={handleCreateAdjustment}
       >
-        <Form form={adjustmentForm} layout="vertical">
-          <Form.Item label="用户ID" name="userId" rules={[{ required: true, message: '请输入用户ID' }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item label="方向" name="direction" rules={[{ required: true, message: '请选择方向' }]}>
-            <Select options={directionOptions.slice(0, 2)} />
-          </Form.Item>
-          <Form.Item label="积分" name="amount" rules={[{ required: true, message: '请输入积分' }]}>
-            <InputNumber min={1} precision={0} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item label="原因" name="reason" rules={[{ required: true, message: '请输入原因' }]}>
-            <Input.TextArea rows={3} maxLength={300} />
-          </Form.Item>
-          <Form.Item label="工单号" name="ticketNo" rules={[{ required: true, message: '请输入工单号' }]}>
-            <Input maxLength={80} />
-          </Form.Item>
-        </Form>
-      </Modal>
+        <Form.Item label="用户ID" name="userId" rules={[{ required: true, message: '请输入用户ID' }]}>
+          <Input />
+        </Form.Item>
+        <Form.Item label="方向" name="direction" rules={[{ required: true, message: '请选择方向' }]}>
+          <Select options={directionOptions.slice(0, 2)} />
+        </Form.Item>
+        <Form.Item label="积分" name="amount" rules={[{ required: true, message: '请输入积分' }]}>
+          <InputNumber min={1} precision={0} style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item label="原因" name="reason" rules={[{ required: true, message: '请输入原因' }]}>
+          <Input.TextArea rows={3} maxLength={300} />
+        </Form.Item>
+        <Form.Item label="工单号" name="ticketNo" rules={[{ required: true, message: '请输入工单号' }]}>
+          <Input maxLength={80} />
+        </Form.Item>
+      </SubmitModalForm>
 
       <Modal
         title="调整单审批"

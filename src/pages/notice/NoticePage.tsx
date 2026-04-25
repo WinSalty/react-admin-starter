@@ -6,13 +6,10 @@ import {
   Button,
   Card,
   DatePicker,
-  Descriptions,
-  Drawer,
   Empty,
   Form,
   Input,
   InputNumber,
-  Modal,
   Popconfirm,
   Select,
   Space,
@@ -21,6 +18,8 @@ import {
 } from 'antd';
 import dayjs from 'dayjs';
 import { Access } from '@/components/Access';
+import EntityDetailDrawer, { type DetailField } from '@/components/admin/EntityDetailDrawer';
+import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
   fetchNoticeDetail,
   fetchNoticePage,
@@ -72,6 +71,18 @@ const priorityOptions = [
   { label: '中', value: 'medium' },
   { label: '高', value: 'high' },
   { label: '紧急', value: 'urgent' },
+];
+
+const detailFields: Array<DetailField<NoticeRecord>> = [
+  { key: 'title', label: '标题', render: (record) => record.title },
+  { key: 'type', label: '类型', render: (record) => renderNoticeType(record.noticeType) },
+  { key: 'priority', label: '优先级', render: (record) => renderPriorityTag(record.priority) },
+  { key: 'status', label: '状态', render: (record) => renderStatusTag(record.status) },
+  { key: 'publisherName', label: '发布人', render: (record) => record.publisherName || '-' },
+  { key: 'publishTime', label: '发布时间', render: (record) => record.publishTime || '-' },
+  { key: 'expireTime', label: '过期时间', render: (record) => record.expireTime || '-' },
+  { key: 'sortOrder', label: '排序', render: (record) => record.sortOrder },
+  { key: 'content', label: '内容', render: (record) => record.content },
 ];
 
 /**
@@ -255,8 +266,7 @@ function NoticePage() {
     setModalOpen(true);
   };
 
-  const handleSave = async () => {
-    const values = await saveForm.validateFields();
+  const handleSave = async (values: NoticeSaveForm) => {
     setSaving(true);
     try {
       const params: NoticeSaveParams = {
@@ -350,46 +360,49 @@ function NoticePage() {
         />
       </Card>
 
-      <Drawer title="公告详情" width={640} open={detailOpen} onClose={() => setDetailOpen(false)}>
-        <Descriptions bordered column={1} size="small" items={buildDetailItems(detailRecord, detailLoading)} />
-      </Drawer>
+      <EntityDetailDrawer<NoticeRecord>
+        title="公告详情"
+        width={640}
+        open={detailOpen}
+        record={detailRecord}
+        loading={detailLoading}
+        fields={detailFields}
+        onClose={() => setDetailOpen(false)}
+      />
 
-      <Modal
+      <SubmitModalForm<NoticeSaveForm>
         title={modalMode === 'create' ? '新增公告' : '编辑公告'}
         open={modalOpen}
-        confirmLoading={saving}
-        destroyOnHidden
-        forceRender
+        form={saveForm}
+        loading={saving}
         onCancel={() => setModalOpen(false)}
-        onOk={() => void handleSave()}
+        onFinish={handleSave}
       >
-        <Form form={saveForm} layout="vertical">
-          <Form.Item label="标题" name="title" rules={[{ required: true, message: '请输入标题' }]}>
-            <Input placeholder="请输入公告标题" maxLength={80} />
-          </Form.Item>
-          <Form.Item label="类型" name="noticeType" rules={[{ required: true, message: '请选择类型' }]}>
-            <Select options={noticeTypeOptions} />
-          </Form.Item>
-          <Form.Item label="优先级" name="priority" rules={[{ required: true, message: '请选择优先级' }]}>
-            <Select options={priorityOptions} />
-          </Form.Item>
-          <Form.Item label="发布时间" name="publishTime">
-            <DatePicker showTime style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item label="过期时间" name="expireTime">
-            <DatePicker showTime style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item label="状态" name="status" rules={[{ required: true, message: '请选择状态' }]}>
-            <Select options={statusOptions} />
-          </Form.Item>
-          <Form.Item label="排序" name="sortOrder">
-            <InputNumber min={0} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item label="内容" name="content" rules={[{ required: true, message: '请输入内容' }]}>
-            <Input.TextArea rows={6} placeholder="请输入公告内容" maxLength={1000} />
-          </Form.Item>
-        </Form>
-      </Modal>
+        <Form.Item label="标题" name="title" rules={[{ required: true, message: '请输入标题' }]}>
+          <Input placeholder="请输入公告标题" maxLength={80} />
+        </Form.Item>
+        <Form.Item label="类型" name="noticeType" rules={[{ required: true, message: '请选择类型' }]}>
+          <Select options={noticeTypeOptions} />
+        </Form.Item>
+        <Form.Item label="优先级" name="priority" rules={[{ required: true, message: '请选择优先级' }]}>
+          <Select options={priorityOptions} />
+        </Form.Item>
+        <Form.Item label="发布时间" name="publishTime">
+          <DatePicker showTime style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item label="过期时间" name="expireTime">
+          <DatePicker showTime style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item label="状态" name="status" rules={[{ required: true, message: '请选择状态' }]}>
+          <Select options={statusOptions} />
+        </Form.Item>
+        <Form.Item label="排序" name="sortOrder">
+          <InputNumber min={0} style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item label="内容" name="content" rules={[{ required: true, message: '请输入内容' }]}>
+          <Input.TextArea rows={6} placeholder="请输入公告内容" maxLength={1000} />
+        </Form.Item>
+      </SubmitModalForm>
     </div>
   );
 }
@@ -422,26 +435,6 @@ function renderPriorityTag(priority: string) {
 
 function renderNoticeType(noticeType: string) {
   return noticeTypeOptions.find((item) => item.value === noticeType)?.label || noticeType;
-}
-
-function buildDetailItems(record?: NoticeRecord, loading?: boolean) {
-  if (loading) {
-    return [{ key: 'loading', label: '加载状态', children: '加载中' }];
-  }
-  if (!record) {
-    return [{ key: 'empty', label: '加载状态', children: '暂无详情' }];
-  }
-  return [
-    { key: 'title', label: '标题', children: record.title },
-    { key: 'type', label: '类型', children: renderNoticeType(record.noticeType) },
-    { key: 'priority', label: '优先级', children: renderPriorityTag(record.priority) },
-    { key: 'status', label: '状态', children: renderStatusTag(record.status) },
-    { key: 'publisherName', label: '发布人', children: record.publisherName || '-' },
-    { key: 'publishTime', label: '发布时间', children: record.publishTime || '-' },
-    { key: 'expireTime', label: '过期时间', children: record.expireTime || '-' },
-    { key: 'sortOrder', label: '排序', children: record.sortOrder },
-    { key: 'content', label: '内容', children: record.content },
-  ];
 }
 
 function normalizeNoticeType(value: string): NoticeType {
