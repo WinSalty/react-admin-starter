@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
 import {
-  ArrowDownOutlined,
-  ArrowUpOutlined,
   ClockCircleOutlined,
   EyeOutlined,
   FileTextOutlined,
   MoreOutlined,
-  PieChartOutlined,
   RightOutlined,
+  WalletOutlined,
 } from '@ant-design/icons';
 import { Alert, Button, Card, Col, List, Row, Skeleton, Tag, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import pointsBalanceIcon from '@/assets/points-balance-icon.png';
+import pointsMetricEarnedIcon from '@/assets/points-metric-earned.png';
+import pointsMetricFrozenIcon from '@/assets/points-metric-frozen.png';
+import pointsMetricLatestIcon from '@/assets/points-metric-latest.png';
+import pointsMetricSpentIcon from '@/assets/points-metric-spent.png';
 import { NoticeDetailModal } from '@/components/NoticeHighlights';
 import { useActiveNotices } from '@/hooks/useActiveNotices';
 import { fetchPointAccount, fetchPointLedger } from '@/services/points';
@@ -120,7 +120,7 @@ function WalletBalanceCard({
       <div className="dashboard-wallet-header">
         <div className="dashboard-wallet-title">
           <span className="dashboard-wallet-logo">
-            <img src={pointsBalanceIcon} alt="" aria-hidden="true" />
+            <WalletOutlined />
           </span>
           <div>
             <strong>积分余额</strong>
@@ -148,25 +148,25 @@ function WalletBalanceCard({
 
         <div className="dashboard-wallet-metrics">
           <WalletMetric
-            icon={<ArrowDownOutlined />}
+            iconSrc={pointsMetricEarnedIcon}
             label="今日获得"
             value={`+ ${formatPoints(summary.todayEarned)}`}
             tone="blue"
           />
           <WalletMetric
-            icon={<ArrowUpOutlined />}
+            iconSrc={pointsMetricSpentIcon}
             label="今日消耗"
             value={`- ${formatPoints(summary.todaySpent)}`}
             tone="green"
           />
           <WalletMetric
-            icon={<PieChartOutlined />}
+            iconSrc={pointsMetricFrozenIcon}
             label="冻结积分"
             value={formatPoints(summary.frozenPoints)}
             tone="amber"
           />
           <WalletMetric
-            icon={<FileTextOutlined />}
+            iconSrc={pointsMetricLatestIcon}
             label="最近变动"
             value={summary.latestChangeLabel}
             tone="violet"
@@ -189,19 +189,21 @@ function WalletBalanceCard({
 }
 
 function WalletMetric({
-  icon,
+  iconSrc,
   label,
   value,
   tone,
 }: {
-  icon: ReactNode;
+  iconSrc: string;
   label: string;
   value: string;
   tone: 'blue' | 'green' | 'amber' | 'violet';
 }) {
   return (
     <div className="dashboard-wallet-metric">
-      <span className={`dashboard-wallet-metric-icon is-${tone}`}>{icon}</span>
+      <span className={`dashboard-wallet-metric-icon is-${tone}`}>
+        <img src={iconSrc} alt="" aria-hidden="true" />
+      </span>
       <div>
         <span>{label}</span>
         <strong>{value}</strong>
@@ -213,7 +215,13 @@ function WalletMetric({
 function WalletIllustration() {
   return (
     <div className="dashboard-wallet-visual" aria-hidden="true">
-      <img src={pointsBalanceIcon} alt="" />
+      <div className="wallet-visual-card-back" />
+      <div className="wallet-visual-card-front" />
+      <div className="wallet-visual-pocket">
+        <span />
+      </div>
+      <div className="wallet-visual-coin">P</div>
+      <div className="wallet-visual-shadow" />
     </div>
   );
 }
