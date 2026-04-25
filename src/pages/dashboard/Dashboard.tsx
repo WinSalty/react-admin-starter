@@ -5,7 +5,6 @@ import {
   FileTextOutlined,
   MoreOutlined,
   RightOutlined,
-  WalletOutlined,
 } from '@ant-design/icons';
 import { Alert, Button, Card, Col, List, Row, Skeleton, Tag, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -120,7 +119,11 @@ function WalletBalanceCard({
       <div className="dashboard-wallet-header">
         <div className="dashboard-wallet-title">
           <span className="dashboard-wallet-logo">
-            <WalletOutlined />
+            <span className="dashboard-wallet-logo-mark" aria-hidden="true">
+              <span className="dashboard-wallet-logo-card" />
+              <span className="dashboard-wallet-logo-pocket" />
+              <span className="dashboard-wallet-logo-coin" />
+            </span>
           </span>
           <div>
             <strong>积分余额</strong>
