@@ -9,10 +9,10 @@ import {
   MoreOutlined,
   PieChartOutlined,
   RightOutlined,
-  WalletOutlined,
 } from '@ant-design/icons';
 import { Alert, Button, Card, Col, List, Row, Skeleton, Tag, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import pointsBalanceIcon from '@/assets/points-balance-icon.png';
 import { NoticeDetailModal } from '@/components/NoticeHighlights';
 import { useActiveNotices } from '@/hooks/useActiveNotices';
 import { fetchPointAccount, fetchPointLedger } from '@/services/points';
@@ -79,23 +79,23 @@ function Dashboard() {
       {walletErrorMessage ? <Alert message={walletErrorMessage} type="error" showIcon /> : null}
 
       <Row gutter={[16, 16]} align="top">
-        <Col xs={24} xl={16}>
+        <Col xs={24} xl={12}>
           <WalletBalanceCard
             loading={walletLoading}
             summary={walletSummary}
             onDetail={() => navigate('/points/wallet')}
           />
         </Col>
-        <Col xs={24} xl={8}>
+        <Col xs={24} xl={12}>
           <NoticeQuickPanel notices={notices} loading={noticesLoading} errorMessage={noticeErrorMessage} />
         </Col>
       </Row>
 
       <Row gutter={[16, 16]}>
-        <Col xs={24} xl={14}>
+        <Col xs={24} xl={12}>
           <ReservedTrendPanel />
         </Col>
-        <Col xs={24} xl={10}>
+        <Col xs={24} xl={12}>
           <ReservedStructurePanel />
         </Col>
       </Row>
@@ -120,7 +120,7 @@ function WalletBalanceCard({
       <div className="dashboard-wallet-header">
         <div className="dashboard-wallet-title">
           <span className="dashboard-wallet-logo">
-            <WalletOutlined />
+            <img src={pointsBalanceIcon} alt="" aria-hidden="true" />
           </span>
           <div>
             <strong>积分余额</strong>
@@ -213,13 +213,7 @@ function WalletMetric({
 function WalletIllustration() {
   return (
     <div className="dashboard-wallet-visual" aria-hidden="true">
-      <div className="wallet-visual-card-back" />
-      <div className="wallet-visual-card-front" />
-      <div className="wallet-visual-pocket">
-        <span />
-      </div>
-      <div className="wallet-visual-coin">P</div>
-      <div className="wallet-visual-shadow" />
+      <img src={pointsBalanceIcon} alt="" />
     </div>
   );
 }
@@ -252,7 +246,9 @@ function NoticeQuickPanel({
               <List.Item key={notice.id} className="notice-quick-list-item" onClick={() => setSelectedNotice(notice)}>
                 <div className="notice-quick-item">
                   <div className="notice-quick-main">
-                    <Tag color={notice.priority === 'urgent' ? 'red' : 'blue'}>{notice.priority || 'normal'}</Tag>
+                    <Tag color={getNoticePriorityMeta(notice.priority).color}>
+                      {getNoticePriorityMeta(notice.priority).label}
+                    </Tag>
                     <Text ellipsis={{ tooltip: notice.title }}>{notice.title}</Text>
                   </div>
                   <Text type="secondary">{notice.publishTime?.slice(5, 10) || '-'}</Text>
@@ -361,6 +357,17 @@ function sortNotices(prev: NoticeRecord, next: NoticeRecord) {
     return nextWeight - prevWeight;
   }
   return (next.publishTime || '').localeCompare(prev.publishTime || '');
+}
+
+function getNoticePriorityMeta(priority: string) {
+  const priorityMeta: Record<string, { label: string; color: string }> = {
+    urgent: { label: '紧急', color: 'red' },
+    high: { label: '重要', color: 'volcano' },
+    medium: { label: '普通', color: 'blue' },
+    low: { label: '低优先级', color: 'default' },
+    normal: { label: '普通', color: 'blue' },
+  };
+  return priorityMeta[priority] || priorityMeta.normal;
 }
 
 export default Dashboard;

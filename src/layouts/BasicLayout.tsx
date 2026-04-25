@@ -155,6 +155,7 @@ function BasicLayout() {
         onCollapse={setCollapsed}
         trigger={null}
         width={232}
+        collapsedWidth={64}
       >
         <div className="app-logo">
           <img src={brandLogo} alt="" aria-hidden="true" />
