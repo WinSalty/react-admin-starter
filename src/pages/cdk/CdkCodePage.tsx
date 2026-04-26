@@ -8,6 +8,7 @@ import ListSearchCard from '@/components/admin/ListSearchCard';
 import ListTableCard from '@/components/admin/ListTableCard';
 import { fetchCdkCodes, updateCdkCodeStatus } from '@/services/cdk';
 import type { CdkCode } from '@/types/cdk';
+import { copyText } from '@/utils/clipboard';
 
 interface CodeSearchForm {
   keyword?: string;
@@ -71,8 +72,11 @@ function CdkCodePage() {
   }, []);
 
   const handleCopy = async (cdk: string) => {
-    await navigator.clipboard.writeText(cdk);
-    message.success('已复制');
+    if (await copyText(cdk)) {
+      message.success('已复制');
+      return;
+    }
+    message.error('复制失败，请手动选中文本复制');
   };
 
   const handleStatus = async (record: CdkCode, status: string) => {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TableProps } from 'antd';
-import { App, Button, DatePicker, Empty, Form, Input, InputNumber, Popconfirm, Progress, Select, Space, Table, Tag } from 'antd';
+import { App, Button, DatePicker, Empty, Form, Input, InputNumber, Popconfirm, Progress, Select, Space, Spin, Table, Tag } from 'antd';
 import { CopyOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Access } from '@/components/Access';
@@ -16,6 +16,7 @@ import {
   voidCdkBatch,
 } from '@/services/cdk';
 import type { CdkBatch, CdkBatchCreateParams, CdkCode } from '@/types/cdk';
+import { copyText } from '@/utils/clipboard';
 
 interface BatchSearchForm {
   keyword?: string;
@@ -41,7 +42,7 @@ const DEFAULT_RISK_LEVEL = 'normal';
 const DEFAULT_VALID_DAYS = 30;
 const DEFAULT_POINTS = 100;
 const DEFAULT_TOTAL_COUNT = 100;
-const DETAIL_CODE_PAGE_SIZE = 10;
+const DETAIL_CODE_PAGE_SIZE = 100;
 
 const detailFields: Array<DetailField<CdkBatch>> = [
   { key: 'batchName', label: '批次名称', render: (record) => record.batchName },
@@ -74,8 +75,7 @@ function CdkBatchPage() {
   const [loading, setLoading] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailRecord, setDetailRecord] = useState<CdkBatch>();
-  const [detailCodes, setDetailCodes] = useState<CdkCode[]>([]);
-  const [detailCodePageNo, setDetailCodePageNo] = useState(1);
+  const [detailCodeText, setDetailCodeText] = useState('');
   const [detailCodeTotal, setDetailCodeTotal] = useState(0);
   const [detailCodesLoading, setDetailCodesLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -113,21 +113,35 @@ function CdkBatchPage() {
   }, []);
 
   const loadDetailCodes = useCallback(
-    async (batchId: string, nextPageNo = 1, nextPageSize = DETAIL_CODE_PAGE_SIZE) => {
+    async (batchId: string) => {
       setDetailCodesLoading(true);
       try {
-        const response = await fetchCdkCodes({
+        const firstResponse = await fetchCdkCodes({
           batchId,
-          pageNo: nextPageNo,
-          pageSize: nextPageSize,
+          pageNo: 1,
+          pageSize: DETAIL_CODE_PAGE_SIZE,
         });
-        if (response.code !== 0) {
-          message.error(response.message || '批次 CDK 获取失败');
+        if (firstResponse.code !== 0) {
+          message.error(firstResponse.message || '批次 CDK 获取失败');
           return;
         }
-        setDetailCodes(response.data.records);
-        setDetailCodePageNo(response.data.pageNo);
-        setDetailCodeTotal(response.data.total);
+        const codes = [...firstResponse.data.records];
+        const totalCount = firstResponse.data.total;
+        const pageCount = Math.ceil(totalCount / DETAIL_CODE_PAGE_SIZE);
+        for (let currentPage = 2; currentPage <= pageCount; currentPage += 1) {
+          const response = await fetchCdkCodes({
+            batchId,
+            pageNo: currentPage,
+            pageSize: DETAIL_CODE_PAGE_SIZE,
+          });
+          if (response.code !== 0) {
+            message.error(response.message || '批次 CDK 获取失败');
+            return;
+          }
+          codes.push(...response.data.records);
+        }
+        setDetailCodeText(buildCodeText(codes));
+        setDetailCodeTotal(totalCount);
       } finally {
         setDetailCodesLoading(false);
       }
@@ -135,54 +149,17 @@ function CdkBatchPage() {
     [message],
   );
 
-  const handleCopy = useCallback(
-    async (cdk: string) => {
-      await navigator.clipboard.writeText(cdk);
-      message.success('已复制');
-    },
-    [message],
-  );
-
-  const handleCopyCurrentPage = async () => {
-    const codes = detailCodes.map((code) => code.cdk).filter(Boolean);
-    if (codes.length === 0) {
-      message.error('当前页没有可复制 CDK');
+  const handleCopyAllCodes = async () => {
+    if (!detailCodeText) {
+      message.error('没有可复制 CDK');
       return;
     }
-    await navigator.clipboard.writeText(codes.join('\n'));
-    message.success('已复制当前页 CDK');
+    if (await copyText(detailCodeText)) {
+      message.success('已复制全部 CDK');
+      return;
+    }
+    message.error('复制失败，请手动选中文本复制');
   };
-
-  const detailCodeColumns = useMemo<TableProps<CdkCode>['columns']>(
-    () => [
-      {
-        title: 'CDK',
-        dataIndex: 'cdk',
-        width: 360,
-        render: (_, record) => (
-          <Space size={8}>
-            <Input value={record.cdk || '历史码不可查看'} readOnly disabled={!record.cdk} style={{ width: 260 }} />
-            <Button size="small" icon={<CopyOutlined />} disabled={!record.cdk} onClick={() => void handleCopy(record.cdk)}>
-              复制
-            </Button>
-          </Space>
-        ),
-      },
-      { title: '状态', dataIndex: 'status', width: 110, render: renderCodeStatus },
-      {
-        title: '兑换信息',
-        key: 'redeem',
-        width: 230,
-        render: (_, record) => (
-          <div className="query-name-cell">
-            <strong>{record.redeemedUserId || '-'}</strong>
-            <span>{record.redeemRecordNo || record.redeemedAt || '-'}</span>
-          </div>
-        ),
-      },
-    ],
-    [handleCopy],
-  );
 
   const columns = useMemo<TableProps<CdkBatch>['columns']>(
     () => [
@@ -253,8 +230,7 @@ function CdkBatchPage() {
   const openDetail = (record: CdkBatch) => {
     setDetailRecord(record);
     setDetailOpen(true);
-    setDetailCodes([]);
-    setDetailCodePageNo(1);
+    setDetailCodeText('');
     setDetailCodeTotal(0);
     void loadDetailCodes(record.id);
   };
@@ -366,31 +342,19 @@ function CdkBatchPage() {
       >
         <div style={{ marginTop: 16 }}>
           <Space style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-            <strong>批次 CDK</strong>
-            <Button icon={<CopyOutlined />} disabled={detailCodes.length === 0} onClick={() => void handleCopyCurrentPage()}>
-              复制本页
+            <strong>批次 CDK（{detailCodeTotal.toLocaleString()}）</strong>
+            <Button icon={<CopyOutlined />} disabled={!detailCodeText} onClick={() => void handleCopyAllCodes()}>
+              复制全部
             </Button>
           </Space>
-          <Table<CdkCode>
-            size="small"
-            columns={detailCodeColumns}
-            dataSource={detailCodes}
-            loading={detailCodesLoading}
-            locale={{ emptyText: <Empty description="暂无 CDK" /> }}
-            pagination={{
-              current: detailCodePageNo,
-              pageSize: DETAIL_CODE_PAGE_SIZE,
-              total: detailCodeTotal,
-              showTotal: (count) => `共 ${count} 条`,
-            }}
-            rowKey="id"
-            scroll={{ x: 760 }}
-            onChange={(pagination) => {
-              if (detailRecord?.id) {
-                void loadDetailCodes(detailRecord.id, pagination.current || 1, DETAIL_CODE_PAGE_SIZE);
-              }
-            }}
-          />
+          <Spin spinning={detailCodesLoading}>
+            <Input.TextArea
+              value={detailCodeText}
+              readOnly
+              rows={14}
+              placeholder="暂无 CDK"
+            />
+          </Spin>
         </div>
       </EntityDetailDrawer>
 
@@ -432,16 +396,6 @@ function renderBatchStatus(status: string) {
   return <Tag color={matched?.color || 'default'}>{matched?.text || status}</Tag>;
 }
 
-function renderCodeStatus(status: string) {
-  if (status === 'active') {
-    return <Tag color="success">可兑换</Tag>;
-  }
-  if (status === 'redeemed') {
-    return <Tag color="processing">已兑换</Tag>;
-  }
-  return <Tag color="error">已失效</Tag>;
-}
-
 function renderBenefitConfig(value: string) {
   try {
     const config = JSON.parse(value) as { points?: number };
@@ -458,6 +412,10 @@ function calculateTotalPoints(record: CdkBatch) {
   } catch {
     return 0;
   }
+}
+
+function buildCodeText(codes: CdkCode[]) {
+  return codes.map((code) => code.cdk).filter(Boolean).join('\n');
 }
 
 export default CdkBatchPage;
