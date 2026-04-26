@@ -1,6 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { App, Button, Card, Col, Empty, Form, Input, InputNumber, Row, Space, Statistic, Table, Tabs, Tag } from 'antd';
+import type { ReactNode } from 'react';
+import { App, Button, Card, Empty, Form, Input, InputNumber, Table, Tabs, Tag, Tooltip } from 'antd';
 import type { TableProps, TabsProps } from 'antd';
+import {
+  DatabaseOutlined,
+  FilterOutlined,
+  GiftOutlined,
+  LockOutlined,
+  PieChartOutlined,
+  QuestionCircleOutlined,
+  SearchOutlined,
+  ShoppingOutlined,
+  WalletOutlined,
+} from '@ant-design/icons';
 import {
   fetchPointAccount,
   fetchPointConsumeOrders,
@@ -38,6 +50,7 @@ function WalletPage() {
   const [loading, setLoading] = useState(false);
   const [redeeming, setRedeeming] = useState(false);
   const [recharging, setRecharging] = useState(false);
+  const [recordKeyword, setRecordKeyword] = useState('');
 
   const loadWallet = useCallback(async () => {
     setLoading(true);
@@ -67,7 +80,7 @@ function WalletPage() {
 
   const ledgerColumns = useMemo<TableProps<PointLedgerRecord>['columns']>(
     () => [
-      { title: '业务类型', dataIndex: 'bizType', width: 160 },
+      { title: '业务类型', dataIndex: 'bizType', width: 160, render: renderBusinessType },
       {
         title: '方向',
         dataIndex: 'direction',
@@ -108,7 +121,7 @@ function WalletPage() {
   const freezeColumns = useMemo<TableProps<PointFreezeOrder>['columns']>(
     () => [
       { title: '冻结单号', dataIndex: 'freezeNo', width: 220 },
-      { title: '业务类型', dataIndex: 'bizType', width: 160 },
+      { title: '业务类型', dataIndex: 'bizType', width: 160, render: renderBusinessType },
       { title: '积分', dataIndex: 'amount', width: 100, align: 'right' },
       { title: '状态', dataIndex: 'status', width: 120, render: renderStatusTag },
       { title: '过期时间', dataIndex: 'expireAt', width: 180 },
@@ -117,30 +130,56 @@ function WalletPage() {
     [],
   );
 
+  const filteredLedgerRecords = useMemo(
+    () => filterRecords(ledgerRecords, recordKeyword),
+    [ledgerRecords, recordKeyword],
+  );
+  const filteredRechargeRecords = useMemo(
+    () => filterRecords(rechargeRecords, recordKeyword),
+    [rechargeRecords, recordKeyword],
+  );
+  const filteredConsumeRecords = useMemo(
+    () => filterRecords(consumeRecords, recordKeyword),
+    [consumeRecords, recordKeyword],
+  );
+  const filteredFreezeRecords = useMemo(
+    () => filterRecords(freezeRecords, recordKeyword),
+    [freezeRecords, recordKeyword],
+  );
+
   const tabItems = useMemo<TabsProps['items']>(
     () => [
       {
         key: 'ledger',
         label: '积分流水',
-        children: renderTable(ledgerColumns, ledgerRecords, loading),
+        children: renderTable(ledgerColumns, filteredLedgerRecords, loading),
       },
       {
         key: 'recharge',
         label: '充值记录',
-        children: renderTable(rechargeColumns, rechargeRecords, loading),
+        children: renderTable(rechargeColumns, filteredRechargeRecords, loading),
       },
       {
         key: 'consume',
         label: '消费记录',
-        children: renderTable(ledgerColumns, consumeRecords, loading),
+        children: renderTable(ledgerColumns, filteredConsumeRecords, loading),
       },
       {
         key: 'freeze',
         label: '冻结记录',
-        children: renderTable(freezeColumns, freezeRecords, loading),
+        children: renderTable(freezeColumns, filteredFreezeRecords, loading),
       },
     ],
-    [consumeRecords, freezeColumns, freezeRecords, ledgerColumns, ledgerRecords, loading, rechargeColumns, rechargeRecords],
+    [
+      filteredConsumeRecords,
+      filteredFreezeRecords,
+      filteredLedgerRecords,
+      filteredRechargeRecords,
+      freezeColumns,
+      ledgerColumns,
+      loading,
+      rechargeColumns,
+    ],
   );
 
   const handleRedeem = async (values: RedeemForm) => {
@@ -177,77 +216,203 @@ function WalletPage() {
 
   return (
     <div className="page-stack points-wallet-page">
-      <Row gutter={[12, 12]}>
-        <Col xs={24} md={6}>
-          <Card>
-            <Statistic title="可用积分" value={account?.availablePoints || 0} loading={loading && !account} />
-          </Card>
-        </Col>
-        <Col xs={24} md={6}>
-          <Card>
-            <Statistic title="冻结积分" value={account?.frozenPoints || 0} loading={loading && !account} />
-          </Card>
-        </Col>
-        <Col xs={24} md={6}>
-          <Card>
-            <Statistic title="累计获得" value={account?.totalEarnedPoints || 0} loading={loading && !account} />
-          </Card>
-        </Col>
-        <Col xs={24} md={6}>
-          <Card>
-            <Statistic title="累计消费" value={account?.totalSpentPoints || 0} loading={loading && !account} />
-          </Card>
-        </Col>
-      </Row>
+      <div className="wallet-page-title">
+        <span className="wallet-page-title-icon">
+          <WalletOutlined />
+        </span>
+        <h2>积分钱包</h2>
+        <Tag color="orange">重要</Tag>
+        <span>权限联调提醒</span>
+      </div>
 
-      <Row gutter={[12, 12]}>
-        <Col xs={24} lg={14}>
-          <Card title="CDK 兑换">
-            <Form form={redeemForm} layout="inline" className="query-form" onFinish={(values) => void handleRedeem(values)}>
-              <Form.Item name="cdk" rules={[{ required: true, message: '请输入 CDK' }]}>
-                <Input className="wallet-cdk-input" placeholder="XXXX-XXXX-XXXX-XXXX-C" allowClear />
-              </Form.Item>
-              <Form.Item>
-                <Button type="primary" htmlType="submit" loading={redeeming}>
-                  兑换
-                </Button>
-              </Form.Item>
-            </Form>
-          </Card>
-        </Col>
-        <Col xs={24} lg={10}>
-          <Card title="在线充值">
-            <Form
-              form={onlineRechargeForm}
-              layout="inline"
-              className="query-form"
-              onFinish={(values) => void handleOnlineRecharge(values)}
-            >
-              <Form.Item name="amount" rules={[{ required: true, message: '请输入充值积分' }]}>
-                <InputNumber min={1} precision={0} placeholder="充值积分" style={{ width: 180 }} />
-              </Form.Item>
-              <Form.Item>
-                <Space>
-                  <Button type="primary" htmlType="submit" loading={recharging}>
-                    创建充值单
-                  </Button>
-                </Space>
-              </Form.Item>
-            </Form>
-          </Card>
-        </Col>
-      </Row>
+      <div className="wallet-metric-grid">
+        <WalletMetricCard
+          title="可用积分"
+          value={account?.availablePoints || 0}
+          loading={loading && !account}
+          tone="blue"
+          icon={<DatabaseOutlined />}
+        />
+        <WalletMetricCard
+          title="冻结积分"
+          value={account?.frozenPoints || 0}
+          loading={loading && !account}
+          tone="violet"
+          icon={<LockOutlined />}
+        />
+        <WalletMetricCard
+          title="累计获得"
+          value={account?.totalEarnedPoints || 0}
+          loading={loading && !account}
+          tone="green"
+          icon={<PieChartOutlined />}
+        />
+        <WalletMetricCard
+          title="累计消费"
+          value={account?.totalSpentPoints || 0}
+          loading={loading && !account}
+          tone="orange"
+          icon={<ShoppingOutlined />}
+        />
+      </div>
 
-      <Card title="积分记录">
-        <Tabs items={tabItems} />
+      <div className="wallet-action-grid">
+        <WalletActionCard
+          title="CDK 兑换"
+          description="输入 CDK 兑换码，兑换积分到您的账户"
+          icon={<GiftOutlined />}
+          artwork="gift"
+        >
+          <Form form={redeemForm} layout="inline" className="wallet-action-form" onFinish={(values) => void handleRedeem(values)}>
+            <Form.Item name="cdk" rules={[{ required: true, message: '请输入 CDK' }]}>
+              <Input className="wallet-cdk-input" placeholder="XXXX-XXXX-XXXX-XXXX-C" allowClear />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" loading={redeeming}>
+                兑换
+              </Button>
+            </Form.Item>
+          </Form>
+        </WalletActionCard>
+
+        <WalletActionCard
+          title="在线充值"
+          description="通过在线充值，快速获取更多积分"
+          icon={<WalletOutlined />}
+          artwork="card"
+        >
+          <Form
+            form={onlineRechargeForm}
+            layout="inline"
+            className="wallet-action-form"
+            onFinish={(values) => void handleOnlineRecharge(values)}
+          >
+            <Form.Item name="amount" rules={[{ required: true, message: '请输入充值积分' }]}>
+              <InputNumber min={1} precision={0} placeholder="输入充值积分" />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" loading={recharging}>
+                创建充值单
+              </Button>
+            </Form.Item>
+          </Form>
+        </WalletActionCard>
+      </div>
+
+      <Card className="wallet-record-card" title={<WalletSectionTitle icon={<GiftOutlined />} title="积分记录" />}>
+        <Tabs
+          items={tabItems}
+          tabBarExtraContent={
+            <div className="wallet-record-tools">
+              <Input
+                allowClear
+                prefix={<SearchOutlined />}
+                placeholder="搜索业务单号"
+                value={recordKeyword}
+                onChange={(event) => setRecordKeyword(event.target.value)}
+              />
+              <Button icon={<FilterOutlined />}>筛选</Button>
+            </div>
+          }
+        />
       </Card>
     </div>
+  );
+}
+
+/**
+ * 积分钱包顶部指标卡片。
+ * author: sunshengxian
+ * 创建日期：2026-04-26
+ */
+function WalletMetricCard({
+  title,
+  value,
+  loading,
+  tone,
+  icon,
+}: {
+  title: string;
+  value: number;
+  loading: boolean;
+  tone: 'blue' | 'violet' | 'green' | 'orange';
+  icon: ReactNode;
+}) {
+  return (
+    <Card className={`wallet-metric-card is-${tone}`} loading={loading}>
+      <div className="wallet-metric-card-body">
+        <span className="wallet-metric-icon">{icon}</span>
+        <div className="wallet-metric-content">
+          <span>
+            {title}
+            <Tooltip title={`${title}说明`}>
+              <QuestionCircleOutlined />
+            </Tooltip>
+          </span>
+          <strong>{formatPoints(value)}</strong>
+        </div>
+        <span className="wallet-metric-watermark" aria-hidden="true" />
+      </div>
+    </Card>
+  );
+}
+
+/**
+ * 钱包操作卡片，承载 CDK 兑换与在线充值表单。
+ * author: sunshengxian
+ * 创建日期：2026-04-26
+ */
+function WalletActionCard({
+  title,
+  description,
+  icon,
+  artwork,
+  children,
+}: {
+  title: string;
+  description: string;
+  icon: ReactNode;
+  artwork: 'gift' | 'card';
+  children: ReactNode;
+}) {
+  return (
+    <Card className={`wallet-action-card is-${artwork}`}>
+      <div className="wallet-action-card-content">
+        <div className="wallet-action-heading">
+          <span>{icon}</span>
+          <div>
+            <strong>{title}</strong>
+            <em>{description}</em>
+          </div>
+        </div>
+        {children}
+      </div>
+      <div className="wallet-action-art" aria-hidden="true">
+        <span />
+        <i />
+      </div>
+    </Card>
+  );
+}
+
+/**
+ * 卡片标题，统一钱包页面模块标题样式。
+ * author: sunshengxian
+ * 创建日期：2026-04-26
+ */
+function WalletSectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
+  return (
+    <span className="wallet-section-title">
+      <span>{icon}</span>
+      {title}
+    </span>
   );
 }
 
 function renderTable<T extends { id: string }>(columns: TableProps<T>['columns'], records: T[], loading: boolean) {
   return (
     <Table<T>
+      className="wallet-record-table"
       columns={columns}
       dataSource={records}
       loading={loading}
@@ -260,14 +425,25 @@ function renderTable<T extends { id: string }>(columns: TableProps<T>['columns']
   );
 }
 
+function renderBusinessType(value: string) {
+  return (
+    <span className="wallet-business-type">
+      <span>
+        <DatabaseOutlined />
+      </span>
+      {value || '-'}
+    </span>
+  );
+}
+
 function renderDirectionTag(direction: PointLedgerRecord['direction']) {
   if (direction === 'earn' || direction === 'refund' || direction === 'unfreeze') {
-    return <Tag color="success">{directionLabel(direction)}</Tag>;
+    return <Tag className="wallet-direction-tag is-earn" color="success">{directionLabel(direction)}</Tag>;
   }
   if (direction === 'freeze') {
-    return <Tag color="blue">{directionLabel(direction)}</Tag>;
+    return <Tag className="wallet-direction-tag is-freeze" color="blue">{directionLabel(direction)}</Tag>;
   }
-  return <Tag color="volcano">{directionLabel(direction)}</Tag>;
+  return <Tag className="wallet-direction-tag is-spend" color="volcano">{directionLabel(direction)}</Tag>;
 }
 
 function renderStatusTag(status: string) {
@@ -293,6 +469,18 @@ function directionLabel(direction: string) {
 
 function createClientIdempotencyKey(prefix = 'cdk') {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function filterRecords<T>(records: T[], keyword: string): T[] {
+  const normalizedKeyword = keyword.trim().toLowerCase();
+  if (!normalizedKeyword) {
+    return records;
+  }
+  return records.filter((record) => JSON.stringify(record).toLowerCase().includes(normalizedKeyword));
+}
+
+function formatPoints(value: number) {
+  return new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 0 }).format(value || 0);
 }
 
 export default WalletPage;
