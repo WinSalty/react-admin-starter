@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TableProps } from 'antd';
 import { App, Button, DatePicker, Empty, Form, Input, InputNumber, Popconfirm, Progress, Select, Space, Table, Tag } from 'antd';
+import { CopyOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Access } from '@/components/Access';
 import CreateButton from '@/components/admin/CreateButton';
@@ -10,10 +11,11 @@ import ListTableCard from '@/components/admin/ListTableCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
   createCdkBatch,
+  fetchCdkCodes,
   fetchCdkBatches,
   voidCdkBatch,
 } from '@/services/cdk';
-import type { CdkBatch, CdkBatchCreateParams } from '@/types/cdk';
+import type { CdkBatch, CdkBatchCreateParams, CdkCode } from '@/types/cdk';
 
 interface BatchSearchForm {
   keyword?: string;
@@ -39,6 +41,7 @@ const DEFAULT_RISK_LEVEL = 'normal';
 const DEFAULT_VALID_DAYS = 30;
 const DEFAULT_POINTS = 100;
 const DEFAULT_TOTAL_COUNT = 100;
+const DETAIL_CODE_PAGE_SIZE = 10;
 
 const detailFields: Array<DetailField<CdkBatch>> = [
   { key: 'batchName', label: '批次名称', render: (record) => record.batchName },
@@ -71,6 +74,10 @@ function CdkBatchPage() {
   const [loading, setLoading] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailRecord, setDetailRecord] = useState<CdkBatch>();
+  const [detailCodes, setDetailCodes] = useState<CdkCode[]>([]);
+  const [detailCodePageNo, setDetailCodePageNo] = useState(1);
+  const [detailCodeTotal, setDetailCodeTotal] = useState(0);
+  const [detailCodesLoading, setDetailCodesLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -104,6 +111,78 @@ function CdkBatchPage() {
   useEffect(() => {
     void loadRecords(1, pageSize);
   }, []);
+
+  const loadDetailCodes = useCallback(
+    async (batchId: string, nextPageNo = 1, nextPageSize = DETAIL_CODE_PAGE_SIZE) => {
+      setDetailCodesLoading(true);
+      try {
+        const response = await fetchCdkCodes({
+          batchId,
+          pageNo: nextPageNo,
+          pageSize: nextPageSize,
+        });
+        if (response.code !== 0) {
+          message.error(response.message || '批次 CDK 获取失败');
+          return;
+        }
+        setDetailCodes(response.data.records);
+        setDetailCodePageNo(response.data.pageNo);
+        setDetailCodeTotal(response.data.total);
+      } finally {
+        setDetailCodesLoading(false);
+      }
+    },
+    [message],
+  );
+
+  const handleCopy = useCallback(
+    async (cdk: string) => {
+      await navigator.clipboard.writeText(cdk);
+      message.success('已复制');
+    },
+    [message],
+  );
+
+  const handleCopyCurrentPage = async () => {
+    const codes = detailCodes.map((code) => code.cdk).filter(Boolean);
+    if (codes.length === 0) {
+      message.error('当前页没有可复制 CDK');
+      return;
+    }
+    await navigator.clipboard.writeText(codes.join('\n'));
+    message.success('已复制当前页 CDK');
+  };
+
+  const detailCodeColumns = useMemo<TableProps<CdkCode>['columns']>(
+    () => [
+      {
+        title: 'CDK',
+        dataIndex: 'cdk',
+        width: 360,
+        render: (_, record) => (
+          <Space size={8}>
+            <Input value={record.cdk || '历史码不可查看'} readOnly disabled={!record.cdk} style={{ width: 260 }} />
+            <Button size="small" icon={<CopyOutlined />} disabled={!record.cdk} onClick={() => void handleCopy(record.cdk)}>
+              复制
+            </Button>
+          </Space>
+        ),
+      },
+      { title: '状态', dataIndex: 'status', width: 110, render: renderCodeStatus },
+      {
+        title: '兑换信息',
+        key: 'redeem',
+        width: 230,
+        render: (_, record) => (
+          <div className="query-name-cell">
+            <strong>{record.redeemedUserId || '-'}</strong>
+            <span>{record.redeemRecordNo || record.redeemedAt || '-'}</span>
+          </div>
+        ),
+      },
+    ],
+    [handleCopy],
+  );
 
   const columns = useMemo<TableProps<CdkBatch>['columns']>(
     () => [
@@ -174,6 +253,10 @@ function CdkBatchPage() {
   const openDetail = (record: CdkBatch) => {
     setDetailRecord(record);
     setDetailOpen(true);
+    setDetailCodes([]);
+    setDetailCodePageNo(1);
+    setDetailCodeTotal(0);
+    void loadDetailCodes(record.id);
   };
 
   const handleSearch = () => {
@@ -275,12 +358,41 @@ function CdkBatchPage() {
 
       <EntityDetailDrawer<CdkBatch>
         title="CDK 批次详情"
-        width={640}
+        width={920}
         open={detailOpen}
         record={detailRecord}
         fields={detailFields}
         onClose={() => setDetailOpen(false)}
-      />
+      >
+        <div style={{ marginTop: 16 }}>
+          <Space style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+            <strong>批次 CDK</strong>
+            <Button icon={<CopyOutlined />} disabled={detailCodes.length === 0} onClick={() => void handleCopyCurrentPage()}>
+              复制本页
+            </Button>
+          </Space>
+          <Table<CdkCode>
+            size="small"
+            columns={detailCodeColumns}
+            dataSource={detailCodes}
+            loading={detailCodesLoading}
+            locale={{ emptyText: <Empty description="暂无 CDK" /> }}
+            pagination={{
+              current: detailCodePageNo,
+              pageSize: DETAIL_CODE_PAGE_SIZE,
+              total: detailCodeTotal,
+              showTotal: (count) => `共 ${count} 条`,
+            }}
+            rowKey="id"
+            scroll={{ x: 760 }}
+            onChange={(pagination) => {
+              if (detailRecord?.id) {
+                void loadDetailCodes(detailRecord.id, pagination.current || 1, DETAIL_CODE_PAGE_SIZE);
+              }
+            }}
+          />
+        </div>
+      </EntityDetailDrawer>
 
       <SubmitModalForm<BatchCreateForm>
         title="生成积分 CDK"
@@ -313,11 +425,21 @@ function CdkBatchPage() {
 function renderBatchStatus(status: string) {
   const statusMap: Record<string, { color: string; text: string }> = {
     active: { color: 'success', text: '可兑换' },
-    paused: { color: 'warning', text: '已暂停' },
+    paused: { color: 'warning', text: '不可用' },
     voided: { color: 'error', text: '整批失效' },
   };
   const matched = statusMap[status];
   return <Tag color={matched?.color || 'default'}>{matched?.text || status}</Tag>;
+}
+
+function renderCodeStatus(status: string) {
+  if (status === 'active') {
+    return <Tag color="success">可兑换</Tag>;
+  }
+  if (status === 'redeemed') {
+    return <Tag color="processing">已兑换</Tag>;
+  }
+  return <Tag color="error">已失效</Tag>;
 }
 
 function renderBenefitConfig(value: string) {

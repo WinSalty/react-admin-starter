@@ -112,7 +112,7 @@ function CdkCodePage() {
         ),
       },
       { title: '积分', dataIndex: 'benefitConfig', width: 120, render: renderBenefitConfig },
-      { title: '状态', dataIndex: 'status', width: 110, render: renderCodeStatus },
+      { title: '状态', dataIndex: 'status', width: 110, render: (_, record) => renderCodeStatus(record.status, record.batchStatus) },
       { title: '批次状态', dataIndex: 'batchStatus', width: 110, render: renderBatchStatus },
       { title: '有效期', key: 'valid', width: 300, render: (_, record) => `${record.validFrom || '-'} 至 ${record.validTo || '-'}` },
       {
@@ -141,7 +141,7 @@ function CdkCodePage() {
                 </Button>
               </Popconfirm>
               <Popconfirm title="确认启用该 CDK？" onConfirm={() => void handleStatus(record, 'active')}>
-                <Button type="link" disabled={record.status !== 'disabled'}>
+                <Button type="link" disabled={record.status !== 'disabled' || record.batchStatus !== 'active'}>
                   启用
                 </Button>
               </Popconfirm>
@@ -197,7 +197,10 @@ function CdkCodePage() {
   );
 }
 
-function renderCodeStatus(status: string) {
+function renderCodeStatus(status: string, batchStatus?: string) {
+  if (status === 'active' && batchStatus && batchStatus !== 'active') {
+    return <Tag color="error">批次失效</Tag>;
+  }
   if (status === 'active') {
     return <Tag color="success">可兑换</Tag>;
   }
@@ -212,7 +215,7 @@ function renderBatchStatus(status?: string) {
     return <Tag color="success">可用</Tag>;
   }
   if (status === 'paused') {
-    return <Tag color="warning">暂停</Tag>;
+    return <Tag color="warning">不可用</Tag>;
   }
   if (status === 'voided') {
     return <Tag color="error">整批失效</Tag>;

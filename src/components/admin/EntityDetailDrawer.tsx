@@ -16,6 +16,7 @@ interface EntityDetailDrawerProps<RecordType> {
   width?: number;
   fields: Array<DetailField<RecordType>>;
   emptyText?: ReactNode;
+  children?: ReactNode;
   onClose: () => void;
 }
 
@@ -33,11 +34,13 @@ function EntityDetailDrawer<RecordType>({
   width = 560,
   fields,
   emptyText = '暂无详情',
+  children,
   onClose,
 }: EntityDetailDrawerProps<RecordType>) {
   return (
     <Drawer title={title} width={width} open={open} onClose={onClose}>
       <Descriptions bordered column={1} size="small" items={buildItems(record, fields, loading, emptyText)} />
+      {children}
     </Drawer>
   );
 }
