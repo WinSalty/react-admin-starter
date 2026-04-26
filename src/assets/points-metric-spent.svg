@@ -1,11 +1,21 @@
 <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="10" y="10" width="76" height="76" rx="20" fill="#ECFDF5"/>
-  <path d="M25 34.8C25 31.5 27.7 28.8 31 28.8H62.6C65.9 28.8 68.6 31.5 68.6 34.8V62.4C68.6 65.7 65.9 68.4 62.6 68.4H31C27.7 68.4 25 65.7 25 62.4V34.8Z" fill="#059669"/>
-  <path d="M36.2 42.2H56.8" stroke="#A7F3D0" stroke-width="5" stroke-linecap="round"/>
-  <path d="M36.2 53.3H48.8" stroke="#A7F3D0" stroke-width="5" stroke-linecap="round"/>
-  <circle cx="66.5" cy="65.4" r="13.2" fill="#34D399"/>
-  <path d="M66.5 59.3V71.5" stroke="#FFFFFF" stroke-width="5.4" stroke-linecap="round"/>
-  <path d="M60.9 65.4H72.1" stroke="#FFFFFF" stroke-width="5.4" stroke-linecap="round"/>
-  <path d="M66.5 30.6C71.2 33.6 74.2 38.8 74.2 44.8" stroke="#2563EB" stroke-width="5" stroke-linecap="round"/>
-  <path d="M74.4 32.5L66.4 30.5L68.4 38.4" stroke="#2563EB" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="10" y="10" width="76" height="76" rx="22" fill="url(#spent-bg)"/>
+  <path d="M27.5 34.5C27.5 30.9 30.4 28 34 28H62C65.6 28 68.5 30.9 68.5 34.5V61.5C68.5 65.1 65.6 68 62 68H34C30.4 68 27.5 65.1 27.5 61.5V34.5Z" fill="url(#spent-card)"/>
+  <path d="M36.4 41H58.6" stroke="#D1FAE5" stroke-width="5" stroke-linecap="round"/>
+  <path d="M36.4 52H48.6" stroke="#D1FAE5" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="65.5" cy="65.5" r="13.5" fill="#10B981"/>
+  <path d="M65.5 59.2V71.8" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M59.2 65.5H71.8" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M72.5 35C72.5 29.5 68 25 62.5 25" stroke="#2563EB" stroke-width="5" stroke-linecap="round"/>
+  <path d="M64.4 19.4L62.4 25.1L68.2 27" stroke="#2563EB" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="spent-bg" x1="18" y1="16" x2="78" y2="82" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ECFDF5"/>
+      <stop offset="1" stop-color="#D1FAE5"/>
+    </linearGradient>
+    <linearGradient id="spent-card" x1="34" y1="29" x2="63" y2="68" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#34D399"/>
+      <stop offset="1" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
 </svg>
