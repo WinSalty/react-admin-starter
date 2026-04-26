@@ -8,10 +8,10 @@ import {
 } from '@ant-design/icons';
 import { Alert, Button, Card, Col, List, Row, Skeleton, Tag, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import pointsMetricEarnedIcon from '@/assets/points-metric-earned.png';
-import pointsMetricFrozenIcon from '@/assets/points-metric-frozen.png';
-import pointsMetricLatestIcon from '@/assets/points-metric-latest.png';
-import pointsMetricSpentIcon from '@/assets/points-metric-spent.png';
+import pointsMetricEarnedIcon from '@/assets/points-metric-earned.svg';
+import pointsMetricFrozenIcon from '@/assets/points-metric-frozen.svg';
+import pointsMetricLatestIcon from '@/assets/points-metric-latest.svg';
+import pointsMetricSpentIcon from '@/assets/points-metric-spent.svg';
 import { NoticeDetailModal } from '@/components/NoticeHighlights';
 import { useActiveNotices } from '@/hooks/useActiveNotices';
 import { fetchPointAccount, fetchPointLedger } from '@/services/points';
