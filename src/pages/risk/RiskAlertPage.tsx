@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TableProps } from 'antd';
-import { App, Card, Empty, Form, Select, Table, Tag } from 'antd';
+import { App, Empty, Form, Select, Table, Tag } from 'antd';
+import ListSearchCard from '@/components/admin/ListSearchCard';
+import ListTableCard from '@/components/admin/ListTableCard';
 import { fetchRiskAlerts } from '@/services/risk';
 import type { RiskAlert } from '@/types/risk';
 
@@ -60,30 +62,32 @@ function RiskAlertPage() {
 
   return (
     <div className="page-stack">
-      <Card>
-        <Form form={form} layout="inline" className="query-form" onValuesChange={() => void loadRecords()}>
-          <Form.Item label="状态" name="status">
-            <Select
-              allowClear
-              placeholder="全部状态"
-              style={{ width: 140 }}
-              options={[{ label: '待处理', value: 'open' }]}
-            />
-          </Form.Item>
-          <Form.Item label="类型" name="alertType">
-            <Select
-              allowClear
-              placeholder="全部类型"
-              style={{ width: 220 }}
-              options={[
-                { label: '兑换锁定', value: 'cdk_redeem_locked' },
-                { label: '双人复核', value: 'cdk_batch_double_review' },
-              ]}
-            />
-          </Form.Item>
-        </Form>
-      </Card>
-      <Card title="风控告警">
+      <ListSearchCard<{ status?: string; alertType?: string }>
+        form={form}
+        showActions={false}
+        onValuesChange={() => void loadRecords()}
+      >
+        <Form.Item label="状态" name="status">
+          <Select
+            allowClear
+            placeholder="全部状态"
+            style={{ width: 140 }}
+            options={[{ label: '待处理', value: 'open' }]}
+          />
+        </Form.Item>
+        <Form.Item label="类型" name="alertType">
+          <Select
+            allowClear
+            placeholder="全部类型"
+            style={{ width: 220 }}
+            options={[
+              { label: '兑换锁定', value: 'cdk_redeem_locked' },
+              { label: '双人复核', value: 'cdk_batch_double_review' },
+            ]}
+          />
+        </Form.Item>
+      </ListSearchCard>
+      <ListTableCard title="风控告警">
         <Table<RiskAlert>
           columns={columns}
           dataSource={records}
@@ -93,7 +97,7 @@ function RiskAlertPage() {
           rowKey="id"
           scroll={{ x: 1360 }}
         />
-      </Card>
+      </ListTableCard>
     </div>
   );
 }

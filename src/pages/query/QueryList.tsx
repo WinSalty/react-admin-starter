@@ -4,7 +4,6 @@ import {
   Alert,
   App,
   Button,
-  Card,
   Empty,
   Form,
   Input,
@@ -14,7 +13,10 @@ import {
   Tag,
 } from 'antd';
 import { Access } from '@/components/Access';
+import CreateButton from '@/components/admin/CreateButton';
 import EntityDetailDrawer, { type DetailField } from '@/components/admin/EntityDetailDrawer';
+import ListSearchCard from '@/components/admin/ListSearchCard';
+import ListTableCard from '@/components/admin/ListTableCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
   fetchQueryDetail,
@@ -266,37 +268,32 @@ function QueryList() {
     <div className="page-stack">
       {errorMessage ? <Alert message={errorMessage} type="error" showIcon /> : null}
 
-      <Card>
-        <Form form={searchForm} layout="inline" className="query-form" onFinish={handleSearch}>
-          <Form.Item label="关键字" name="keyword">
-            <Input placeholder="名称 / 编码 / 描述" allowClear />
-          </Form.Item>
-          <Form.Item label="状态" name="status">
-            <Select
-              allowClear
-              placeholder="全部状态"
-              style={{ width: 160 }}
-              options={statusOptions}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button onClick={handleReset}>重置</Button>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Card>
+      <ListSearchCard<QuerySearchForm>
+        form={searchForm}
+        loading={loading}
+        onReset={handleReset}
+        onFinish={handleSearch}
+      >
+        <Form.Item label="关键字" name="keyword">
+          <Input placeholder="名称 / 编码 / 描述" allowClear />
+        </Form.Item>
+        <Form.Item label="状态" name="status">
+          <Select
+            allowClear
+            placeholder="全部状态"
+            style={{ width: 160 }}
+            options={statusOptions}
+          />
+        </Form.Item>
+      </ListSearchCard>
 
-      <Card
+      <ListTableCard
         title="查询结果"
         extra={
           <Access action="query:add">
-            <Button type="primary" onClick={openCreateModal}>
+            <CreateButton onClick={openCreateModal}>
               新增
-            </Button>
+            </CreateButton>
           </Access>
         }
       >
@@ -316,7 +313,7 @@ function QueryList() {
           scroll={{ x: 980 }}
           onChange={handleTableChange}
         />
-      </Card>
+      </ListTableCard>
 
       <EntityDetailDrawer<QueryRecord>
         title="查询配置详情"

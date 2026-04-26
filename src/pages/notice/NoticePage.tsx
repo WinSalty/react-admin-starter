@@ -4,7 +4,6 @@ import {
   Alert,
   App,
   Button,
-  Card,
   DatePicker,
   Empty,
   Form,
@@ -18,7 +17,10 @@ import {
 } from 'antd';
 import dayjs from 'dayjs';
 import { Access } from '@/components/Access';
+import CreateButton from '@/components/admin/CreateButton';
 import EntityDetailDrawer, { type DetailField } from '@/components/admin/EntityDetailDrawer';
+import ListSearchCard from '@/components/admin/ListSearchCard';
+import ListTableCard from '@/components/admin/ListTableCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
   fetchNoticeDetail,
@@ -310,35 +312,30 @@ function NoticePage() {
     <div className="page-stack">
       {errorMessage ? <Alert message={errorMessage} type="error" showIcon /> : null}
 
-      <Card>
-        <Form form={searchForm} layout="inline" className="query-form" onFinish={handleSearch}>
-          <Form.Item label="关键字" name="keyword">
-            <Input placeholder="标题 / 内容" allowClear />
-          </Form.Item>
-          <Form.Item label="状态" name="status">
-            <Select allowClear placeholder="全部状态" style={{ width: 140 }} options={statusOptions} />
-          </Form.Item>
-          <Form.Item label="类型" name="noticeType">
-            <Select allowClear placeholder="全部类型" style={{ width: 140 }} options={noticeTypeOptions} />
-          </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button onClick={handleReset}>重置</Button>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Card>
+      <ListSearchCard<NoticeSearchForm>
+        form={searchForm}
+        loading={loading}
+        onReset={handleReset}
+        onFinish={handleSearch}
+      >
+        <Form.Item label="关键字" name="keyword">
+          <Input placeholder="标题 / 内容" allowClear />
+        </Form.Item>
+        <Form.Item label="状态" name="status">
+          <Select allowClear placeholder="全部状态" style={{ width: 140 }} options={statusOptions} />
+        </Form.Item>
+        <Form.Item label="类型" name="noticeType">
+          <Select allowClear placeholder="全部类型" style={{ width: 140 }} options={noticeTypeOptions} />
+        </Form.Item>
+      </ListSearchCard>
 
-      <Card
+      <ListTableCard
         title="公告管理"
         extra={
           <Access action="system:notice:add">
-            <Button type="primary" onClick={openCreateModal}>
+            <CreateButton onClick={openCreateModal}>
               新增公告
-            </Button>
+            </CreateButton>
           </Access>
         }
       >
@@ -358,7 +355,7 @@ function NoticePage() {
           scroll={{ x: 1200 }}
           onChange={handleTableChange}
         />
-      </Card>
+      </ListTableCard>
 
       <EntityDetailDrawer<NoticeRecord>
         title="公告详情"

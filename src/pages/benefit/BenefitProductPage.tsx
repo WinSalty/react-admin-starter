@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TableProps } from 'antd';
-import { App, Button, Card, DatePicker, Empty, Form, Input, InputNumber, Popconfirm, Select, Space, Table, Tag } from 'antd';
+import { App, Button, DatePicker, Empty, Form, Input, InputNumber, Popconfirm, Select, Space, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
 import { Access } from '@/components/Access';
+import CreateButton from '@/components/admin/CreateButton';
 import EntityDetailDrawer, { type DetailField } from '@/components/admin/EntityDetailDrawer';
+import ListTableCard from '@/components/admin/ListTableCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import { fetchAdminBenefitProducts, saveBenefitProduct, updateBenefitProductStatus } from '@/services/benefit';
 import type { BenefitProduct, BenefitProductSaveParams } from '@/types/benefit';
@@ -186,13 +188,13 @@ function BenefitProductPage() {
 
   return (
     <div className="page-stack">
-      <Card
+      <ListTableCard
         title="权益商品"
         extra={
           <Access action="benefit:product:create">
-            <Button type="primary" onClick={openCreateModal}>
+            <CreateButton onClick={openCreateModal}>
               新建权益
-            </Button>
+            </CreateButton>
           </Access>
         }
       >
@@ -205,7 +207,7 @@ function BenefitProductPage() {
           rowKey="id"
           scroll={{ x: 1260 }}
         />
-      </Card>
+      </ListTableCard>
 
       <EntityDetailDrawer<BenefitProduct>
         title="权益商品详情"

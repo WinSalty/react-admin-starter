@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TableProps, TabsProps } from 'antd';
 import { App, Button, Card, Empty, Form, Input, InputNumber, Modal, Select, Space, Table, Tabs, Tag } from 'antd';
 import { Access } from '@/components/Access';
+import CreateButton from '@/components/admin/CreateButton';
+import ListSearchCard from '@/components/admin/ListSearchCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
   approvePointAdjustment,
@@ -188,22 +190,19 @@ function PointAuditPage() {
         label: '积分账户',
         children: (
           <div className="page-stack">
-            <Card>
-              <Form form={accountForm} layout="inline" className="query-form" onFinish={() => void loadAccounts(1, pageSize)}>
-                <Form.Item label="关键字" name="keyword">
-                  <Input placeholder="用户ID / 用户名" allowClear />
-                </Form.Item>
-                <Form.Item label="状态" name="status">
-                  <Select allowClear placeholder="全部状态" style={{ width: 140 }} options={accountStatusOptions} />
-                </Form.Item>
-                <Form.Item>
-                  <Space>
-                    <Button onClick={() => { accountForm.resetFields(); void loadAccounts(1, pageSize); }}>重置</Button>
-                    <Button type="primary" htmlType="submit">查询</Button>
-                  </Space>
-                </Form.Item>
-              </Form>
-            </Card>
+            <ListSearchCard<AccountSearchForm>
+              form={accountForm}
+              loading={loadingAccounts}
+              onReset={() => { accountForm.resetFields(); void loadAccounts(1, pageSize); }}
+              onFinish={() => void loadAccounts(1, pageSize)}
+            >
+              <Form.Item label="关键字" name="keyword">
+                <Input placeholder="用户ID / 用户名" allowClear />
+              </Form.Item>
+              <Form.Item label="状态" name="status">
+                <Select allowClear placeholder="全部状态" style={{ width: 140 }} options={accountStatusOptions} />
+              </Form.Item>
+            </ListSearchCard>
             <Table<PointAccount>
               columns={accountColumns}
               dataSource={accounts}
@@ -222,28 +221,25 @@ function PointAuditPage() {
         label: '流水审计',
         children: (
           <div className="page-stack">
-            <Card>
-              <Form form={ledgerForm} layout="inline" className="query-form" onFinish={() => void loadLedger(1, pageSize)}>
-                <Form.Item label="用户ID" name="userId">
-                  <Input placeholder="用户ID" allowClear />
-                </Form.Item>
-                <Form.Item label="方向" name="direction">
-                  <Select allowClear placeholder="全部方向" style={{ width: 140 }} options={directionOptions} />
-                </Form.Item>
-                <Form.Item label="业务类型" name="bizType">
-                  <Input placeholder="业务类型" allowClear />
-                </Form.Item>
-                <Form.Item label="业务单号" name="bizNo">
-                  <Input placeholder="业务单号" allowClear />
-                </Form.Item>
-                <Form.Item>
-                  <Space>
-                    <Button onClick={() => { ledgerForm.resetFields(); void loadLedger(1, pageSize); }}>重置</Button>
-                    <Button type="primary" htmlType="submit">查询</Button>
-                  </Space>
-                </Form.Item>
-              </Form>
-            </Card>
+            <ListSearchCard<LedgerSearchForm>
+              form={ledgerForm}
+              loading={loadingLedger}
+              onReset={() => { ledgerForm.resetFields(); void loadLedger(1, pageSize); }}
+              onFinish={() => void loadLedger(1, pageSize)}
+            >
+              <Form.Item label="用户ID" name="userId">
+                <Input placeholder="用户ID" allowClear />
+              </Form.Item>
+              <Form.Item label="方向" name="direction">
+                <Select allowClear placeholder="全部方向" style={{ width: 140 }} options={directionOptions} />
+              </Form.Item>
+              <Form.Item label="业务类型" name="bizType">
+                <Input placeholder="业务类型" allowClear />
+              </Form.Item>
+              <Form.Item label="业务单号" name="bizNo">
+                <Input placeholder="业务单号" allowClear />
+              </Form.Item>
+            </ListSearchCard>
             <Table<PointLedgerRecord>
               columns={ledgerColumns}
               dataSource={ledgerRecords}
@@ -344,9 +340,9 @@ function PointAuditPage() {
         title="积分审计"
         extra={
           <Access action="points:adjust:apply">
-            <Button type="primary" onClick={openAdjustmentModal}>
+            <CreateButton onClick={openAdjustmentModal}>
               人工调整
-            </Button>
+            </CreateButton>
           </Access>
         }
       >

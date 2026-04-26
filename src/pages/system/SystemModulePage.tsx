@@ -5,7 +5,6 @@ import {
   App,
   Avatar,
   Button,
-  Card,
   Empty,
   Form,
   Input,
@@ -16,7 +15,10 @@ import {
   Tag,
 } from 'antd';
 import { Access } from '@/components/Access';
+import CreateButton from '@/components/admin/CreateButton';
 import EntityDetailDrawer, { type DetailField } from '@/components/admin/EntityDetailDrawer';
+import ListSearchCard from '@/components/admin/ListSearchCard';
+import ListTableCard from '@/components/admin/ListTableCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
   fetchSystemDetail,
@@ -313,53 +315,48 @@ function SystemModulePage({ moduleKey }: SystemModulePageProps) {
     <div className="page-stack">
       {errorMessage ? <Alert message={errorMessage} type="error" showIcon /> : null}
 
-      <Card>
-        <Form form={searchForm} layout="inline" className="query-form" onFinish={handleSearch}>
-          <Form.Item label="关键字" name="keyword">
-            <Input placeholder="名称 / 编码 / 描述" allowClear />
-          </Form.Item>
-          <Form.Item label="状态" name="status">
+      <ListSearchCard<SystemSearchForm>
+        form={searchForm}
+        loading={loading}
+        onReset={handleReset}
+        onFinish={handleSearch}
+      >
+        <Form.Item label="关键字" name="keyword">
+          <Input placeholder="名称 / 编码 / 描述" allowClear />
+        </Form.Item>
+        <Form.Item label="状态" name="status">
+          <Select
+            allowClear
+            placeholder="全部状态"
+            style={{ width: 140 }}
+            options={statusOptions}
+          />
+        </Form.Item>
+        {moduleKey === 'logs' ? (
+          <Form.Item label="日志类型" name="logType">
             <Select
               allowClear
-              placeholder="全部状态"
+              placeholder="全部类型"
               style={{ width: 140 }}
-              options={statusOptions}
+              options={logTypeOptions}
             />
           </Form.Item>
-          {moduleKey === 'logs' ? (
-            <Form.Item label="日志类型" name="logType">
-              <Select
-                allowClear
-                placeholder="全部类型"
-                style={{ width: 140 }}
-                options={logTypeOptions}
-              />
-            </Form.Item>
-          ) : null}
-          <Form.Item>
-            <Space>
-              <Button onClick={handleReset}>重置</Button>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Card>
+        ) : null}
+      </ListSearchCard>
 
-      <Card
+      <ListTableCard
         title={config.title}
+        description={config.description}
         extra={
           config.readonly ? null : (
             <Access action={`system:${getActionScope(moduleKey)}:add`}>
-              <Button type="primary" onClick={openCreateModal}>
+              <CreateButton onClick={openCreateModal}>
                 {config.createText || '新增'}
-              </Button>
+              </CreateButton>
             </Access>
           )
         }
       >
-        <p className="system-module-desc">{config.description}</p>
         <Table<SystemRecord>
           columns={columns}
           dataSource={records}
@@ -376,7 +373,7 @@ function SystemModulePage({ moduleKey }: SystemModulePageProps) {
           scroll={{ x: config.readonly ? 1080 : 1180 }}
           onChange={handleTableChange}
         />
-      </Card>
+      </ListTableCard>
 
       <EntityDetailDrawer<SystemRecord>
         title={`${config.title}详情`}

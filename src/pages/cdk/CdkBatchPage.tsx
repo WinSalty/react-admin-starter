@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TableProps } from 'antd';
-import { App, Button, Card, DatePicker, Empty, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag } from 'antd';
+import { App, Button, DatePicker, Empty, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
 import { Access } from '@/components/Access';
+import CreateButton from '@/components/admin/CreateButton';
 import EntityDetailDrawer, { type DetailField } from '@/components/admin/EntityDetailDrawer';
+import ListSearchCard from '@/components/admin/ListSearchCard';
+import ListTableCard from '@/components/admin/ListTableCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
   approveCdkBatch,
@@ -311,32 +314,27 @@ function CdkBatchPage() {
 
   return (
     <div className="page-stack">
-      <Card>
-        <Form form={searchForm} layout="inline" className="query-form" onFinish={handleSearch}>
-          <Form.Item label="关键字" name="keyword">
-            <Input placeholder="批次号 / 名称" allowClear />
-          </Form.Item>
-          <Form.Item label="状态" name="status">
-            <Select allowClear placeholder="全部状态" style={{ width: 140 }} options={statusOptions} />
-          </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button onClick={handleReset}>重置</Button>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Card>
+      <ListSearchCard<BatchSearchForm>
+        form={searchForm}
+        loading={loading}
+        onReset={handleReset}
+        onFinish={handleSearch}
+      >
+        <Form.Item label="关键字" name="keyword">
+          <Input placeholder="批次号 / 名称" allowClear />
+        </Form.Item>
+        <Form.Item label="状态" name="status">
+          <Select allowClear placeholder="全部状态" style={{ width: 140 }} options={statusOptions} />
+        </Form.Item>
+      </ListSearchCard>
 
-      <Card
+      <ListTableCard
         title="CDK 批次"
         extra={
           <Access action="cdk:batch:create">
-            <Button type="primary" onClick={openCreateModal}>
+            <CreateButton onClick={openCreateModal}>
               新建批次
-            </Button>
+            </CreateButton>
           </Access>
         }
       >
@@ -350,7 +348,7 @@ function CdkBatchPage() {
           scroll={{ x: 1360 }}
           onChange={(pagination) => void loadRecords(pagination.current || 1, pagination.pageSize || pageSize)}
         />
-      </Card>
+      </ListTableCard>
 
       <EntityDetailDrawer<CdkBatch>
         title="CDK 批次详情"

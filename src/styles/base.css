@@ -290,6 +290,65 @@ body {
   row-gap: 12px;
 }
 
+.admin-search-card .ant-card-head,
+.admin-table-card .ant-card-head {
+  min-height: 52px;
+  padding: 0 20px;
+}
+
+.admin-search-card .ant-card-head-title,
+.admin-table-card .ant-card-head-title {
+  color: rgba(0, 0, 0, 0.82);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.admin-search-card .ant-card-body {
+  padding: 18px 20px 6px;
+}
+
+.admin-search-form {
+  align-items: flex-start;
+}
+
+.admin-search-form .ant-form-item-label > label {
+  color: rgba(0, 0, 0, 0.68);
+  font-weight: 500;
+}
+
+.admin-search-form .ant-input,
+.admin-search-form .ant-picker,
+.admin-search-form .ant-select-selector {
+  border-radius: 8px;
+}
+
+.admin-search-actions {
+  margin-left: auto;
+}
+
+.admin-search-actions .ant-btn {
+  border-radius: 8px;
+}
+
+.admin-table-card .ant-card-body {
+  padding: 18px 20px 20px;
+}
+
+.admin-table-card .ant-card-extra {
+  padding: 10px 0;
+}
+
+.admin-table-card .ant-card-extra .ant-btn {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.admin-table-card-description {
+  margin: 0 0 16px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+}
+
 .query-name-cell {
   display: flex;
   min-width: 0;
@@ -1842,6 +1901,12 @@ body {
     flex-direction: column;
   }
 
+  .admin-search-card .ant-card-body,
+  .admin-table-card .ant-card-body {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
   .query-form .ant-form-item {
     width: 100%;
     margin-inline-end: 0;
@@ -1850,6 +1915,15 @@ body {
   .query-form .ant-input,
   .query-form .ant-select {
     width: 100% !important;
+  }
+
+  .admin-search-actions {
+    margin-left: 0;
+  }
+
+  .admin-search-actions .ant-space,
+  .admin-search-actions .ant-btn {
+    width: 100%;
   }
 
   .admin-submit-modal {

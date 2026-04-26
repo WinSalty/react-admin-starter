@@ -4,7 +4,6 @@ import {
   Alert,
   App,
   Button,
-  Card,
   Empty,
   Form,
   Input,
@@ -17,7 +16,10 @@ import {
   TreeSelect,
 } from 'antd';
 import { Access } from '@/components/Access';
+import CreateButton from '@/components/admin/CreateButton';
 import EntityDetailDrawer, { type DetailField } from '@/components/admin/EntityDetailDrawer';
+import ListSearchCard from '@/components/admin/ListSearchCard';
+import ListTableCard from '@/components/admin/ListTableCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
   fetchSystemMenuTree,
@@ -273,38 +275,31 @@ function MenuManagementPage() {
     <div className="page-stack">
       {errorMessage ? <Alert message={errorMessage} type="error" showIcon /> : null}
 
-      <Card>
-        <Form form={searchForm} layout="inline" className="query-form" onFinish={handleSearch}>
-          <Form.Item label="关键字" name="keyword">
-            <Input placeholder="名称 / 编码 / 路由 / 权限" allowClear />
-          </Form.Item>
-          <Form.Item label="状态" name="status">
-            <Select allowClear placeholder="全部状态" style={{ width: 140 }} options={statusOptions} />
-          </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button onClick={handleReset}>重置</Button>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Card>
+      <ListSearchCard<MenuSearchForm>
+        form={searchForm}
+        loading={loading}
+        onReset={handleReset}
+        onFinish={handleSearch}
+      >
+        <Form.Item label="关键字" name="keyword">
+          <Input placeholder="名称 / 编码 / 路由 / 权限" allowClear />
+        </Form.Item>
+        <Form.Item label="状态" name="status">
+          <Select allowClear placeholder="全部状态" style={{ width: 140 }} options={statusOptions} />
+        </Form.Item>
+      </ListSearchCard>
 
-      <Card
+      <ListTableCard
         title="菜单管理"
+        description="维护目录、菜单、隐藏路由和外链节点，字段与动态菜单和权限编码保持一致。"
         extra={
           <Access action="system:menu:add">
-            <Button type="primary" onClick={openCreateModal}>
+            <CreateButton onClick={openCreateModal}>
               新增菜单
-            </Button>
+            </CreateButton>
           </Access>
         }
       >
-        <p className="system-module-desc">
-          维护目录、菜单、隐藏路由和外链节点，字段与动态菜单和权限编码保持一致。
-        </p>
         <Table<SystemMenuRecord>
           columns={columns}
           dataSource={menus}
@@ -315,7 +310,7 @@ function MenuManagementPage() {
           scroll={{ x: 1380 }}
           expandable={{ defaultExpandAllRows: true }}
         />
-      </Card>
+      </ListTableCard>
 
       <EntityDetailDrawer<SystemMenuRecord>
         title="菜单详情"

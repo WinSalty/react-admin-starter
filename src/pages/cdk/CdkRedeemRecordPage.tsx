@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TableProps } from 'antd';
-import { App, Button, Card, Empty, Form, Input, Select, Space, Table, Tag } from 'antd';
+import { App, Empty, Form, Input, Select, Table, Tag } from 'antd';
+import ListSearchCard from '@/components/admin/ListSearchCard';
+import ListTableCard from '@/components/admin/ListTableCard';
 import { fetchCdkRedeemRecords } from '@/services/cdk';
 import type { CdkRedeemRecord } from '@/types/cdk';
 
@@ -88,29 +90,24 @@ function CdkRedeemRecordPage() {
 
   return (
     <div className="page-stack">
-      <Card>
-        <Form form={searchForm} layout="inline" className="query-form" onFinish={handleSearch}>
-          <Form.Item label="用户ID" name="userId">
-            <Input placeholder="用户ID" allowClear />
-          </Form.Item>
-          <Form.Item label="批次ID" name="batchId">
-            <Input placeholder="批次ID" allowClear />
-          </Form.Item>
-          <Form.Item label="状态" name="status">
-            <Select allowClear placeholder="全部状态" style={{ width: 140 }} options={statusOptions} />
-          </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button onClick={handleReset}>重置</Button>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Card>
+      <ListSearchCard<RedeemSearchForm>
+        form={searchForm}
+        loading={loading}
+        onReset={handleReset}
+        onFinish={handleSearch}
+      >
+        <Form.Item label="用户ID" name="userId">
+          <Input placeholder="用户ID" allowClear />
+        </Form.Item>
+        <Form.Item label="批次ID" name="batchId">
+          <Input placeholder="批次ID" allowClear />
+        </Form.Item>
+        <Form.Item label="状态" name="status">
+          <Select allowClear placeholder="全部状态" style={{ width: 140 }} options={statusOptions} />
+        </Form.Item>
+      </ListSearchCard>
 
-      <Card title="CDK 兑换记录">
+      <ListTableCard title="CDK 兑换记录">
         <Table<CdkRedeemRecord>
           columns={columns}
           dataSource={records}
@@ -121,7 +118,7 @@ function CdkRedeemRecordPage() {
           scroll={{ x: 1320 }}
           onChange={(pagination) => void loadRecords(pagination.current || 1, pagination.pageSize || pageSize)}
         />
-      </Card>
+      </ListTableCard>
     </div>
   );
 }
