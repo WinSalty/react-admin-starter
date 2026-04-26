@@ -205,7 +205,7 @@ function WalletPage() {
           <Card title="CDK 兑换">
             <Form form={redeemForm} layout="inline" className="query-form" onFinish={(values) => void handleRedeem(values)}>
               <Form.Item name="cdk" rules={[{ required: true, message: '请输入 CDK' }]}>
-                <Input className="wallet-cdk-input" placeholder="WSA-202604-XXXX-XXXX-XXXX-XXXX" allowClear />
+                <Input className="wallet-cdk-input" placeholder="XXXX-XXXX-XXXX-C" allowClear />
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit" loading={redeeming}>

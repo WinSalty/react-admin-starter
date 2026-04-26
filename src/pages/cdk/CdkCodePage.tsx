@@ -175,7 +175,7 @@ function CdkCodePage() {
         onFinish={handleSearch}
       >
         <Form.Item label="关键字" name="keyword">
-          <Input placeholder="批次号 / 名称 / CDK前缀" allowClear />
+          <Input placeholder="批次号 / 名称" allowClear />
         </Form.Item>
         <Form.Item label="批次ID" name="batchId">
           <Input placeholder="精确批次ID" allowClear />
