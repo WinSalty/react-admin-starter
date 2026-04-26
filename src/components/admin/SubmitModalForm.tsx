@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import type { FormInstance } from 'antd';
 import { Form, Modal } from 'antd';
 
+const DEFAULT_MODAL_WIDTH = 520;
+
 interface SubmitModalFormProps<FormValues extends object> {
   title: ReactNode;
   open: boolean;
@@ -35,7 +37,10 @@ function SubmitModalForm<FormValues extends object>({
     <Modal
       title={title}
       open={open}
-      width={width}
+      width={width || DEFAULT_MODAL_WIDTH}
+      className="admin-submit-modal"
+      okText="提交"
+      cancelText="取消"
       confirmLoading={loading}
       destroyOnHidden
       forceRender
