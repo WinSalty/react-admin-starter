@@ -1634,7 +1634,14 @@ body {
   padding-right: 36px;
 }
 
-.notice-detail-header h2.ant-typography {
+.notice-detail-title-block {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notice-detail-title-block h2.ant-typography {
   margin: 0;
   color: #111827;
   font-size: 22px;
@@ -1699,51 +1706,12 @@ body {
   padding: 18px 20px;
 }
 
-.notice-detail-paper-title {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.notice-detail-paper-title .ant-tag {
-  display: inline-flex;
-  height: 28px;
-  align-items: center;
-  border: 0;
-  border-radius: 6px;
-  padding: 0 12px;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.notice-detail-paper-title h3.ant-typography {
-  min-width: 0;
-  margin: 0;
-  color: #111827;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.35;
-}
-
 .notice-detail-content.ant-typography {
   margin-bottom: 0;
   color: #344054;
   font-size: 15px;
   line-height: 1.8;
   white-space: pre-wrap;
-}
-
-.notice-detail-signature {
-  display: flex;
-  margin-top: 14px;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  color: #263956;
-  font-size: 13px;
-  line-height: 1.6;
 }
 
 .notice-detail-footer {
@@ -2588,7 +2556,7 @@ body {
     gap: 12px;
   }
 
-  .notice-detail-header h2.ant-typography {
+  .notice-detail-title-block h2.ant-typography {
     font-size: 22px;
   }
 
@@ -2602,23 +2570,9 @@ body {
     padding: 18px 16px;
   }
 
-  .notice-detail-paper-title {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .notice-detail-paper-title h3.ant-typography {
-    font-size: 18px;
-  }
-
   .notice-detail-content.ant-typography {
     font-size: 15px;
     line-height: 1.8;
-  }
-
-  .notice-detail-signature {
-    font-size: 13px;
   }
 
   .notice-detail-footer {

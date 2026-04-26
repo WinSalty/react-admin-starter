@@ -256,25 +256,23 @@ export function NoticeDetailModal({
               <i />
               <i />
             </span>
-            <Title level={2}>系统公告</Title>
+            <div className="notice-detail-title-block">
+              <Space size={8} wrap>
+                <Tag color={getPriorityMeta(notice.priority).color}>
+                  {getPriorityMeta(notice.priority).label}
+                </Tag>
+                <Tag>{getNoticeTypeLabel(notice.noticeType)}</Tag>
+                {notice.required ? <Tag color="red">必读</Tag> : null}
+              </Space>
+              <Title level={2}>{notice.title}</Title>
+            </div>
           </div>
           <div className="notice-detail-divider" />
           <div className="notice-detail-paper">
-            <div className="notice-detail-paper-title">
-              <Tag color={getPriorityMeta(notice.priority).color}>
-                {getPriorityMeta(notice.priority).label}
-              </Tag>
-              <Title level={3}>{notice.title}</Title>
-            </div>
             <Paragraph className="notice-detail-content">{notice.content}</Paragraph>
-            <div className="notice-detail-signature">
-              <span>{notice.publisherName || getNoticeTypeLabel(notice.noticeType)}</span>
-              <span>{formatNoticeDate(notice.publishTime)}</span>
-              {notice.expireTime ? <span>有效至 {formatNoticeDate(notice.expireTime)}</span> : null}
-            </div>
           </div>
           <div className="notice-detail-footer">
-            <span>{forceRead ? '必读公告，确认阅读后继续使用系统' : `发布于 ${formatDateTime(notice.publishTime)}`}</span>
+            <span>{forceRead ? '必读公告，确认阅读后继续使用系统' : buildNoticeMeta(notice)}</span>
             <Button type="primary" size="large" loading={confirmLoading} onClick={handleConfirm}>
               {forceRead ? '确认已读' : '我知道了'}
             </Button>
@@ -307,6 +305,8 @@ function formatDateTime(value?: string) {
   return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '未设置';
 }
 
-function formatNoticeDate(value?: string) {
-  return value ? dayjs(value).format('YYYY年M月D日') : '未设置';
+function buildNoticeMeta(notice: NoticeRecord) {
+  const publisher = notice.publisherName || getNoticeTypeLabel(notice.noticeType);
+  const publishText = formatDateTime(notice.publishTime);
+  return notice.expireTime ? `${publisher} · ${publishText} · 有效至 ${formatDateTime(notice.expireTime)}` : `${publisher} · ${publishText}`;
 }
