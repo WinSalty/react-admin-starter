@@ -43,3 +43,15 @@ export async function fetchActiveNotices(): Promise<ApiResponse<NoticeRecord[]>>
   const response = await request.get<ApiResponse<NoticeRecord[]>>('/api/system/notices/active');
   return response.data;
 }
+
+export async function fetchUnreadRequiredNotices(): Promise<ApiResponse<NoticeRecord[]>> {
+  const response = await request.get<ApiResponse<NoticeRecord[]>>('/api/system/notices/required-unread');
+  return response.data;
+}
+
+export async function markNoticeRead(id: string): Promise<ApiResponse<NoticeRecord>> {
+  const response = await request.post<ApiResponse<NoticeRecord>>('/api/system/notices/read', null, {
+    params: { id },
+  });
+  return response.data;
+}

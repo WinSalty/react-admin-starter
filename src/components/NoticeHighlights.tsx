@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ClockCircleOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Checkbox, Dropdown, Empty, List, Modal, Skeleton, Space, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Dropdown, Empty, List, Modal, Skeleton, Space, Tag, Typography } from 'antd';
 import dayjs from 'dayjs';
 import type { NoticePriority, NoticeRecord } from '@/types/notice';
 
@@ -210,15 +210,26 @@ export function HeaderNoticeTicker({
 export function NoticeDetailModal({
   notice,
   onClose,
+  forceRead = false,
+  confirmLoading = false,
+  onConfirm,
 }: {
   notice?: NoticeRecord;
   onClose: () => void;
+  forceRead?: boolean;
+  confirmLoading?: boolean;
+  onConfirm?: (notice: NoticeRecord) => void;
 }) {
-  const [skipTodayReminder, setSkipTodayReminder] = useState(false);
-
-  useEffect(() => {
-    setSkipTodayReminder(false);
-  }, [notice?.id]);
+  const handleConfirm = () => {
+    if (!notice) {
+      return;
+    }
+    if (onConfirm) {
+      onConfirm(notice);
+      return;
+    }
+    onClose();
+  };
 
   return (
     <Modal
@@ -230,6 +241,9 @@ export function NoticeDetailModal({
       width={640}
       centered
       destroyOnHidden
+      closable={!forceRead}
+      maskClosable={!forceRead}
+      keyboard={!forceRead}
       onCancel={onClose}
     >
       {notice ? (
@@ -260,11 +274,9 @@ export function NoticeDetailModal({
             </div>
           </div>
           <div className="notice-detail-footer">
-            <Checkbox checked={skipTodayReminder} onChange={(event) => setSkipTodayReminder(event.target.checked)}>
-              今日不再提醒
-            </Checkbox>
-            <Button type="primary" size="large" onClick={onClose}>
-              我知道了
+            <span>{forceRead ? '必读公告，确认阅读后继续使用系统' : `发布于 ${formatDateTime(notice.publishTime)}`}</span>
+            <Button type="primary" size="large" loading={confirmLoading} onClick={handleConfirm}>
+              {forceRead ? '确认已读' : '我知道了'}
             </Button>
           </div>
         </div>

@@ -18,6 +18,7 @@ export interface NoticeRecord {
   content: string;
   noticeType: NoticeType | string;
   priority: NoticePriority | string;
+  required: boolean;
   publisherId: string;
   publisherName: string;
   publishTime: string;
@@ -34,8 +35,8 @@ export interface NoticeSaveParams {
   content: string;
   noticeType: NoticeType | string;
   priority: NoticePriority | string;
+  required?: boolean;
   publisherId?: string;
-  publishTime?: string;
   expireTime?: string;
   status: NoticeStatus;
   sortOrder?: number;

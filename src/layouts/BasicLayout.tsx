@@ -13,11 +13,13 @@ import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import brandLogo from '@/assets/brand-logo.svg';
-import { HeaderNoticeTicker } from '@/components/NoticeHighlights';
+import { HeaderNoticeTicker, NoticeDetailModal } from '@/components/NoticeHighlights';
 import { appMenus, mapPermissionMenusToAppMenus, resolveRouteCodeByPath, type AppMenuItem } from '@/config/menu';
 import { useActiveNotices } from '@/hooks/useActiveNotices';
 import { fetchAccountProfile } from '@/services/account';
+import { fetchUnreadRequiredNotices, markNoticeRead } from '@/services/notice';
 import { useAuthStore } from '@/stores/auth';
+import type { NoticeRecord } from '@/types/notice';
 import { resolveAvatarDisplayUrl } from '@/utils/avatar';
 
 const { Header, Sider, Content } = Layout;
@@ -35,6 +37,8 @@ function BasicLayout() {
   const [openKeys, setOpenKeys] = useState<string[]>(() => getSavedOpenKeys());
   const [currentTime, setCurrentTime] = useState(() => dayjs().format('YYYY-MM-DD HH:mm'));
   const [tickerEnabled, setTickerEnabled] = useState(true);
+  const [requiredNotices, setRequiredNotices] = useState<NoticeRecord[]>([]);
+  const [noticeReadSubmitting, setNoticeReadSubmitting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = theme.useToken();
@@ -47,6 +51,7 @@ function BasicLayout() {
     notices,
     loading: noticesLoading,
     errorMessage: noticesErrorMessage,
+    reload: reloadNotices,
   } = useActiveNotices();
 
   const isAdmin = role === 'admin';
@@ -105,6 +110,38 @@ function BasicLayout() {
         setProfile(undefined);
       });
   }, [setProfile]);
+
+  useEffect(() => {
+    let mounted = true;
+    void fetchUnreadRequiredNotices()
+      .then((response) => {
+        if (!mounted) {
+          return;
+        }
+        setRequiredNotices(response.code === 0 ? response.data || [] : []);
+      })
+      .catch(() => {
+        if (mounted) {
+          setRequiredNotices([]);
+        }
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  async function handleRequiredNoticeRead(notice: NoticeRecord) {
+    setNoticeReadSubmitting(true);
+    try {
+      const response = await markNoticeRead(notice.id);
+      if (response.code === 0) {
+        setRequiredNotices((records) => records.filter((record) => record.id !== notice.id));
+        reloadNotices();
+      }
+    } finally {
+      setNoticeReadSubmitting(false);
+    }
+  }
 
   const userDropdownItems: MenuProps['items'] = [
     {
@@ -235,6 +272,13 @@ function BasicLayout() {
           <Outlet />
         </Content>
       </Layout>
+      <NoticeDetailModal
+        notice={requiredNotices[0]}
+        forceRead
+        confirmLoading={noticeReadSubmitting}
+        onClose={() => undefined}
+        onConfirm={(notice) => void handleRequiredNoticeRead(notice)}
+      />
     </Layout>
   );
 }

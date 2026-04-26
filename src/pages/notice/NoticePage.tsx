@@ -12,6 +12,7 @@ import {
   Popconfirm,
   Select,
   Space,
+  Switch,
   Table,
   Tag,
 } from 'antd';
@@ -48,7 +49,7 @@ interface NoticeSaveForm {
   content: string;
   noticeType: NoticeType;
   priority: NoticePriority;
-  publishTime?: dayjs.Dayjs;
+  required?: boolean;
   expireTime?: dayjs.Dayjs;
   status: NoticeStatus;
   sortOrder?: number;
@@ -79,6 +80,7 @@ const detailFields: Array<DetailField<NoticeRecord>> = [
   { key: 'title', label: '标题', render: (record) => record.title },
   { key: 'type', label: '类型', render: (record) => renderNoticeType(record.noticeType) },
   { key: 'priority', label: '优先级', render: (record) => renderPriorityTag(record.priority) },
+  { key: 'required', label: '必读公告', render: (record) => renderRequiredTag(record.required) },
   { key: 'status', label: '状态', render: (record) => renderStatusTag(record.status) },
   { key: 'publisherName', label: '发布人', render: (record) => record.publisherName || '-' },
   { key: 'publishTime', label: '发布时间', render: (record) => record.publishTime || '-' },
@@ -174,6 +176,12 @@ function NoticePage() {
         width: 100,
         render: (status: NoticeStatus) => renderStatusTag(status),
       },
+      {
+        title: '必读',
+        dataIndex: 'required',
+        width: 90,
+        render: (required: boolean) => renderRequiredTag(required),
+      },
       { title: '发布人', dataIndex: 'publisherName', width: 120 },
       { title: '发布时间', dataIndex: 'publishTime', width: 180 },
       { title: '过期时间', dataIndex: 'expireTime', width: 180 },
@@ -244,9 +252,10 @@ function NoticePage() {
     setEditingRecord(undefined);
     saveForm.resetFields();
     saveForm.setFieldsValue({
-      status: 'draft',
+      status: 'active',
       noticeType: 'system',
       priority: 'medium',
+      required: false,
       sortOrder: 0,
     });
     setModalOpen(true);
@@ -260,7 +269,7 @@ function NoticePage() {
       content: record.content,
       noticeType: normalizeNoticeType(record.noticeType),
       priority: normalizePriority(record.priority),
-      publishTime: record.publishTime ? dayjs(record.publishTime) : undefined,
+      required: record.required,
       expireTime: record.expireTime ? dayjs(record.expireTime) : undefined,
       status: record.status,
       sortOrder: record.sortOrder,
@@ -277,7 +286,7 @@ function NoticePage() {
         content: values.content,
         noticeType: values.noticeType,
         priority: values.priority,
-        publishTime: values.publishTime?.format('YYYY-MM-DD HH:mm:ss'),
+        required: values.required,
         expireTime: values.expireTime?.format('YYYY-MM-DD HH:mm:ss'),
         status: values.status,
         sortOrder: values.sortOrder,
@@ -384,8 +393,8 @@ function NoticePage() {
         <Form.Item label="优先级" name="priority" rules={[{ required: true, message: '请选择优先级' }]}>
           <Select options={priorityOptions} />
         </Form.Item>
-        <Form.Item label="发布时间" name="publishTime">
-          <DatePicker showTime style={{ width: '100%' }} />
+        <Form.Item label="必读公告" name="required" valuePropName="checked">
+          <Switch checkedChildren="必读" unCheckedChildren="普通" />
         </Form.Item>
         <Form.Item label="过期时间" name="expireTime">
           <DatePicker showTime style={{ width: '100%' }} />
@@ -428,6 +437,10 @@ function renderPriorityTag(priority: string) {
     return <Tag color="blue">中</Tag>;
   }
   return <Tag color="default">低</Tag>;
+}
+
+function renderRequiredTag(required?: boolean) {
+  return required ? <Tag color="red">必读</Tag> : <Tag color="default">普通</Tag>;
 }
 
 function renderNoticeType(noticeType: string) {

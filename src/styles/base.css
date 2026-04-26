@@ -1595,23 +1595,21 @@ body {
 .notice-detail {
   display: flex;
   flex-direction: column;
-  min-height: 410px;
-  padding: 24px 34px 28px;
+  min-height: 360px;
+  padding: 26px 30px 24px;
 }
 
 .notice-detail-modal-root .ant-modal-mask {
-  background: rgba(15, 23, 42, 0.68);
-  backdrop-filter: blur(8px);
+  background: rgba(15, 23, 42, 0.52);
+  backdrop-filter: blur(5px);
 }
 
 .notice-detail-modal .ant-modal-content {
   overflow: hidden;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 14px;
-  background:
-    radial-gradient(circle at 24% 16%, rgba(59, 130, 246, 0.08) 0, rgba(59, 130, 246, 0) 24%),
-    linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.3);
+  border: 1px solid rgba(226, 232, 240, 0.86);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
   padding: 0;
 }
 
@@ -1630,16 +1628,16 @@ body {
 
 .notice-detail-header {
   display: flex;
-  min-height: 74px;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
+  justify-content: flex-start;
+  gap: 14px;
+  padding-right: 36px;
 }
 
 .notice-detail-header h2.ant-typography {
   margin: 0;
-  color: #0f1b35;
-  font-size: 25px;
+  color: #111827;
+  font-size: 22px;
   font-weight: 700;
   line-height: 1.2;
 }
@@ -1647,27 +1645,20 @@ body {
 .notice-detail-icon {
   position: relative;
   display: inline-flex;
-  width: 54px;
-  height: 54px;
+  width: 44px;
+  height: 44px;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.95) 0, rgba(255, 255, 255, 0) 42%),
-    linear-gradient(135deg, #dbeafe 0%, #eef6ff 100%);
+  border-radius: 10px;
+  background: #eff6ff;
   color: #1677ff;
-  font-size: 25px;
-  box-shadow: 0 8px 18px rgba(22, 119, 255, 0.12);
+  font-size: 22px;
+  box-shadow: inset 0 0 0 1px rgba(22, 119, 255, 0.08);
 }
 
 .notice-detail-icon i {
-  position: absolute;
-  display: block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #bfdbfe;
+  display: none;
 }
 
 .notice-detail-icon i:nth-child(2) {
@@ -1696,24 +1687,24 @@ body {
 
 .notice-detail-divider {
   height: 1px;
-  margin: 10px 0 20px;
-  background: linear-gradient(90deg, rgba(203, 213, 225, 0) 0%, #d9e2ef 12%, #d9e2ef 88%, rgba(203, 213, 225, 0) 100%);
+  margin: 18px -30px 20px;
+  background: #eef2f7;
 }
 
 .notice-detail-paper {
-  border-radius: 14px;
-  background:
-    radial-gradient(circle at 78% 82%, rgba(59, 130, 246, 0.1) 0, rgba(59, 130, 246, 0) 34%),
-    linear-gradient(135deg, #f7fbff 0%, #eef6ff 100%);
-  padding: 22px 24px;
+  border: 1px solid #e5eaf3;
+  border-left: 4px solid #1677ff;
+  border-radius: 8px;
+  background: #f8fbff;
+  padding: 18px 20px;
 }
 
 .notice-detail-paper-title {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .notice-detail-paper-title .ant-tag {
@@ -1730,17 +1721,17 @@ body {
 .notice-detail-paper-title h3.ant-typography {
   min-width: 0;
   margin: 0;
-  color: #0f1b35;
-  font-size: 19px;
+  color: #111827;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1.35;
 }
 
 .notice-detail-content.ant-typography {
   margin-bottom: 0;
-  color: #263956;
-  font-size: 16px;
-  line-height: 1.85;
+  color: #344054;
+  font-size: 15px;
+  line-height: 1.8;
   white-space: pre-wrap;
 }
 
@@ -1751,31 +1742,31 @@ body {
   align-items: flex-end;
   gap: 4px;
   color: #263956;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.6;
 }
 
 .notice-detail-footer {
   display: grid;
-  grid-template-columns: 1fr minmax(220px, 280px);
+  grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   margin-top: auto;
-  padding-top: 24px;
+  padding-top: 20px;
 }
 
-.notice-detail-footer .ant-checkbox-wrapper {
+.notice-detail-footer > span {
   color: #667085;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .notice-detail-footer .ant-btn {
-  height: 44px;
+  min-width: 112px;
+  height: 40px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #1677ff 0%, #0b63f6 100%);
-  font-size: 17px;
-  font-weight: 700;
-  box-shadow: 0 12px 26px rgba(22, 119, 255, 0.24);
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: none;
 }
 
 .dashboard-summary-grid {
