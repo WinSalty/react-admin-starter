@@ -21,7 +21,7 @@ const statusOptions = [
 
 /**
  * CDK 管理页面。
- * 支持按批次查看、复制和变更 CDK 状态，不提供删除入口。
+ * 默认展示全部 CDK，并支持按批次筛选、复制和变更 CDK 状态，不提供删除入口。
  * author: sunshengxian
  * 创建日期：2026-04-26
  */
@@ -38,11 +38,6 @@ function CdkCodePage() {
   const loadRecords = useCallback(
     async (nextPageNo = pageNo, nextPageSize = pageSize) => {
       const values = searchForm.getFieldsValue();
-      if (!values.batchId) {
-        setRecords([]);
-        setTotal(0);
-        return;
-      }
       setLoading(true);
       try {
         const response = await fetchCdkCodes({
@@ -69,9 +64,7 @@ function CdkCodePage() {
   useEffect(() => {
     const batchId = searchParams.get('batchId') || undefined;
     searchForm.setFieldsValue({ batchId });
-    if (batchId) {
-      void loadRecords(1, pageSize);
-    }
+    void loadRecords(1, pageSize);
   }, []);
 
   const handleCopy = async (cdk: string) => {
@@ -153,8 +146,8 @@ function CdkCodePage() {
         onReset={handleReset}
         onFinish={handleSearch}
       >
-        <Form.Item label="批次ID" name="batchId" rules={[{ required: true, message: '请输入批次ID' }]}>
-          <Input placeholder="批次ID" allowClear />
+        <Form.Item label="批次ID" name="batchId">
+          <Input placeholder="不填则展示全部" allowClear />
         </Form.Item>
         <Form.Item label="状态" name="status">
           <Select allowClear placeholder="全部状态" style={{ width: 140 }} options={statusOptions} />

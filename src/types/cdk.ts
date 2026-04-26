@@ -64,7 +64,7 @@ export interface CdkCode {
 }
 
 export interface CdkCodeListParams {
-  batchId: string;
+  batchId?: string;
   status?: string;
   pageNo?: number;
   pageSize?: number;
