@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TableProps } from 'antd';
 import { App, Button, DatePicker, Empty, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
 import { Access } from '@/components/Access';
 import CreateButton from '@/components/admin/CreateButton';
 import EntityDetailDrawer, { type DetailField } from '@/components/admin/EntityDetailDrawer';
@@ -9,13 +10,10 @@ import ListSearchCard from '@/components/admin/ListSearchCard';
 import ListTableCard from '@/components/admin/ListTableCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
-  approveCdkBatch,
   createCdkBatch,
   exportCdkBatch,
   fetchCdkBatches,
   pauseCdkBatch,
-  secondApproveCdkBatch,
-  submitCdkBatch,
   voidCdkBatch,
 } from '@/services/cdk';
 import type { CdkBatch, CdkBatchCreateParams, CdkExportResult } from '@/types/cdk';
@@ -35,13 +33,7 @@ interface BatchCreateForm {
   remark?: string;
 }
 
-interface BatchExportForm {
-  exportPassword: string;
-}
-
 const statusOptions = [
-  { label: '草稿', value: 'draft' },
-  { label: '待审批', value: 'pending_approval' },
   { label: '已启用', value: 'active' },
   { label: '已暂停', value: 'paused' },
   { label: '已作废', value: 'voided' },
@@ -65,10 +57,6 @@ const detailFields: Array<DetailField<CdkBatch>> = [
   { key: 'valid', label: '有效期', render: (record) => `${record.validFrom} 至 ${record.validTo}` },
   { key: 'status', label: '状态', render: (record) => renderBatchStatus(record.status) },
   { key: 'riskLevel', label: '风险等级', render: (record) => renderRiskTag(record.riskLevel) },
-  { key: 'approvedBy', label: '审批人', render: (record) => record.approvedBy || '-' },
-  { key: 'approvedAt', label: '审批时间', render: (record) => record.approvedAt || '-' },
-  { key: 'secondApprovedBy', label: '复核人', render: (record) => record.secondApprovedBy || '-' },
-  { key: 'secondApprovedAt', label: '复核时间', render: (record) => record.secondApprovedAt || '-' },
   { key: 'exportCount', label: '导出次数', render: (record) => record.exportCount },
   { key: 'createdAt', label: '创建时间', render: (record) => record.createdAt },
   { key: 'updatedAt', label: '更新时间', render: (record) => record.updatedAt },
@@ -76,15 +64,15 @@ const detailFields: Array<DetailField<CdkBatch>> = [
 
 /**
  * CDK 批次管理页面。
- * 支持批次创建、提交审批、审批生成、一次性导出、暂停和作废。
+ * 支持管理员直接生成批次、纯文本导出、在线查看、暂停和作废。
  * author: sunshengxian
  * 创建日期：2026-04-24
  */
 function CdkBatchPage() {
   const { message } = App.useApp();
+  const navigate = useNavigate();
   const [searchForm] = Form.useForm<BatchSearchForm>();
   const [createForm] = Form.useForm<BatchCreateForm>();
-  const [exportForm] = Form.useForm<BatchExportForm>();
   const [records, setRecords] = useState<CdkBatch[]>([]);
   const [pageNo, setPageNo] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -93,7 +81,6 @@ function CdkBatchPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailRecord, setDetailRecord] = useState<CdkBatch>();
   const [modalOpen, setModalOpen] = useState(false);
-  const [exportingRecord, setExportingRecord] = useState<CdkBatch>();
   const [saving, setSaving] = useState(false);
   const [exportResult, setExportResult] = useState<CdkExportResult>();
 
@@ -149,45 +136,22 @@ function CdkBatchPage() {
       { title: '状态', dataIndex: 'status', width: 120, render: renderBatchStatus },
       { title: '风险', dataIndex: 'riskLevel', width: 100, render: renderRiskTag },
       {
-        title: '审批',
-        key: 'approval',
-        width: 180,
-        render: (_, record) => (
-          <div className="query-name-cell">
-            <strong>{record.approvedBy || '-'}</strong>
-            <span>{record.secondApprovedBy ? `复核：${record.secondApprovedBy}` : '待复核'}</span>
-          </div>
-        ),
-      },
-      {
         title: '操作',
         key: 'action',
         fixed: 'right',
-        width: 300,
+        width: 280,
         render: (_, record) => (
           <Space size={4}>
             <Button type="link" onClick={() => openDetail(record)}>
               详情
             </Button>
-            <Access action="cdk:batch:approve">
-              <Button type="link" disabled={record.status !== 'draft'} onClick={() => void handleSubmit(record)}>
-                提交
+            <Access action="cdk:code:view">
+              <Button type="link" onClick={() => navigate(`/system/cdk/codes?batchId=${record.id}`)}>
+                CDK
               </Button>
-              <Popconfirm title="确认审批并生成 CDK？" onConfirm={() => void handleApprove(record)}>
-                <Button type="link" disabled={record.status !== 'pending_approval'}>
-                  审批
-                </Button>
-              </Popconfirm>
-            </Access>
-            <Access action="cdk:batch:second-approve">
-              <Popconfirm title="确认二次复核并生成 CDK？" onConfirm={() => void handleSecondApprove(record)}>
-                <Button type="link" disabled={record.status !== 'pending_approval' || !record.approvedBy}>
-                  复核
-                </Button>
-              </Popconfirm>
             </Access>
             <Access action="cdk:batch:export">
-              <Button type="link" disabled={record.status !== 'active'} onClick={() => openExportModal(record)}>
+              <Button type="link" disabled={record.generatedCount <= 0} onClick={() => void handleExport(record)}>
                 导出
               </Button>
             </Access>
@@ -207,7 +171,7 @@ function CdkBatchPage() {
         ),
       },
     ],
-    [],
+    [navigate],
   );
 
   const openDetail = (record: CdkBatch) => {
@@ -262,18 +226,6 @@ function CdkBatchPage() {
     }
   };
 
-  const handleSubmit = async (record: CdkBatch) => {
-    await handleAction(() => submitCdkBatch(record.id));
-  };
-
-  const handleApprove = async (record: CdkBatch) => {
-    await handleAction(() => approveCdkBatch(record.id));
-  };
-
-  const handleSecondApprove = async (record: CdkBatch) => {
-    await handleAction(() => secondApproveCdkBatch(record.id));
-  };
-
   const handlePause = async (record: CdkBatch) => {
     await handleAction(() => pauseCdkBatch(record.id));
   };
@@ -282,24 +234,22 @@ function CdkBatchPage() {
     await handleAction(() => voidCdkBatch(record.id));
   };
 
-  const openExportModal = (record: CdkBatch) => {
-    exportForm.resetFields();
-    setExportingRecord(record);
-  };
-
-  const handleExport = async (values: BatchExportForm) => {
-    if (!exportingRecord) {
-      return;
-    }
-    const response = await exportCdkBatch(exportingRecord.id, values.exportPassword);
+  const handleExport = async (record: CdkBatch) => {
+    const response = await exportCdkBatch(record.id);
     if (response.code !== 0) {
       message.error(response.message || '导出失败');
       return;
     }
     setExportResult(response.data);
-    downloadBase64File(response.data.fileName, response.data.encryptedPackageBase64);
-    setExportingRecord(undefined);
     void loadRecords(pageNo, pageSize);
+  };
+
+  const handleCopyExport = async () => {
+    if (!exportResult?.content) {
+      return;
+    }
+    await navigator.clipboard.writeText(exportResult.content);
+    message.success('已复制');
   };
 
   const handleAction = async (action: () => Promise<{ code: number; message: string }>) => {
@@ -390,55 +340,28 @@ function CdkBatchPage() {
         </Form.Item>
       </SubmitModalForm>
 
-      <SubmitModalForm<BatchExportForm>
-        title="加密导出 CDK"
-        open={!!exportingRecord}
-        form={exportForm}
-        onCancel={() => setExportingRecord(undefined)}
-        onFinish={handleExport}
-      >
-        <Form.Item
-          label="导出密码"
-          name="exportPassword"
-          rules={[{ required: true, min: 12, message: '请输入至少 12 位导出密码' }]}
-        >
-          <Input.Password maxLength={128} />
-        </Form.Item>
-      </SubmitModalForm>
-
       <Modal
-        title="CDK 一次性导出"
+        title="CDK 导出"
         open={!!exportResult}
-        footer={<Button type="primary" onClick={() => setExportResult(undefined)}>关闭</Button>}
+        footer={(
+          <Space>
+            <Button onClick={handleCopyExport}>复制全部</Button>
+            <Button type="primary" onClick={() => setExportResult(undefined)}>关闭</Button>
+          </Space>
+        )}
         width={760}
         onCancel={() => setExportResult(undefined)}
       >
         <p>批次：{exportResult?.batchNo}，数量：{exportResult?.count}</p>
-        <p>文件：{exportResult?.fileName}，算法：{exportResult?.encryptionAlgorithm}</p>
-        <Input.TextArea value={exportResult?.fingerprint} rows={3} readOnly />
+        <p>文件：{exportResult?.fileName}，指纹：{exportResult?.fingerprint}</p>
+        <Input.TextArea value={exportResult?.content} rows={12} readOnly />
       </Modal>
     </div>
   );
 }
 
-function downloadBase64File(fileName: string, base64: string) {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index);
-  }
-  const url = URL.createObjectURL(new Blob([bytes], { type: 'application/zip' }));
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
 function renderBatchStatus(status: string) {
   const colorMap: Record<string, string> = {
-    draft: 'default',
-    pending_approval: 'processing',
     active: 'success',
     paused: 'warning',
     voided: 'error',

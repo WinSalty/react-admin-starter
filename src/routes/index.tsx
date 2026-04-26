@@ -14,6 +14,7 @@ const Register = lazy(() => import('@/pages/auth/Register'));
 const AccountSettings = lazy(() => import('@/pages/account/AccountSettings'));
 const BenefitProductPage = lazy(() => import('@/pages/benefit/BenefitProductPage'));
 const CdkBatchPage = lazy(() => import('@/pages/cdk/CdkBatchPage'));
+const CdkCodePage = lazy(() => import('@/pages/cdk/CdkCodePage'));
 const CdkRedeemRecordPage = lazy(() => import('@/pages/cdk/CdkRedeemRecordPage'));
 const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
 const PermissionPage = lazy(() => import('@/pages/permission/PermissionPage'));
@@ -204,6 +205,16 @@ export const router = createBrowserRouter(
             <LazyRoute>
               <RouteGuard permissionCode={dynamicRouteMap.cdkBatches.routeCode}>
                 <CdkBatchPage />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: dynamicRouteMap.cdkCodes.path,
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode={dynamicRouteMap.cdkCodes.routeCode}>
+                <CdkCodePage />
               </RouteGuard>
             </LazyRoute>
           ),

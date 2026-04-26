@@ -46,8 +46,28 @@ export interface CdkExportResult {
   fingerprint: string;
   fileName: string;
   fileType: string;
-  encryptionAlgorithm: string;
-  encryptedPackageBase64: string;
+  content: string;
+}
+
+export interface CdkCode {
+  id: string;
+  batchId: string;
+  cdk: string;
+  codePrefix: string;
+  checksum: string;
+  status: string;
+  redeemedUserId?: string;
+  redeemedAt?: string;
+  redeemRecordNo?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CdkCodeListParams {
+  batchId: string;
+  status?: string;
+  pageNo?: number;
+  pageSize?: number;
 }
 
 export interface CdkRedeemRecord {

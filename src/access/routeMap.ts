@@ -75,6 +75,11 @@ export const dynamicRouteMap = {
     componentKey: 'CdkBatchPage',
     routeCode: 'cdk_batch',
   },
+  cdkCodes: {
+    path: '/system/cdk/codes',
+    componentKey: 'CdkCodePage',
+    routeCode: 'cdk_code',
+  },
   cdkRedeemRecords: {
     path: '/system/cdk/redeem-records',
     componentKey: 'CdkRedeemRecordPage',

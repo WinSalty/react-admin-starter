@@ -3,6 +3,8 @@ import type {
   CdkBatch,
   CdkBatchCreateParams,
   CdkBatchListParams,
+  CdkCode,
+  CdkCodeListParams,
   CdkExportResult,
   CdkRedeemRecord,
   CdkRedeemRecordListParams,
@@ -25,21 +27,6 @@ export async function createCdkBatch(params: CdkBatchCreateParams): Promise<ApiR
   return response.data;
 }
 
-export async function submitCdkBatch(id: string): Promise<ApiResponse<CdkBatch>> {
-  const response = await request.post<ApiResponse<CdkBatch>>(`/api/admin/cdk/batches/${id}/submit`);
-  return response.data;
-}
-
-export async function approveCdkBatch(id: string): Promise<ApiResponse<CdkBatch>> {
-  const response = await request.post<ApiResponse<CdkBatch>>(`/api/admin/cdk/batches/${id}/approve`);
-  return response.data;
-}
-
-export async function secondApproveCdkBatch(id: string): Promise<ApiResponse<CdkBatch>> {
-  const response = await request.post<ApiResponse<CdkBatch>>(`/api/admin/cdk/batches/${id}/second-approve`);
-  return response.data;
-}
-
 export async function pauseCdkBatch(id: string): Promise<ApiResponse<CdkBatch>> {
   const response = await request.post<ApiResponse<CdkBatch>>(`/api/admin/cdk/batches/${id}/pause`);
   return response.data;
@@ -50,10 +37,18 @@ export async function voidCdkBatch(id: string): Promise<ApiResponse<CdkBatch>> {
   return response.data;
 }
 
-export async function exportCdkBatch(id: string, exportPassword: string): Promise<ApiResponse<CdkExportResult>> {
-  const response = await request.post<ApiResponse<CdkExportResult>>(`/api/admin/cdk/batches/${id}/export`, {
-    exportPassword,
-  });
+export async function exportCdkBatch(id: string): Promise<ApiResponse<CdkExportResult>> {
+  const response = await request.post<ApiResponse<CdkExportResult>>(`/api/admin/cdk/batches/${id}/export`);
+  return response.data;
+}
+
+export async function fetchCdkCodes(params: CdkCodeListParams): Promise<ApiResponse<PageResult<CdkCode>>> {
+  const response = await request.get<ApiResponse<PageResult<CdkCode>>>('/api/admin/cdk/codes', { params });
+  return response.data;
+}
+
+export async function updateCdkCodeStatus(id: string, status: string): Promise<ApiResponse<CdkCode>> {
+  const response = await request.post<ApiResponse<CdkCode>>(`/api/admin/cdk/codes/${id}/status`, { status });
   return response.data;
 }
 
