@@ -41,7 +41,7 @@ const BENEFIT_TYPE_POINTS = 'points';
 const DEFAULT_RISK_LEVEL = 'normal';
 const DEFAULT_VALID_DAYS = 30;
 const DEFAULT_POINTS = 100;
-const DEFAULT_TOTAL_COUNT = 100;
+const DEFAULT_TOTAL_COUNT = 10;
 const DETAIL_CODE_PAGE_SIZE = 100;
 
 const detailFields: Array<DetailField<CdkBatch>> = [
