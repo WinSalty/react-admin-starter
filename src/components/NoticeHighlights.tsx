@@ -227,7 +227,7 @@ export function NoticeDetailModal({
       title={null}
       open={!!notice}
       footer={null}
-      width={820}
+      width={640}
       centered
       destroyOnHidden
       onCancel={onClose}
