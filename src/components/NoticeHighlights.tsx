@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CalendarOutlined, ClockCircleOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Dropdown, Empty, List, Modal, Skeleton, Space, Tag, Typography } from 'antd';
+import { ClockCircleOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
+import { Alert, Button, Card, Checkbox, Dropdown, Empty, List, Modal, Skeleton, Space, Tag, Typography } from 'antd';
 import dayjs from 'dayjs';
 import type { NoticePriority, NoticeRecord } from '@/types/notice';
 
@@ -202,6 +202,11 @@ export function HeaderNoticeTicker({
   );
 }
 
+/**
+ * 公告详情弹窗，采用居中公告卡片结构展示重要通知内容。
+ * 创建日期：2026-04-26
+ * author: sunshengxian
+ */
 export function NoticeDetailModal({
   notice,
   onClose,
@@ -209,48 +214,58 @@ export function NoticeDetailModal({
   notice?: NoticeRecord;
   onClose: () => void;
 }) {
+  const [skipTodayReminder, setSkipTodayReminder] = useState(false);
+
+  useEffect(() => {
+    setSkipTodayReminder(false);
+  }, [notice?.id]);
+
   return (
     <Modal
       className="notice-detail-modal"
+      rootClassName="notice-detail-modal-root"
       title={null}
       open={!!notice}
       footer={null}
-      width={720}
+      width={820}
+      centered
       destroyOnHidden
       onCancel={onClose}
     >
       {notice ? (
         <div className="notice-detail">
-          <div className="notice-detail-hero">
-            <div className="notice-detail-badges">
+          <div className="notice-detail-header">
+            <span className="notice-detail-icon" aria-hidden="true">
+              <NotificationOutlined />
+              <i />
+              <i />
+              <i />
+              <i />
+            </span>
+            <Title level={2}>系统公告</Title>
+          </div>
+          <div className="notice-detail-divider" />
+          <div className="notice-detail-paper">
+            <div className="notice-detail-paper-title">
               <Tag color={getPriorityMeta(notice.priority).color}>
                 {getPriorityMeta(notice.priority).label}
               </Tag>
-              <Tag>{getNoticeTypeLabel(notice.noticeType)}</Tag>
+              <Title level={3}>{notice.title}</Title>
             </div>
-            <Title level={3}>{notice.title}</Title>
-            <Paragraph className="notice-detail-summary">
-              发布人：{notice.publisherName || '系统'} · 发布时间：{formatDateTime(notice.publishTime)}
-            </Paragraph>
-          </div>
-          <div className="notice-detail-body">
-            <div className="notice-detail-section">
-              <Text className="notice-detail-section-label">公告内容</Text>
-              <Paragraph>{notice.content}</Paragraph>
+            <Paragraph className="notice-detail-content">{notice.content}</Paragraph>
+            <div className="notice-detail-signature">
+              <span>{notice.publisherName || getNoticeTypeLabel(notice.noticeType)}</span>
+              <span>{formatNoticeDate(notice.publishTime)}</span>
+              {notice.expireTime ? <span>有效至 {formatNoticeDate(notice.expireTime)}</span> : null}
             </div>
           </div>
-          <div className="notice-detail-meta">
-            <Text type="secondary">
-              <UserOutlined /> {notice.publisherName || '系统'}
-            </Text>
-            <Text type="secondary">
-              <CalendarOutlined /> {formatDateTime(notice.publishTime)}
-            </Text>
-            {notice.expireTime ? (
-              <Text type="secondary">
-                <ClockCircleOutlined /> 截止 {formatDateTime(notice.expireTime)}
-              </Text>
-            ) : null}
+          <div className="notice-detail-footer">
+            <Checkbox checked={skipTodayReminder} onChange={(event) => setSkipTodayReminder(event.target.checked)}>
+              今日不再提醒
+            </Checkbox>
+            <Button type="primary" size="large" onClick={onClose}>
+              我知道了
+            </Button>
           </div>
         </div>
       ) : null}
@@ -278,4 +293,8 @@ function getNoticeTypeLabel(noticeType: string) {
 
 function formatDateTime(value?: string) {
   return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '未设置';
+}
+
+function formatNoticeDate(value?: string) {
+  return value ? dayjs(value).format('YYYY年M月D日') : '未设置';
 }
