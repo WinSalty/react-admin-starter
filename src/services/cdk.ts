@@ -5,7 +5,6 @@ import type {
   CdkBatchListParams,
   CdkCode,
   CdkCodeListParams,
-  CdkExportResult,
   CdkRedeemRecord,
   CdkRedeemRecordListParams,
   CdkRedeemResult,
@@ -27,18 +26,8 @@ export async function createCdkBatch(params: CdkBatchCreateParams): Promise<ApiR
   return response.data;
 }
 
-export async function pauseCdkBatch(id: string): Promise<ApiResponse<CdkBatch>> {
-  const response = await request.post<ApiResponse<CdkBatch>>(`/api/admin/cdk/batches/${id}/pause`);
-  return response.data;
-}
-
 export async function voidCdkBatch(id: string): Promise<ApiResponse<CdkBatch>> {
   const response = await request.post<ApiResponse<CdkBatch>>(`/api/admin/cdk/batches/${id}/void`);
-  return response.data;
-}
-
-export async function exportCdkBatch(id: string): Promise<ApiResponse<CdkExportResult>> {
-  const response = await request.post<ApiResponse<CdkExportResult>>(`/api/admin/cdk/batches/${id}/export`);
   return response.data;
 }
 

@@ -40,18 +40,16 @@ export interface CdkBatchCreateParams {
   remark?: string;
 }
 
-export interface CdkExportResult {
-  batchNo: string;
-  count: number;
-  fingerprint: string;
-  fileName: string;
-  fileType: string;
-  content: string;
-}
-
 export interface CdkCode {
   id: string;
   batchId: string;
+  batchNo?: string;
+  batchName?: string;
+  benefitType?: string;
+  benefitConfig?: string;
+  batchStatus?: string;
+  validFrom?: string;
+  validTo?: string;
   cdk: string;
   codePrefix: string;
   checksum: string;
@@ -64,6 +62,7 @@ export interface CdkCode {
 }
 
 export interface CdkCodeListParams {
+  keyword?: string;
   batchId?: string;
   status?: string;
   pageNo?: number;

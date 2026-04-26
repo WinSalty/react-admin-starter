@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TableProps } from 'antd';
-import { App, Button, DatePicker, Empty, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag } from 'antd';
+import { App, Button, DatePicker, Empty, Form, Input, InputNumber, Popconfirm, Progress, Select, Space, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
-import { useNavigate } from 'react-router-dom';
 import { Access } from '@/components/Access';
 import CreateButton from '@/components/admin/CreateButton';
 import EntityDetailDrawer, { type DetailField } from '@/components/admin/EntityDetailDrawer';
@@ -11,12 +10,10 @@ import ListTableCard from '@/components/admin/ListTableCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
   createCdkBatch,
-  exportCdkBatch,
   fetchCdkBatches,
-  pauseCdkBatch,
   voidCdkBatch,
 } from '@/services/cdk';
-import type { CdkBatch, CdkBatchCreateParams, CdkExportResult } from '@/types/cdk';
+import type { CdkBatch, CdkBatchCreateParams } from '@/types/cdk';
 
 interface BatchSearchForm {
   keyword?: string;
@@ -24,28 +21,24 @@ interface BatchSearchForm {
 }
 
 interface BatchCreateForm {
-  batchName: string;
+  batchName?: string;
   points: number;
   totalCount: number;
-  validFrom: dayjs.Dayjs;
-  validTo: dayjs.Dayjs;
-  riskLevel: string;
+  validRange: [dayjs.Dayjs, dayjs.Dayjs];
   remark?: string;
 }
 
 const statusOptions = [
   { label: '已启用', value: 'active' },
-  { label: '已暂停', value: 'paused' },
   { label: '已作废', value: 'voided' },
 ];
 
-const riskOptions = [
-  { label: '普通', value: 'normal' },
-  { label: '高', value: 'high' },
-  { label: '关键', value: 'critical' },
-];
-
 const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+const BENEFIT_TYPE_POINTS = 'points';
+const DEFAULT_RISK_LEVEL = 'normal';
+const DEFAULT_VALID_DAYS = 30;
+const DEFAULT_POINTS = 100;
+const DEFAULT_TOTAL_COUNT = 100;
 
 const detailFields: Array<DetailField<CdkBatch>> = [
   { key: 'batchName', label: '批次名称', render: (record) => record.batchName },
@@ -56,21 +49,19 @@ const detailFields: Array<DetailField<CdkBatch>> = [
   { key: 'redeemedCount', label: '已兑换', render: (record) => record.redeemedCount },
   { key: 'valid', label: '有效期', render: (record) => `${record.validFrom} 至 ${record.validTo}` },
   { key: 'status', label: '状态', render: (record) => renderBatchStatus(record.status) },
-  { key: 'riskLevel', label: '风险等级', render: (record) => renderRiskTag(record.riskLevel) },
-  { key: 'exportCount', label: '导出次数', render: (record) => record.exportCount },
+  { key: 'totalPoints', label: '积分总量', render: (record) => calculateTotalPoints(record).toLocaleString() },
   { key: 'createdAt', label: '创建时间', render: (record) => record.createdAt },
   { key: 'updatedAt', label: '更新时间', render: (record) => record.updatedAt },
 ];
 
 /**
  * CDK 批次管理页面。
- * 支持管理员直接生成批次、纯文本导出、在线查看、暂停和作废。
+ * 作为积分 CDK 生成记录页，保留整批失效能力，具体码管理由 CDK 管理页统一承载。
  * author: sunshengxian
  * 创建日期：2026-04-24
  */
 function CdkBatchPage() {
   const { message } = App.useApp();
-  const navigate = useNavigate();
   const [searchForm] = Form.useForm<BatchSearchForm>();
   const [createForm] = Form.useForm<BatchCreateForm>();
   const [records, setRecords] = useState<CdkBatch[]>([]);
@@ -82,7 +73,6 @@ function CdkBatchPage() {
   const [detailRecord, setDetailRecord] = useState<CdkBatch>();
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [exportResult, setExportResult] = useState<CdkExportResult>();
 
   const loadRecords = useCallback(
     async (nextPageNo = pageNo, nextPageSize = pageSize) => {
@@ -92,7 +82,7 @@ function CdkBatchPage() {
         const response = await fetchCdkBatches({
           keyword: values.keyword,
           status: values.status,
-          benefitType: 'points',
+          benefitType: BENEFIT_TYPE_POINTS,
           pageNo: nextPageNo,
           pageSize: nextPageSize,
         });
@@ -120,7 +110,7 @@ function CdkBatchPage() {
       {
         title: '批次',
         dataIndex: 'batchName',
-        width: 240,
+        width: 260,
         render: (_, record) => (
           <div className="query-name-cell">
             <strong>{record.batchName}</strong>
@@ -128,42 +118,49 @@ function CdkBatchPage() {
           </div>
         ),
       },
-      { title: '权益', dataIndex: 'benefitConfig', width: 160, render: renderBenefitConfig },
-      { title: '总数', dataIndex: 'totalCount', width: 90, align: 'right' },
-      { title: '已生成', dataIndex: 'generatedCount', width: 90, align: 'right' },
-      { title: '已兑换', dataIndex: 'redeemedCount', width: 90, align: 'right' },
+      {
+        title: '生成规则',
+        key: 'rule',
+        width: 220,
+        render: (_, record) => (
+          <div className="query-name-cell">
+            <strong>{renderBenefitConfig(record.benefitConfig)} / 张</strong>
+            <span>{record.totalCount.toLocaleString()} 张，共 {calculateTotalPoints(record).toLocaleString()} 积分</span>
+          </div>
+        ),
+      },
+      {
+        title: '兑换进度',
+        key: 'progress',
+        width: 220,
+        render: (_, record) => {
+          const percent = record.totalCount > 0 ? Math.round((record.redeemedCount / record.totalCount) * 100) : 0;
+          return (
+            <div className="query-name-cell">
+              <Progress percent={percent} size="small" />
+              <span>{record.redeemedCount.toLocaleString()} / {record.totalCount.toLocaleString()}</span>
+            </div>
+          );
+        },
+      },
       { title: '有效期', key: 'valid', width: 300, render: (_, record) => `${record.validFrom} 至 ${record.validTo}` },
       { title: '状态', dataIndex: 'status', width: 120, render: renderBatchStatus },
-      { title: '风险', dataIndex: 'riskLevel', width: 100, render: renderRiskTag },
+      { title: '创建人', dataIndex: 'createdBy', width: 120 },
+      { title: '创建时间', dataIndex: 'createdAt', width: 180 },
       {
         title: '操作',
         key: 'action',
         fixed: 'right',
-        width: 280,
+        width: 160,
         render: (_, record) => (
           <Space size={4}>
             <Button type="link" onClick={() => openDetail(record)}>
               详情
             </Button>
-            <Access action="cdk:code:view">
-              <Button type="link" onClick={() => navigate(`/system/cdk/codes?batchId=${record.id}`)}>
-                CDK
-              </Button>
-            </Access>
-            <Access action="cdk:batch:export">
-              <Button type="link" disabled={record.generatedCount <= 0} onClick={() => void handleExport(record)}>
-                导出
-              </Button>
-            </Access>
-            <Access action="cdk:batch:pause">
-              <Button type="link" disabled={record.status !== 'active'} onClick={() => void handlePause(record)}>
-                暂停
-              </Button>
-            </Access>
             <Access action="cdk:batch:void">
-              <Popconfirm title="确认作废该批次？" onConfirm={() => void handleVoid(record)}>
+              <Popconfirm title="确认整批失效？" onConfirm={() => void handleVoid(record)}>
                 <Button type="link" danger disabled={record.status === 'voided'}>
-                  作废
+                  整批失效
                 </Button>
               </Popconfirm>
             </Access>
@@ -171,7 +168,7 @@ function CdkBatchPage() {
         ),
       },
     ],
-    [navigate],
+    [],
   );
 
   const openDetail = (record: CdkBatch) => {
@@ -191,11 +188,9 @@ function CdkBatchPage() {
   const openCreateModal = () => {
     createForm.resetFields();
     createForm.setFieldsValue({
-      totalCount: 100,
-      points: 100,
-      riskLevel: 'normal',
-      validFrom: dayjs(),
-      validTo: dayjs().add(30, 'day'),
+      totalCount: DEFAULT_TOTAL_COUNT,
+      points: DEFAULT_POINTS,
+      validRange: [dayjs(), dayjs().add(DEFAULT_VALID_DAYS, 'day')],
     });
     setModalOpen(true);
   };
@@ -204,13 +199,13 @@ function CdkBatchPage() {
     setSaving(true);
     try {
       const params: CdkBatchCreateParams = {
-        batchName: values.batchName,
-        benefitType: 'points',
+        batchName: values.batchName || `积分CDK-${dayjs().format('YYYYMMDDHHmm')}`,
+        benefitType: BENEFIT_TYPE_POINTS,
         points: values.points,
         totalCount: values.totalCount,
-        validFrom: values.validFrom.format(DATE_TIME_FORMAT),
-        validTo: values.validTo.format(DATE_TIME_FORMAT),
-        riskLevel: values.riskLevel,
+        validFrom: values.validRange[0].format(DATE_TIME_FORMAT),
+        validTo: values.validRange[1].format(DATE_TIME_FORMAT),
+        riskLevel: DEFAULT_RISK_LEVEL,
         remark: values.remark,
       };
       const response = await createCdkBatch(params);
@@ -226,30 +221,8 @@ function CdkBatchPage() {
     }
   };
 
-  const handlePause = async (record: CdkBatch) => {
-    await handleAction(() => pauseCdkBatch(record.id));
-  };
-
   const handleVoid = async (record: CdkBatch) => {
     await handleAction(() => voidCdkBatch(record.id));
-  };
-
-  const handleExport = async (record: CdkBatch) => {
-    const response = await exportCdkBatch(record.id);
-    if (response.code !== 0) {
-      message.error(response.message || '导出失败');
-      return;
-    }
-    setExportResult(response.data);
-    void loadRecords(pageNo, pageSize);
-  };
-
-  const handleCopyExport = async () => {
-    if (!exportResult?.content) {
-      return;
-    }
-    await navigator.clipboard.writeText(exportResult.content);
-    message.success('已复制');
   };
 
   const handleAction = async (action: () => Promise<{ code: number; message: string }>) => {
@@ -279,11 +252,11 @@ function CdkBatchPage() {
       </ListSearchCard>
 
       <ListTableCard
-        title="CDK 批次"
+        title="积分 CDK 生成记录"
         extra={
           <Access action="cdk:batch:create">
             <CreateButton onClick={openCreateModal}>
-              新建批次
+              生成积分 CDK
             </CreateButton>
           </Access>
         }
@@ -295,7 +268,7 @@ function CdkBatchPage() {
           locale={{ emptyText: <Empty description="暂无批次" /> }}
           pagination={{ current: pageNo, pageSize, total, showSizeChanger: true, showTotal: (count) => `共 ${count} 条` }}
           rowKey="id"
-          scroll={{ x: 1360 }}
+          scroll={{ x: 1480 }}
           onChange={(pagination) => void loadRecords(pagination.current || 1, pagination.pageSize || pageSize)}
         />
       </ListTableCard>
@@ -310,15 +283,15 @@ function CdkBatchPage() {
       />
 
       <SubmitModalForm<BatchCreateForm>
-        title="新建 CDK 批次"
+        title="生成积分 CDK"
         open={modalOpen}
         form={createForm}
         loading={saving}
         onCancel={() => setModalOpen(false)}
         onFinish={handleCreate}
       >
-        <Form.Item label="批次名称" name="batchName" rules={[{ required: true, message: '请输入批次名称' }]}>
-          <Input maxLength={80} />
+        <Form.Item label="批次名称" name="batchName">
+          <Input maxLength={80} placeholder="不填自动使用当前时间命名" />
         </Form.Item>
         <Form.Item label="积分数量" name="points" rules={[{ required: true, message: '请输入积分数量' }]}>
           <InputNumber min={1} precision={0} style={{ width: '100%' }} />
@@ -326,57 +299,25 @@ function CdkBatchPage() {
         <Form.Item label="生成数量" name="totalCount" rules={[{ required: true, message: '请输入生成数量' }]}>
           <InputNumber min={1} precision={0} style={{ width: '100%' }} />
         </Form.Item>
-        <Form.Item label="生效时间" name="validFrom" rules={[{ required: true, message: '请选择生效时间' }]}>
-          <DatePicker showTime style={{ width: '100%' }} />
-        </Form.Item>
-        <Form.Item label="失效时间" name="validTo" rules={[{ required: true, message: '请选择失效时间' }]}>
-          <DatePicker showTime style={{ width: '100%' }} />
-        </Form.Item>
-        <Form.Item label="风险等级" name="riskLevel" rules={[{ required: true, message: '请选择风险等级' }]}>
-          <Select options={riskOptions} />
+        <Form.Item label="有效期" name="validRange" rules={[{ required: true, message: '请选择有效期' }]}>
+          <DatePicker.RangePicker showTime style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item label="备注" name="remark">
           <Input.TextArea rows={3} maxLength={200} />
         </Form.Item>
       </SubmitModalForm>
-
-      <Modal
-        title="CDK 导出"
-        open={!!exportResult}
-        footer={(
-          <Space>
-            <Button onClick={handleCopyExport}>复制全部</Button>
-            <Button type="primary" onClick={() => setExportResult(undefined)}>关闭</Button>
-          </Space>
-        )}
-        width={760}
-        onCancel={() => setExportResult(undefined)}
-      >
-        <p>批次：{exportResult?.batchNo}，数量：{exportResult?.count}</p>
-        <p>文件：{exportResult?.fileName}，指纹：{exportResult?.fingerprint}</p>
-        <Input.TextArea value={exportResult?.content} rows={12} readOnly />
-      </Modal>
     </div>
   );
 }
 
 function renderBatchStatus(status: string) {
-  const colorMap: Record<string, string> = {
-    active: 'success',
-    paused: 'warning',
-    voided: 'error',
+  const statusMap: Record<string, { color: string; text: string }> = {
+    active: { color: 'success', text: '可兑换' },
+    paused: { color: 'warning', text: '已暂停' },
+    voided: { color: 'error', text: '整批失效' },
   };
-  return <Tag color={colorMap[status] || 'default'}>{status}</Tag>;
-}
-
-function renderRiskTag(riskLevel: string) {
-  if (riskLevel === 'critical') {
-    return <Tag color="red">关键</Tag>;
-  }
-  if (riskLevel === 'high') {
-    return <Tag color="volcano">高</Tag>;
-  }
-  return <Tag color="blue">普通</Tag>;
+  const matched = statusMap[status];
+  return <Tag color={matched?.color || 'default'}>{matched?.text || status}</Tag>;
 }
 
 function renderBenefitConfig(value: string) {
@@ -385,6 +326,15 @@ function renderBenefitConfig(value: string) {
     return `${config.points || 0} 积分`;
   } catch {
     return '-';
+  }
+}
+
+function calculateTotalPoints(record: CdkBatch) {
+  try {
+    const config = JSON.parse(record.benefitConfig) as { points?: number };
+    return (config.points || 0) * record.totalCount;
+  } catch {
+    return 0;
   }
 }
 

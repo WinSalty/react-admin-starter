@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TableProps } from 'antd';
 import { App, Button, Empty, Form, Input, Popconfirm, Select, Space, Table, Tag } from 'antd';
+import { CopyOutlined } from '@ant-design/icons';
 import { useSearchParams } from 'react-router-dom';
 import { Access } from '@/components/Access';
 import ListSearchCard from '@/components/admin/ListSearchCard';
@@ -9,6 +10,7 @@ import { fetchCdkCodes, updateCdkCodeStatus } from '@/services/cdk';
 import type { CdkCode } from '@/types/cdk';
 
 interface CodeSearchForm {
+  keyword?: string;
   batchId?: string;
   status?: string;
 }
@@ -41,6 +43,7 @@ function CdkCodePage() {
       setLoading(true);
       try {
         const response = await fetchCdkCodes({
+          keyword: values.keyword,
           batchId: values.batchId,
           status: values.status,
           pageNo: nextPageNo,
@@ -90,18 +93,39 @@ function CdkCodePage() {
         width: 360,
         render: (_, record) => (
           <Space size={8}>
-            <Input value={record.cdk} readOnly style={{ width: 280 }} />
-            <Button size="small" onClick={() => void handleCopy(record.cdk)}>
+            <Input value={record.cdk || '历史码不可查看'} readOnly disabled={!record.cdk} style={{ width: 280 }} />
+            <Button size="small" icon={<CopyOutlined />} disabled={!record.cdk} onClick={() => void handleCopy(record.cdk)}>
               复制
             </Button>
           </Space>
         ),
       },
-      { title: '批次ID', dataIndex: 'batchId', width: 100 },
+      {
+        title: '批次',
+        key: 'batch',
+        width: 260,
+        render: (_, record) => (
+          <div className="query-name-cell">
+            <strong>{record.batchName || '-'}</strong>
+            <span>{record.batchNo || `ID ${record.batchId}`}</span>
+          </div>
+        ),
+      },
+      { title: '积分', dataIndex: 'benefitConfig', width: 120, render: renderBenefitConfig },
       { title: '状态', dataIndex: 'status', width: 110, render: renderCodeStatus },
-      { title: '兑换用户', dataIndex: 'redeemedUserId', width: 120, render: (value?: string) => value || '-' },
-      { title: '兑换时间', dataIndex: 'redeemedAt', width: 180, render: (value?: string) => value || '-' },
-      { title: '兑换单号', dataIndex: 'redeemRecordNo', width: 220, render: (value?: string) => value || '-' },
+      { title: '批次状态', dataIndex: 'batchStatus', width: 110, render: renderBatchStatus },
+      { title: '有效期', key: 'valid', width: 300, render: (_, record) => `${record.validFrom || '-'} 至 ${record.validTo || '-'}` },
+      {
+        title: '兑换信息',
+        key: 'redeem',
+        width: 260,
+        render: (_, record) => (
+          <div className="query-name-cell">
+            <strong>{record.redeemedUserId || '-'}</strong>
+            <span>{record.redeemRecordNo || record.redeemedAt || '-'}</span>
+          </div>
+        ),
+      },
       { title: '创建时间', dataIndex: 'createdAt', width: 180 },
       {
         title: '操作',
@@ -146,8 +170,11 @@ function CdkCodePage() {
         onReset={handleReset}
         onFinish={handleSearch}
       >
+        <Form.Item label="关键字" name="keyword">
+          <Input placeholder="批次号 / 名称 / CDK前缀" allowClear />
+        </Form.Item>
         <Form.Item label="批次ID" name="batchId">
-          <Input placeholder="不填则展示全部" allowClear />
+          <Input placeholder="精确批次ID" allowClear />
         </Form.Item>
         <Form.Item label="状态" name="status">
           <Select allowClear placeholder="全部状态" style={{ width: 140 }} options={statusOptions} />
@@ -162,7 +189,7 @@ function CdkCodePage() {
           locale={{ emptyText: <Empty description="暂无 CDK" /> }}
           pagination={{ current: pageNo, pageSize, total, showSizeChanger: true, showTotal: (count) => `共 ${count} 条` }}
           rowKey="id"
-          scroll={{ x: 1500 }}
+          scroll={{ x: 1860 }}
           onChange={(pagination) => void loadRecords(pagination.current || 1, pagination.pageSize || pageSize)}
         />
       </ListTableCard>
@@ -178,6 +205,31 @@ function renderCodeStatus(status: string) {
     return <Tag color="processing">已兑换</Tag>;
   }
   return <Tag color="error">已失效</Tag>;
+}
+
+function renderBatchStatus(status?: string) {
+  if (status === 'active') {
+    return <Tag color="success">可用</Tag>;
+  }
+  if (status === 'paused') {
+    return <Tag color="warning">暂停</Tag>;
+  }
+  if (status === 'voided') {
+    return <Tag color="error">整批失效</Tag>;
+  }
+  return <Tag>{status || '-'}</Tag>;
+}
+
+function renderBenefitConfig(value?: string) {
+  if (!value) {
+    return '-';
+  }
+  try {
+    const config = JSON.parse(value) as { points?: number };
+    return `${(config.points || 0).toLocaleString()} 积分`;
+  } catch {
+    return '-';
+  }
 }
 
 export default CdkCodePage;
