@@ -15,6 +15,7 @@ const AccountSettings = lazy(() => import('@/pages/account/AccountSettings'));
 const BenefitProductPage = lazy(() => import('@/pages/benefit/BenefitProductPage'));
 const CdkBatchPage = lazy(() => import('@/pages/cdk/CdkBatchPage'));
 const CdkCodePage = lazy(() => import('@/pages/cdk/CdkCodePage'));
+const CdkExtractPage = lazy(() => import('@/pages/cdk/CdkExtractPage'));
 const CdkRedeemRecordPage = lazy(() => import('@/pages/cdk/CdkRedeemRecordPage'));
 const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
 const PermissionPage = lazy(() => import('@/pages/permission/PermissionPage'));
@@ -57,6 +58,14 @@ export const router = createBrowserRouter(
       element: (
         <LazyRoute>
           <Navigate to="/dashboard" replace />
+        </LazyRoute>
+      ),
+    },
+    {
+      path: '/cdk/extract/:token',
+      element: (
+        <LazyRoute>
+          <CdkExtractPage />
         </LazyRoute>
       ),
     },

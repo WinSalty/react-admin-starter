@@ -93,7 +93,7 @@
 | 公告管理 | 公告分页、详情、编辑、发布状态控制 |
 | 系统配置 | 查看和维护系统配置项 |
 | CDK 批次 | 管理员生成积分 CDK 批次，展示生成记录、兑换进度、有效期、批次内 CDK 和整批失效 |
-| CDK 管理 | 默认展示全部 CDK，支持按批次、关键字和状态筛选，展示批次与积分信息，支持复制、启用和失效，不提供删除入口 |
+| CDK 管理 | 默认展示全部 CDK，支持按批次、关键字和状态筛选，展示批次与积分信息，支持复制、启用、失效和生成临时提取链接，不提供删除入口 |
 | CDK 兑换记录 | 按用户、批次、状态查询兑换审计记录 |
 | 积分审计 | 管理端积分账户、流水、对账结果和人工调整入口 |
 
@@ -139,7 +139,8 @@
 | 系统配置 | `GET /api/system/configs`、`POST /api/system/configs/save` |
 | 积分账户 | `GET /api/points/account`、`GET /api/points/ledger`、`GET /api/points/recharge/orders`、`GET /api/points/consume/orders`、`GET /api/points/freeze/orders` |
 | CDK 兑换 | `POST /api/points/cdk/redeem` |
-| 管理端 CDK | `GET/POST /api/admin/cdk/batches`、`POST /api/admin/cdk/batches/{id}/void`、`GET /api/admin/cdk/codes`、`POST /api/admin/cdk/codes/{id}/status`、`GET /api/admin/cdk/redeem-records` |
+| 管理端 CDK | `GET/POST /api/admin/cdk/batches`、`POST /api/admin/cdk/batches/{id}/void`、`GET /api/admin/cdk/codes`、`POST /api/admin/cdk/codes/{id}/status`、`POST /api/admin/cdk/codes/{id}/extract-links`、`GET /api/admin/cdk/extract-links/{id}/access-records`、`GET /api/admin/cdk/redeem-records` |
+| CDK 公开提取 | `POST /api/public/cdk/extract/{token}`，匿名提取页面会采集浏览器指纹摘要并支持一键复制 CDK |
 | 积分审计 | `GET /api/admin/points/accounts`、`GET /api/admin/points/ledger`、`POST /api/admin/points/adjustments`、`POST /api/admin/points/adjustments/{id}/approve`、`GET /api/admin/points/reconciliation` |
 
 ## 配套环境说明

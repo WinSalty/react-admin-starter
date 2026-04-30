@@ -102,3 +102,75 @@ export interface CdkRedeemResult {
   frozenPoints: number;
   status: string;
 }
+
+export interface DeviceSnapshot {
+  platform?: string;
+  language?: string;
+  timezone?: string;
+  screen?: string;
+  colorDepth?: number;
+  deviceMemory?: number;
+  hardwareConcurrency?: number;
+  touchPoints?: number;
+}
+
+export interface CdkExtractLink {
+  id: string;
+  linkNo: string;
+  codeId: string;
+  batchId: string;
+  url?: string;
+  maxAccessCount: number;
+  accessedCount: number;
+  remainingAccessCount: number;
+  expireAt: string;
+  status: string;
+  createdBy: string;
+  disabledBy?: string;
+  disabledAt?: string;
+  remark?: string;
+  lastAccessedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CdkExtractLinkCreateParams {
+  maxAccessCount: number;
+  expireAt: string;
+  remark?: string;
+}
+
+export interface CdkExtractAccessRecord {
+  id: string;
+  accessNo: string;
+  linkId: string;
+  codeId: string;
+  batchId: string;
+  result: string;
+  failureCode: string;
+  failureMessage: string;
+  clientIp: string;
+  userAgentHash: string;
+  browserFingerprint: string;
+  deviceSnapshot: string;
+  referer: string;
+  traceId: string;
+  createdAt: string;
+}
+
+export interface CdkExtractAccessRecordListParams {
+  result?: string;
+  fingerprint?: string;
+  pageNo?: number;
+  pageSize?: number;
+}
+
+export interface CdkExtractView {
+  cdk: string;
+  batchName: string;
+  benefitType: string;
+  benefitText: string;
+  validTo: string;
+  remainingAccessCount: number;
+  status: string;
+}

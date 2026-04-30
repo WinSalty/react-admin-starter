@@ -5,6 +5,12 @@ import type {
   CdkBatchListParams,
   CdkCode,
   CdkCodeListParams,
+  CdkExtractAccessRecord,
+  CdkExtractAccessRecordListParams,
+  CdkExtractLink,
+  CdkExtractLinkCreateParams,
+  CdkExtractView,
+  DeviceSnapshot,
   CdkRedeemRecord,
   CdkRedeemRecordListParams,
   CdkRedeemResult,
@@ -38,6 +44,47 @@ export async function fetchCdkCodes(params: CdkCodeListParams): Promise<ApiRespo
 
 export async function updateCdkCodeStatus(id: string, status: string): Promise<ApiResponse<CdkCode>> {
   const response = await request.post<ApiResponse<CdkCode>>(`/api/admin/cdk/codes/${id}/status`, { status });
+  return response.data;
+}
+
+export async function createCdkExtractLink(
+  id: string,
+  params: CdkExtractLinkCreateParams,
+): Promise<ApiResponse<CdkExtractLink>> {
+  const response = await request.post<ApiResponse<CdkExtractLink>>(`/api/admin/cdk/codes/${id}/extract-links`, params);
+  return response.data;
+}
+
+export async function fetchCdkExtractLinks(id: string): Promise<ApiResponse<CdkExtractLink[]>> {
+  const response = await request.get<ApiResponse<CdkExtractLink[]>>(`/api/admin/cdk/codes/${id}/extract-links`);
+  return response.data;
+}
+
+export async function disableCdkExtractLink(id: string, reason: string): Promise<ApiResponse<CdkExtractLink>> {
+  const response = await request.post<ApiResponse<CdkExtractLink>>(`/api/admin/cdk/extract-links/${id}/disable`, { reason });
+  return response.data;
+}
+
+export async function fetchCdkExtractAccessRecords(
+  id: string,
+  params: CdkExtractAccessRecordListParams,
+): Promise<ApiResponse<PageResult<CdkExtractAccessRecord>>> {
+  const response = await request.get<ApiResponse<PageResult<CdkExtractAccessRecord>>>(
+    `/api/admin/cdk/extract-links/${id}/access-records`,
+    { params },
+  );
+  return response.data;
+}
+
+export async function fetchPublicCdkExtract(
+  token: string,
+  browserFingerprint: string,
+  deviceSnapshot: DeviceSnapshot,
+): Promise<ApiResponse<CdkExtractView>> {
+  const response = await request.post<ApiResponse<CdkExtractView>>(`/api/public/cdk/extract/${token}`, {
+    browserFingerprint,
+    deviceSnapshot,
+  });
   return response.data;
 }
 
