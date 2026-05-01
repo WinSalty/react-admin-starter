@@ -13,6 +13,7 @@ const Login = lazy(() => import('@/pages/auth/Login'));
 const Register = lazy(() => import('@/pages/auth/Register'));
 const AccountSettings = lazy(() => import('@/pages/account/AccountSettings'));
 const BenefitProductPage = lazy(() => import('@/pages/benefit/BenefitProductPage'));
+const CredentialExtractLinkPage = lazy(() => import('@/pages/credential/CredentialExtractLinkPage'));
 const CredentialModulePage = lazy(() => import('@/pages/credential/CredentialModulePage'));
 const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
 const PermissionPage = lazy(() => import('@/pages/permission/PermissionPage'));
@@ -222,7 +223,7 @@ export const router = createBrowserRouter(
           element: (
             <LazyRoute>
               <RouteGuard permissionCode={dynamicRouteMap.credentialExtractLinks.routeCode}>
-                <CredentialModulePage moduleKind="extractLinks" />
+                <CredentialExtractLinkPage />
               </RouteGuard>
             </LazyRoute>
           ),
