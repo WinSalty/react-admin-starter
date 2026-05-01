@@ -110,7 +110,6 @@ function CredentialExtractLinkPage() {
     const response = await reissueCredentialExtractLink(record.id, {
       itemsPerLink: Math.max(record.itemCount || 1, 1),
       maxAccessCount: record.maxAccessCount || 3,
-      expireAt: dayjs().add(7, 'day').format('YYYY-MM-DD HH:mm:ss'),
       remark: record.remark || '补发链接',
     });
     if (response.code !== 0) {

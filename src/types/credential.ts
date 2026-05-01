@@ -188,7 +188,7 @@ export interface CredentialRedeemRecordListParams {
 export interface CredentialExtractLinkCreateRequest {
   itemsPerLink: number;
   maxAccessCount: number;
-  expireAt: string;
+  expireAt?: string;
   itemScope?: string;
   remark?: string;
 }

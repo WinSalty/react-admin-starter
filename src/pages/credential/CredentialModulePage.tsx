@@ -81,7 +81,7 @@ interface ImportBatchForm {
 interface LinkForm {
   itemsPerLink: number;
   maxAccessCount: number;
-  expireAt: dayjs.Dayjs;
+  expireAt?: dayjs.Dayjs;
   remark?: string;
 }
 
@@ -242,7 +242,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
     const payload = {
       itemsPerLink: values.itemsPerLink,
       maxAccessCount: values.maxAccessCount,
-      expireAt: values.expireAt.format('YYYY-MM-DD HH:mm:ss'),
+      expireAt: values.expireAt?.format('YYYY-MM-DD HH:mm:ss'),
       remark: values.remark,
     };
     const response = 'batchNo' in linkTarget
@@ -288,7 +288,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
     },
     onCreateLink: (record) => {
       setLinkTarget(record);
-      linkForm.setFieldsValue({ itemsPerLink: 1, maxAccessCount: 3, expireAt: dayjs().add(7, 'day') });
+      linkForm.setFieldsValue({ itemsPerLink: 1, maxAccessCount: 3, expireAt: undefined });
     },
     onDisableItem: async (record) => {
       await disableCredentialItem(record.id);
@@ -313,8 +313,6 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
               createExtractLinks: false,
               itemsPerLink: 1,
               maxAccessCount: 3,
-              validRange: [dayjs(), dayjs().add(30, 'day')],
-              expireAt: dayjs().add(7, 'day'),
             });
             setImportOpen(true);
           }}>导入卡密批次</Button>
@@ -323,7 +321,6 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
               categoryId: defaultCategoryId('POINTS_REDEEM'),
               totalCount: 100,
               points: 100,
-              validRange: [dayjs(), dayjs().add(30, 'day')],
             });
             setGeneratedOpen(true);
           }}>生成积分 CDK</Button>
@@ -384,7 +381,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
           </Form.Item>
         </Space.Compact>
         <Form.Item label="有效期" name="validRange">
-          <DatePicker.RangePicker showTime style={{ width: '100%' }} />
+          <DatePicker.RangePicker showTime style={{ width: '100%' }} placeholder={['默认当前时间', '默认永久有效']} />
         </Form.Item>
         <Form.Item label="备注" name="remark">
           <Input />
@@ -402,7 +399,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
           <Input placeholder="不填则自动生成" />
         </Form.Item>
         <Form.Item label="有效期" name="validRange">
-          <DatePicker.RangePicker showTime style={{ width: '100%' }} />
+          <DatePicker.RangePicker showTime style={{ width: '100%' }} placeholder={['默认当前时间', '默认永久有效']} />
         </Form.Item>
         <Form.Item label="分隔符" name="delimiter" rules={[{ required: true, message: '请选择分隔符' }]}>
           <Select options={[
@@ -445,7 +442,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
             <InputNumber min={1} precision={0} style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item label="链接过期时间" name="expireAt" style={{ width: '34%' }}>
-            <DatePicker showTime style={{ width: '100%' }} />
+            <DatePicker showTime style={{ width: '100%' }} placeholder="默认永久有效" />
           </Form.Item>
         </Space.Compact>
       </SubmitModalForm>
@@ -457,8 +454,8 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
         <Form.Item label="访问次数" name="maxAccessCount" rules={[{ required: true, message: '请输入访问次数' }]}>
           <InputNumber min={1} precision={0} style={{ width: '100%' }} />
         </Form.Item>
-        <Form.Item label="过期时间" name="expireAt" rules={[{ required: true, message: '请选择过期时间' }]}>
-          <DatePicker showTime style={{ width: '100%' }} />
+        <Form.Item label="过期时间" name="expireAt">
+          <DatePicker showTime style={{ width: '100%' }} placeholder="默认永久有效" />
         </Form.Item>
         <Form.Item label="备注" name="remark">
           <Input />
