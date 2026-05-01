@@ -56,6 +56,8 @@ export interface CredentialBatch {
   createdBy?: string;
   createdAt: string;
   updatedAt: string;
+  generatedSecrets?: CredentialGeneratedSecret[];
+  extractLinks?: CredentialExtractLinkCopyResult[];
 }
 
 export interface CredentialBatchListParams {
@@ -86,6 +88,12 @@ export interface CredentialExtractLinkCopyResult {
   id: string;
   linkNo: string;
   url: string;
+}
+
+export interface CredentialGeneratedSecret {
+  itemNo: string;
+  secretText: string;
+  copyLabel: string;
 }
 
 export interface CredentialItem {

@@ -3,6 +3,7 @@ import { App, Button, DatePicker, Empty, Form, Input, InputNumber, Modal, Popcon
 import type { TableProps } from 'antd';
 import {
   AppstoreOutlined,
+  CopyOutlined,
   EyeOutlined,
   FileSearchOutlined,
   GiftOutlined,
@@ -13,6 +14,8 @@ import {
   StopOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
+import { dynamicRouteMap } from '@/access/routeMap';
 import ListSearchCard from '@/components/admin/ListSearchCard';
 import ListTableCard from '@/components/admin/ListTableCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
@@ -37,11 +40,14 @@ import {
 import type {
   CredentialBatch,
   CredentialCategory,
+  CredentialExtractLinkCopyResult,
+  CredentialGeneratedSecret,
   CredentialImportPreview,
   CredentialImportTask,
   CredentialItem,
   CredentialRedeemRecord,
 } from '@/types/credential';
+import { copyText } from '@/utils/clipboard';
 
 type CredentialModuleKind = 'batches' | 'items' | 'extractLinks' | 'categories' | 'importTasks' | 'redeemRecords';
 type CredentialRow = CredentialBatch | CredentialItem | CredentialCategory | CredentialImportTask | CredentialRedeemRecord;
@@ -86,6 +92,13 @@ interface LinkForm {
   remark?: string;
 }
 
+interface CredentialResultState {
+  title: string;
+  batchId?: string;
+  generatedSecrets?: CredentialGeneratedSecret[];
+  extractLinks?: CredentialExtractLinkCopyResult[];
+}
+
 interface CategoryForm {
   categoryCode: string;
   categoryName: string;
@@ -110,6 +123,7 @@ const moduleMeta: Record<CredentialModuleKind, { title: string; icon: JSX.Elemen
  */
 function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
   const { message, modal } = App.useApp();
+  const navigate = useNavigate();
   const [searchForm] = Form.useForm<SearchForm>();
   const [generatedForm] = Form.useForm<GeneratedBatchForm>();
   const [importForm] = Form.useForm<ImportBatchForm>();
@@ -124,6 +138,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [linkTarget, setLinkTarget] = useState<CredentialBatch | CredentialItem>();
   const [importPreview, setImportPreview] = useState<CredentialImportPreview>();
+  const [resultState, setResultState] = useState<CredentialResultState>();
   const validRangePresets = buildCredentialValidRangePresets();
   const expireAtPresets = buildCredentialExpireAtPresets();
 
@@ -189,6 +204,13 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       return;
     }
     message.success('系统生成批次已创建');
+    if (response.data.generatedSecrets?.length) {
+      setResultState({
+        title: `${response.data.batchName} 生成结果`,
+        batchId: response.data.id,
+        generatedSecrets: response.data.generatedSecrets,
+      });
+    }
     setGeneratedOpen(false);
     generatedForm.resetFields();
     void loadRecords();
@@ -232,6 +254,13 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       return;
     }
     message.success('卡密批次已导入');
+    if (response.data.extractLinks?.length) {
+      setResultState({
+        title: `${response.data.batchName} 提取链接`,
+        batchId: response.data.id,
+        extractLinks: response.data.extractLinks,
+      });
+    }
     setImportOpen(false);
     setImportPreview(undefined);
     importForm.resetFields();
@@ -255,6 +284,13 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       return;
     }
     message.success(`已生成 ${response.data.linkCount} 个提取链接`);
+    if (response.data.links?.length) {
+      setResultState({
+        title: '提取链接生成结果',
+        batchId: 'batchNo' in linkTarget ? linkTarget.id : linkTarget.batchId,
+        extractLinks: response.data.links,
+      });
+    }
     setLinkTarget(undefined);
     linkForm.resetFields();
     void loadRecords();
@@ -284,6 +320,26 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
     });
   };
 
+  const copyGeneratedSecrets = async (records: CredentialGeneratedSecret[]) => {
+    const text = records.map((item) => item.secretText).join('\n');
+    if (await copyText(text)) {
+      message.success('CDK 已复制');
+    }
+  };
+
+  const copyExtractLinks = async (records: CredentialExtractLinkCopyResult[]) => {
+    const text = records.map((item) => item.url).join('\n');
+    if (await copyText(text)) {
+      message.success('提取链接已复制');
+    }
+  };
+
+  const viewExtractLinks = (batchId?: string) => {
+    const query = batchId ? `?batchId=${batchId}` : '';
+    setResultState(undefined);
+    navigate(`${dynamicRouteMap.credentialExtractLinks.path}${query}`);
+  };
+
   const columns = useMemo<TableProps<CredentialRow>['columns']>(() => buildColumns(moduleKind, {
     onDisableBatch: async (record) => {
       await disableCredentialBatch(record.id);
@@ -293,6 +349,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       setLinkTarget(record);
       linkForm.setFieldsValue({ itemsPerLink: 1, maxAccessCount: 3, expireAt: undefined });
     },
+    onViewLinks: (record) => viewExtractLinks(record.id),
     onDisableItem: async (record) => {
       await disableCredentialItem(record.id);
       void loadRecords();
@@ -489,6 +546,79 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
           <Select options={[{ label: '系统生成', value: 'SYSTEM_GENERATED' }, { label: '文本导入', value: 'TEXT_IMPORTED' }, { label: '混合', value: 'MIXED' }]} />
         </Form.Item>
       </SubmitModalForm>
+
+      <Modal
+        title={resultState?.title || '生成结果'}
+        open={!!resultState}
+        width={860}
+        onCancel={() => setResultState(undefined)}
+        footer={[
+          resultState?.generatedSecrets?.length ? (
+            <Button key="copy-secrets" icon={<CopyOutlined />} onClick={() => void copyGeneratedSecrets(resultState.generatedSecrets || [])}>
+              复制全部 CDK
+            </Button>
+          ) : null,
+          resultState?.extractLinks?.length ? (
+            <Button key="copy-links" icon={<CopyOutlined />} onClick={() => void copyExtractLinks(resultState.extractLinks || [])}>
+              复制全部链接
+            </Button>
+          ) : null,
+          resultState?.extractLinks?.length ? (
+            <Button key="view-links" onClick={() => viewExtractLinks(resultState.batchId)}>
+              查看提取链接
+            </Button>
+          ) : null,
+          <Button key="close" type="primary" onClick={() => setResultState(undefined)}>
+            关闭
+          </Button>,
+        ].filter(Boolean)}
+      >
+        {resultState?.generatedSecrets?.length ? (
+          <Table<CredentialGeneratedSecret>
+            columns={[
+              { title: '标签', dataIndex: 'copyLabel', width: 120 },
+              { title: '明细编号', dataIndex: 'itemNo', width: 220 },
+              { title: 'CDK', dataIndex: 'secretText' },
+              {
+                title: '操作',
+                key: 'actions',
+                width: 90,
+                render: (_, record) => (
+                  <Button type="link" icon={<CopyOutlined />} onClick={() => void copyGeneratedSecrets([record])}>
+                    复制
+                  </Button>
+                ),
+              },
+            ]}
+            dataSource={resultState.generatedSecrets}
+            pagination={{ pageSize: 10, showSizeChanger: false }}
+            rowKey="itemNo"
+            size="small"
+          />
+        ) : null}
+        {resultState?.extractLinks?.length ? (
+          <Table<CredentialExtractLinkCopyResult>
+            columns={[
+              { title: '链接编号', dataIndex: 'linkNo', width: 220 },
+              { title: '公开链接', dataIndex: 'url', ellipsis: true },
+              {
+                title: '操作',
+                key: 'actions',
+                width: 90,
+                render: (_, record) => (
+                  <Button type="link" icon={<CopyOutlined />} onClick={() => void copyExtractLinks([record])}>
+                    复制
+                  </Button>
+                ),
+              },
+            ]}
+            dataSource={resultState.extractLinks}
+            pagination={{ pageSize: 10, showSizeChanger: false }}
+            rowKey="id"
+            size="small"
+          />
+        ) : null}
+      </Modal>
     </div>
   );
 }
@@ -498,6 +628,7 @@ function buildColumns(
   handlers: {
     onDisableBatch: (record: CredentialBatch) => Promise<void>;
     onCreateLink: (record: CredentialBatch | CredentialItem) => void;
+    onViewLinks: (record: CredentialBatch) => void;
     onDisableItem: (record: CredentialItem) => Promise<void>;
     onEnableItem: (record: CredentialItem) => Promise<void>;
     onReveal: (record: CredentialItem) => void;
@@ -528,12 +659,13 @@ function buildColumns(
         title: '操作',
         key: 'actions',
         fixed: 'right',
-        width: 210,
+        width: 290,
         render: (_, record) => {
           const batch = record as CredentialBatch;
           return (
             <Space size={4}>
               <Button type="link" icon={<LinkOutlined />} disabled={batch.status !== 'active'} onClick={() => handlers.onCreateLink(batch)}>生成链接</Button>
+              <Button type="link" icon={<EyeOutlined />} disabled={!batch.linkedCount} onClick={() => handlers.onViewLinks(batch)}>查看链接</Button>
               <Popconfirm title="确认停用该批次？" onConfirm={() => void handlers.onDisableBatch(batch)}>
                 <Button type="link" danger icon={<StopOutlined />} disabled={batch.status !== 'active'}>停用</Button>
               </Popconfirm>

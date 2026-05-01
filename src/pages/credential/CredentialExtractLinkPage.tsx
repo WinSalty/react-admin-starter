@@ -3,6 +3,7 @@ import { App, Button, DatePicker, Drawer, Empty, Form, Input, Popconfirm, Select
 import type { TableProps } from 'antd';
 import { CopyOutlined, EyeOutlined, LinkOutlined, StopOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useSearchParams } from 'react-router-dom';
 import { Access } from '@/components/Access';
 import ListSearchCard from '@/components/admin/ListSearchCard';
 import ListTableCard from '@/components/admin/ListTableCard';
@@ -22,6 +23,7 @@ import { copyText } from '@/utils/clipboard';
 
 interface SearchForm {
   keyword?: string;
+  batchId?: string;
   status?: string;
 }
 
@@ -37,6 +39,7 @@ interface ExtendForm {
  */
 function CredentialExtractLinkPage() {
   const { message } = App.useApp();
+  const [searchParams] = useSearchParams();
   const [form] = Form.useForm<SearchForm>();
   const [extendForm] = Form.useForm<ExtendForm>();
   const [records, setRecords] = useState<CredentialExtractLink[]>([]);
@@ -47,12 +50,13 @@ function CredentialExtractLinkPage() {
   const [detailRecord, setDetailRecord] = useState<CredentialExtractLink>();
   const [extendRecord, setExtendRecord] = useState<CredentialExtractLink>();
   const expireAtPresets = buildCredentialExpireAtPresets();
+  const batchIdFromQuery = searchParams.get('batchId') || undefined;
 
   const loadRecords = useCallback(async () => {
     setLoading(true);
     try {
       const values = form.getFieldsValue();
-      const response = await fetchCredentialExtractLinks({ ...values, pageNo: 1, pageSize: 100 });
+      const response = await fetchCredentialExtractLinks({ ...values, batchId: values.batchId || batchIdFromQuery, pageNo: 1, pageSize: 100 });
       if (response.code !== 0) {
         message.error(response.message || '提取链接获取失败');
         return;
@@ -61,7 +65,7 @@ function CredentialExtractLinkPage() {
     } finally {
       setLoading(false);
     }
-  }, [form, message]);
+  }, [batchIdFromQuery, form, message]);
 
   useEffect(() => {
     void loadRecords();
@@ -238,6 +242,7 @@ function CredentialExtractLinkPage() {
             ]}
           />
         </Form.Item>
+        {batchIdFromQuery ? <Tag color="blue">当前批次链接</Tag> : null}
       </ListSearchCard>
 
       <ListTableCard title={<span className="wallet-section-title"><span><LinkOutlined /></span>提取链接</span>}>
