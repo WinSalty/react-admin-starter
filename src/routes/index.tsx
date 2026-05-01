@@ -15,6 +15,7 @@ const AccountSettings = lazy(() => import('@/pages/account/AccountSettings'));
 const BenefitProductPage = lazy(() => import('@/pages/benefit/BenefitProductPage'));
 const CredentialExtractLinkPage = lazy(() => import('@/pages/credential/CredentialExtractLinkPage'));
 const CredentialModulePage = lazy(() => import('@/pages/credential/CredentialModulePage'));
+const PublicCredentialExtractPage = lazy(() => import('@/pages/credential/PublicCredentialExtractPage'));
 const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
 const PermissionPage = lazy(() => import('@/pages/permission/PermissionPage'));
 const PointAuditPage = lazy(() => import('@/pages/points/PointAuditPage'));
@@ -307,6 +308,14 @@ export const router = createBrowserRouter(
           ),
         },
       ],
+    },
+    {
+      path: '/credentials/extract/:token',
+      element: (
+        <LazyRoute>
+          <PublicCredentialExtractPage />
+        </LazyRoute>
+      ),
     },
     {
       element: (

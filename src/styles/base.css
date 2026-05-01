@@ -2703,3 +2703,52 @@ body {
     padding: 24px;
   }
 }
+
+.public-extract-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+  background: #f5f7fb;
+}
+
+.public-extract-card {
+  width: min(760px, 100%);
+}
+
+.public-extract-secret {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.public-extract-secret div {
+  min-width: 0;
+}
+
+.public-extract-secret span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.public-extract-secret strong {
+  display: block;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 15px;
+  line-height: 24px;
+}
+
+@media (max-width: 520px) {
+  .public-extract-secret {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

@@ -5,6 +5,7 @@ import type { TableProps, TabsProps } from 'antd';
 import {
   DatabaseOutlined,
   FilterOutlined,
+  KeyOutlined,
   LockOutlined,
   PieChartOutlined,
   QuestionCircleOutlined,
@@ -19,11 +20,16 @@ import {
   fetchPointLedger,
   fetchPointRechargeOrders,
 } from '@/services/points';
+import { redeemCredential } from '@/services/credential';
 import { createOnlineRecharge } from '@/services/trade';
 import type { PointAccount, PointFreezeOrder, PointLedgerRecord, PointRechargeOrder } from '@/types/points';
 
 interface OnlineRechargeForm {
   amount: number;
+}
+
+interface CdkRedeemForm {
+  secretText: string;
 }
 
 /**
@@ -35,6 +41,7 @@ interface OnlineRechargeForm {
 function WalletPage() {
   const { message } = App.useApp();
   const [onlineRechargeForm] = Form.useForm<OnlineRechargeForm>();
+  const [cdkRedeemForm] = Form.useForm<CdkRedeemForm>();
   const [account, setAccount] = useState<PointAccount>();
   const [ledgerRecords, setLedgerRecords] = useState<PointLedgerRecord[]>([]);
   const [rechargeRecords, setRechargeRecords] = useState<PointRechargeOrder[]>([]);
@@ -42,6 +49,7 @@ function WalletPage() {
   const [freezeRecords, setFreezeRecords] = useState<PointFreezeOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [recharging, setRecharging] = useState(false);
+  const [redeeming, setRedeeming] = useState(false);
   const [recordKeyword, setRecordKeyword] = useState('');
 
   const loadWallet = useCallback(async () => {
@@ -190,6 +198,26 @@ function WalletPage() {
     }
   };
 
+  const handleCdkRedeem = async (values: CdkRedeemForm) => {
+    setRedeeming(true);
+    try {
+      const response = await redeemCredential({
+        secretText: values.secretText,
+        idempotencyKey: createClientIdempotencyKey('credential'),
+        deviceFingerprint: `${navigator.platform}:${navigator.language}`,
+      });
+      if (response.code !== 0) {
+        message.error(response.message || '兑换失败');
+        return;
+      }
+      message.success(`兑换成功，入账 ${response.data.points} 积分`);
+      cdkRedeemForm.resetFields();
+      void loadWallet();
+    } finally {
+      setRedeeming(false);
+    }
+  };
+
   return (
     <div className="page-stack points-wallet-page">
       <div className="wallet-page-title">
@@ -251,6 +279,28 @@ function WalletPage() {
             <Form.Item>
               <Button type="primary" htmlType="submit" loading={recharging}>
                 创建充值单
+              </Button>
+            </Form.Item>
+          </Form>
+        </WalletActionCard>
+        <WalletActionCard
+          title="CDK 兑换"
+          description="输入积分 CDK，兑换到当前积分账户"
+          icon={<KeyOutlined />}
+          artwork="gift"
+        >
+          <Form
+            form={cdkRedeemForm}
+            layout="inline"
+            className="wallet-action-form"
+            onFinish={(values) => void handleCdkRedeem(values)}
+          >
+            <Form.Item name="secretText" rules={[{ required: true, message: '请输入 CDK' }]}>
+              <Input placeholder="输入 CDK" />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" loading={redeeming}>
+                立即兑换
               </Button>
             </Form.Item>
           </Form>

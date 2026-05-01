@@ -14,6 +14,7 @@ import {
   fetchCredentialExtractAccessRecords,
   fetchCredentialExtractLinkItems,
   fetchCredentialExtractLinks,
+  reissueCredentialExtractLink,
 } from '@/services/credential';
 import type { CredentialExtractAccessRecord, CredentialExtractLink, CredentialItem } from '@/types/credential';
 import { copyText } from '@/utils/clipboard';
@@ -105,6 +106,23 @@ function CredentialExtractLinkPage() {
     void loadRecords();
   };
 
+  const handleReissue = async (record: CredentialExtractLink) => {
+    const response = await reissueCredentialExtractLink(record.id, {
+      itemsPerLink: Math.max(record.itemCount || 1, 1),
+      maxAccessCount: record.maxAccessCount || 3,
+      expireAt: dayjs().add(7, 'day').format('YYYY-MM-DD HH:mm:ss'),
+      remark: record.remark || '补发链接',
+    });
+    if (response.code !== 0) {
+      message.error(response.message || '补发失败');
+      return;
+    }
+    if (await copyText(response.data.url)) {
+      message.success('补发链接已复制');
+    }
+    void loadRecords();
+  };
+
   const openExtendModal = (record: CredentialExtractLink) => {
     setExtendRecord(record);
     extendForm.setFieldsValue({
@@ -187,6 +205,11 @@ function CredentialExtractLinkPage() {
                   停用
                 </Button>
               </Popconfirm>
+            </Access>
+            <Access action="credential:extract-link:reissue">
+              <Button type="link" onClick={() => void handleReissue(record)}>
+                补发
+              </Button>
             </Access>
           </Space>
         ),
