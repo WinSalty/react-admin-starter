@@ -16,6 +16,7 @@ import dayjs from 'dayjs';
 import ListSearchCard from '@/components/admin/ListSearchCard';
 import ListTableCard from '@/components/admin/ListTableCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
+import { buildCredentialExpireAtPresets, buildCredentialValidRangePresets } from '@/pages/credential/credentialDatePresets';
 import {
   confirmCredentialImport,
   createBatchCredentialExtractLinks,
@@ -123,6 +124,8 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [linkTarget, setLinkTarget] = useState<CredentialBatch | CredentialItem>();
   const [importPreview, setImportPreview] = useState<CredentialImportPreview>();
+  const validRangePresets = buildCredentialValidRangePresets();
+  const expireAtPresets = buildCredentialExpireAtPresets();
 
   const loadCategories = useCallback(async () => {
     const response = await fetchCredentialCategories();
@@ -381,7 +384,12 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
           </Form.Item>
         </Space.Compact>
         <Form.Item label="有效期" name="validRange">
-          <DatePicker.RangePicker showTime style={{ width: '100%' }} placeholder={['默认当前时间', '默认永久有效']} />
+          <DatePicker.RangePicker
+            showTime
+            presets={validRangePresets}
+            style={{ width: '100%' }}
+            placeholder={['默认当前时间', '默认永久有效']}
+          />
         </Form.Item>
         <Form.Item label="备注" name="remark">
           <Input />
@@ -399,7 +407,12 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
           <Input placeholder="不填则自动生成" />
         </Form.Item>
         <Form.Item label="有效期" name="validRange">
-          <DatePicker.RangePicker showTime style={{ width: '100%' }} placeholder={['默认当前时间', '默认永久有效']} />
+          <DatePicker.RangePicker
+            showTime
+            presets={validRangePresets}
+            style={{ width: '100%' }}
+            placeholder={['默认当前时间', '默认永久有效']}
+          />
         </Form.Item>
         <Form.Item label="分隔符" name="delimiter" rules={[{ required: true, message: '请选择分隔符' }]}>
           <Select options={[
@@ -442,7 +455,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
             <InputNumber min={1} precision={0} style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item label="链接过期时间" name="expireAt" style={{ width: '34%' }}>
-            <DatePicker showTime style={{ width: '100%' }} placeholder="默认永久有效" />
+            <DatePicker showTime presets={expireAtPresets} style={{ width: '100%' }} placeholder="默认永久有效" />
           </Form.Item>
         </Space.Compact>
       </SubmitModalForm>
@@ -455,7 +468,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
           <InputNumber min={1} precision={0} style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item label="过期时间" name="expireAt">
-          <DatePicker showTime style={{ width: '100%' }} placeholder="默认永久有效" />
+          <DatePicker showTime presets={expireAtPresets} style={{ width: '100%' }} placeholder="默认永久有效" />
         </Form.Item>
         <Form.Item label="备注" name="remark">
           <Input />

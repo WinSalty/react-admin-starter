@@ -7,6 +7,7 @@ import { Access } from '@/components/Access';
 import ListSearchCard from '@/components/admin/ListSearchCard';
 import ListTableCard from '@/components/admin/ListTableCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
+import { buildCredentialExpireAtPresets } from '@/pages/credential/credentialDatePresets';
 import {
   copyCredentialExtractLinkUrl,
   disableCredentialExtractLink,
@@ -45,6 +46,7 @@ function CredentialExtractLinkPage() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailRecord, setDetailRecord] = useState<CredentialExtractLink>();
   const [extendRecord, setExtendRecord] = useState<CredentialExtractLink>();
+  const expireAtPresets = buildCredentialExpireAtPresets();
 
   const loadRecords = useCallback(async () => {
     setLoading(true);
@@ -292,7 +294,7 @@ function CredentialExtractLinkPage() {
         onFinish={(values) => void handleExtend(values)}
       >
         <Form.Item label="过期时间" name="expireAt" rules={[{ required: true, message: '请选择过期时间' }]}>
-          <DatePicker showTime style={{ width: '100%' }} />
+          <DatePicker showTime presets={expireAtPresets} style={{ width: '100%' }} />
         </Form.Item>
       </SubmitModalForm>
     </div>
