@@ -140,6 +140,15 @@ export interface CdkExtractLinkCreateParams {
   remark?: string;
 }
 
+export interface CdkBatchExtractLinkResult {
+  batchId: string;
+  batchNo: string;
+  batchName: string;
+  generatedCount: number;
+  skippedCount: number;
+  links: CdkExtractLink[];
+}
+
 export interface CdkExtractAccessRecord {
   id: string;
   accessNo: string;

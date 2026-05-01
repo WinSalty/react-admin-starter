@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TableProps } from 'antd';
-import { App, Button, DatePicker, Empty, Form, Input, InputNumber, Popconfirm, Progress, Select, Space, Spin, Table, Tag } from 'antd';
-import { CopyOutlined } from '@ant-design/icons';
+import { App, Button, DatePicker, Empty, Form, Input, InputNumber, Modal, Popconfirm, Progress, Select, Space, Spin, Table, Tag } from 'antd';
+import { CopyOutlined, LinkOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Access } from '@/components/Access';
 import CreateButton from '@/components/admin/CreateButton';
@@ -10,6 +10,7 @@ import ListSearchCard from '@/components/admin/ListSearchCard';
 import ListTableCard from '@/components/admin/ListTableCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
 import {
+  createCdkBatchExtractLinks,
   createCdkBatch,
   fetchCdkCodes,
   fetchCdkBatches,
@@ -31,6 +32,12 @@ interface BatchCreateForm {
   remark?: string;
 }
 
+interface BatchExtractLinkForm {
+  maxAccessCount: number;
+  expireAt: dayjs.Dayjs;
+  remark?: string;
+}
+
 const statusOptions = [
   { label: '已启用', value: 'active' },
   { label: '已作废', value: 'voided' },
@@ -43,6 +50,8 @@ const DEFAULT_VALID_DAYS = 30;
 const DEFAULT_POINTS = 100;
 const DEFAULT_TOTAL_COUNT = 10;
 const DETAIL_CODE_PAGE_SIZE = 100;
+const DEFAULT_EXTRACT_ACCESS_COUNT = 1;
+const DEFAULT_EXTRACT_EXPIRE_HOURS = 24;
 
 const detailFields: Array<DetailField<CdkBatch>> = [
   { key: 'batchName', label: '批次名称', render: (record) => record.batchName },
@@ -68,6 +77,7 @@ function CdkBatchPage() {
   const { message } = App.useApp();
   const [searchForm] = Form.useForm<BatchSearchForm>();
   const [createForm] = Form.useForm<BatchCreateForm>();
+  const [extractForm] = Form.useForm<BatchExtractLinkForm>();
   const [records, setRecords] = useState<CdkBatch[]>([]);
   const [pageNo, setPageNo] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -80,6 +90,10 @@ function CdkBatchPage() {
   const [detailCodesLoading, setDetailCodesLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [extractModalOpen, setExtractModalOpen] = useState(false);
+  const [extractSaving, setExtractSaving] = useState(false);
+  const [batchExtractLinkText, setBatchExtractLinkText] = useState('');
+  const [batchExtractSummary, setBatchExtractSummary] = useState('');
 
   const loadRecords = useCallback(
     async (nextPageNo = pageNo, nextPageSize = pageSize) => {
@@ -156,6 +170,56 @@ function CdkBatchPage() {
     }
     if (await copyText(detailCodeText)) {
       message.success('已复制全部 CDK');
+      return;
+    }
+    message.error('复制失败，请手动选中文本复制');
+  };
+
+  const openBatchExtractModal = () => {
+    if (!detailRecord) {
+      return;
+    }
+    setBatchExtractLinkText('');
+    setBatchExtractSummary('');
+    extractForm.setFieldsValue({
+      maxAccessCount: DEFAULT_EXTRACT_ACCESS_COUNT,
+      expireAt: dayjs().add(DEFAULT_EXTRACT_EXPIRE_HOURS, 'hour'),
+      remark: detailRecord.batchNo,
+    });
+    setExtractModalOpen(true);
+  };
+
+  const handleCreateBatchExtractLinks = async (values: BatchExtractLinkForm) => {
+    if (!detailRecord) {
+      return;
+    }
+    setExtractSaving(true);
+    try {
+      const response = await createCdkBatchExtractLinks(detailRecord.id, {
+        maxAccessCount: values.maxAccessCount,
+        expireAt: values.expireAt.format(DATE_TIME_FORMAT),
+        remark: values.remark,
+      });
+      if (response.code !== 0) {
+        message.error(response.message || '批次提取链接生成失败');
+        return;
+      }
+      const linkText = response.data.links.map((link) => link.url || '').filter(Boolean).join('\n');
+      setBatchExtractLinkText(linkText);
+      setBatchExtractSummary(`已生成 ${response.data.generatedCount.toLocaleString()} 条，跳过 ${response.data.skippedCount.toLocaleString()} 条`);
+      message.success(response.message);
+    } finally {
+      setExtractSaving(false);
+    }
+  };
+
+  const handleCopyBatchExtractLinks = async () => {
+    if (!batchExtractLinkText) {
+      message.error('没有可复制链接');
+      return;
+    }
+    if (await copyText(batchExtractLinkText)) {
+      message.success('已复制全部提取链接');
       return;
     }
     message.error('复制失败，请手动选中文本复制');
@@ -343,9 +407,16 @@ function CdkBatchPage() {
         <div style={{ marginTop: 16 }}>
           <Space style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
             <strong>批次 CDK（{detailCodeTotal.toLocaleString()}）</strong>
-            <Button icon={<CopyOutlined />} disabled={!detailCodeText} onClick={() => void handleCopyAllCodes()}>
-              复制全部
-            </Button>
+            <Space>
+              <Access action="cdk:code:extract-link:create">
+                <Button icon={<LinkOutlined />} disabled={!detailRecord || detailRecord.status !== 'active'} onClick={openBatchExtractModal}>
+                  生成提取链接
+                </Button>
+              </Access>
+              <Button icon={<CopyOutlined />} disabled={!detailCodeText} onClick={() => void handleCopyAllCodes()}>
+                复制全部
+              </Button>
+            </Space>
           </Space>
           <Spin spinning={detailCodesLoading}>
             <Input.TextArea
@@ -357,6 +428,50 @@ function CdkBatchPage() {
           </Spin>
         </div>
       </EntityDetailDrawer>
+
+      <Modal
+        title="批量生成提取链接"
+        open={extractModalOpen}
+        width={760}
+        confirmLoading={extractSaving}
+        okText="生成链接"
+        cancelText="关闭"
+        destroyOnHidden
+        onCancel={() => setExtractModalOpen(false)}
+        onOk={() => extractForm.submit()}
+      >
+        <Form form={extractForm} layout="vertical" onFinish={(values) => void handleCreateBatchExtractLinks(values)}>
+          <Form.Item label="访问次数" name="maxAccessCount" rules={[{ required: true, message: '请输入访问次数' }]}>
+            <InputNumber min={1} max={100} precision={0} style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item label="过期时间" name="expireAt" rules={[{ required: true, message: '请选择过期时间' }]}>
+            <DatePicker showTime format={DATE_TIME_FORMAT} style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item label="备注" name="remark">
+            <Input.TextArea rows={3} maxLength={512} showCount placeholder="可填写发放渠道、活动或工单信息" />
+          </Form.Item>
+        </Form>
+        {batchExtractSummary ? (
+          <div style={{ marginBottom: 8 }}>
+            <Tag color="blue">{batchExtractSummary}</Tag>
+          </div>
+        ) : null}
+        <Input.TextArea
+          value={batchExtractLinkText}
+          readOnly
+          rows={10}
+          placeholder="生成后展示该批次可提取 CDK 的临时 URL"
+        />
+        <Button
+          type="primary"
+          icon={<CopyOutlined />}
+          disabled={!batchExtractLinkText}
+          style={{ marginTop: 12 }}
+          onClick={() => void handleCopyBatchExtractLinks()}
+        >
+          复制全部链接
+        </Button>
+      </Modal>
 
       <SubmitModalForm<BatchCreateForm>
         title="生成积分 CDK"

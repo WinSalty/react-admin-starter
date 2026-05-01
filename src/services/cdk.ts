@@ -1,6 +1,7 @@
 import type { ApiResponse, PageResult } from '@/types/api';
 import type {
   CdkBatch,
+  CdkBatchExtractLinkResult,
   CdkBatchCreateParams,
   CdkBatchListParams,
   CdkCode,
@@ -52,6 +53,17 @@ export async function createCdkExtractLink(
   params: CdkExtractLinkCreateParams,
 ): Promise<ApiResponse<CdkExtractLink>> {
   const response = await request.post<ApiResponse<CdkExtractLink>>(`/api/admin/cdk/codes/${id}/extract-links`, params);
+  return response.data;
+}
+
+export async function createCdkBatchExtractLinks(
+  id: string,
+  params: CdkExtractLinkCreateParams,
+): Promise<ApiResponse<CdkBatchExtractLinkResult>> {
+  const response = await request.post<ApiResponse<CdkBatchExtractLinkResult>>(
+    `/api/admin/cdk/batches/${id}/extract-links`,
+    params,
+  );
   return response.data;
 }
 
