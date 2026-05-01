@@ -51,12 +51,12 @@ export async function fetchCredentialBatches(params: CredentialBatchListParams):
 }
 
 export async function createGeneratedCredentialBatch(payload: {
-  categoryId: string;
-  batchName: string;
+  categoryId?: string;
+  batchName?: string;
   totalCount: number;
   points: number;
-  validFrom: string;
-  validTo: string;
+  validFrom?: string;
+  validTo?: string;
   remark?: string;
 }): Promise<ApiResponse<CredentialBatch>> {
   const response = await request.post<ApiResponse<CredentialBatch>>('/api/admin/credentials/batches/generated', payload);
@@ -64,7 +64,7 @@ export async function createGeneratedCredentialBatch(payload: {
 }
 
 export async function previewCredentialImport(payload: {
-  categoryId: string;
+  categoryId?: string;
   rawText: string;
   delimiter: string;
   trimBlank?: boolean;
@@ -77,12 +77,12 @@ export async function previewCredentialImport(payload: {
 }
 
 export async function confirmCredentialImport(payload: {
-  categoryId: string;
-  batchName: string;
+  categoryId?: string;
+  batchName?: string;
   rawText: string;
   delimiter: string;
-  validFrom: string;
-  validTo: string;
+  validFrom?: string;
+  validTo?: string;
   remark?: string;
   trimBlank?: boolean;
   batchDeduplicate?: boolean;

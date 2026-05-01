@@ -57,20 +57,20 @@ interface SearchForm {
 }
 
 interface GeneratedBatchForm {
-  categoryId: string;
-  batchName: string;
+  categoryId?: string;
+  batchName?: string;
   totalCount: number;
   points: number;
-  validRange: [dayjs.Dayjs, dayjs.Dayjs];
+  validRange?: [dayjs.Dayjs, dayjs.Dayjs];
   remark?: string;
 }
 
 interface ImportBatchForm {
-  categoryId: string;
-  batchName: string;
+  categoryId?: string;
+  batchName?: string;
   rawText: string;
   delimiter: string;
-  validRange: [dayjs.Dayjs, dayjs.Dayjs];
+  validRange?: [dayjs.Dayjs, dayjs.Dayjs];
   createExtractLinks?: boolean;
   itemsPerLink?: number;
   maxAccessCount?: number;
@@ -163,6 +163,10 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
     }
   }, [moduleKind, searchForm]);
 
+  const defaultCategoryId = useCallback((fulfillmentType: string) => {
+    return categories.find((item) => item.fulfillmentType === fulfillmentType)?.id;
+  }, [categories]);
+
   useEffect(() => {
     void loadCategories();
     void loadRecords();
@@ -174,8 +178,8 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       batchName: values.batchName,
       totalCount: values.totalCount,
       points: values.points,
-      validFrom: values.validRange[0].format('YYYY-MM-DD HH:mm:ss'),
-      validTo: values.validRange[1].format('YYYY-MM-DD HH:mm:ss'),
+      validFrom: values.validRange?.[0].format('YYYY-MM-DD HH:mm:ss'),
+      validTo: values.validRange?.[1].format('YYYY-MM-DD HH:mm:ss'),
       remark: values.remark,
     });
     if (response.code !== 0) {
@@ -209,8 +213,8 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       batchName: values.batchName,
       rawText: values.rawText,
       delimiter: values.delimiter,
-      validFrom: values.validRange[0].format('YYYY-MM-DD HH:mm:ss'),
-      validTo: values.validRange[1].format('YYYY-MM-DD HH:mm:ss'),
+      validFrom: values.validRange?.[0].format('YYYY-MM-DD HH:mm:ss'),
+      validTo: values.validRange?.[1].format('YYYY-MM-DD HH:mm:ss'),
       remark: values.remark,
       trimBlank: true,
       batchDeduplicate: true,
@@ -303,10 +307,26 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       {moduleKind === 'batches' ? (
         <>
           <Button icon={<ImportOutlined />} onClick={() => {
-            importForm.setFieldsValue({ delimiter: '\\n', createExtractLinks: false, itemsPerLink: 1, maxAccessCount: 3 });
+            importForm.setFieldsValue({
+              categoryId: defaultCategoryId('TEXT_SECRET'),
+              delimiter: '\\n',
+              createExtractLinks: false,
+              itemsPerLink: 1,
+              maxAccessCount: 3,
+              validRange: [dayjs(), dayjs().add(30, 'day')],
+              expireAt: dayjs().add(7, 'day'),
+            });
             setImportOpen(true);
           }}>导入卡密批次</Button>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setGeneratedOpen(true)}>生成积分 CDK</Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => {
+            generatedForm.setFieldsValue({
+              categoryId: defaultCategoryId('POINTS_REDEEM'),
+              totalCount: 100,
+              points: 100,
+              validRange: [dayjs(), dayjs().add(30, 'day')],
+            });
+            setGeneratedOpen(true);
+          }}>生成积分 CDK</Button>
         </>
       ) : null}
     </Space>
@@ -349,11 +369,11 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       </ListTableCard>
 
       <SubmitModalForm<GeneratedBatchForm> title="生成积分 CDK 批次" open={generatedOpen} form={generatedForm} width={680} onCancel={() => setGeneratedOpen(false)} onFinish={(values) => void handleGeneratedSubmit(values)}>
-        <Form.Item label="分类" name="categoryId" rules={[{ required: true, message: '请选择分类' }]}>
+        <Form.Item label="分类" name="categoryId">
           <Select options={categories.filter((item) => item.fulfillmentType === 'POINTS_REDEEM').map((item) => ({ label: item.categoryName, value: item.id }))} />
         </Form.Item>
-        <Form.Item label="批次名称" name="batchName" rules={[{ required: true, message: '请输入批次名称' }]}>
-          <Input />
+        <Form.Item label="批次名称" name="batchName">
+          <Input placeholder="不填则自动生成" />
         </Form.Item>
         <Space.Compact block>
           <Form.Item label="数量" name="totalCount" rules={[{ required: true, message: '请输入数量' }]} style={{ width: '50%' }}>
@@ -363,7 +383,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
             <InputNumber min={1} precision={0} style={{ width: '100%' }} />
           </Form.Item>
         </Space.Compact>
-        <Form.Item label="有效期" name="validRange" rules={[{ required: true, message: '请选择有效期' }]}>
+        <Form.Item label="有效期" name="validRange">
           <DatePicker.RangePicker showTime style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item label="备注" name="remark">
@@ -375,13 +395,13 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
         setImportOpen(false);
         setImportPreview(undefined);
       }} onFinish={(values) => void handleImportSubmit(values)}>
-        <Form.Item label="分类" name="categoryId" rules={[{ required: true, message: '请选择分类' }]}>
+        <Form.Item label="分类" name="categoryId">
           <Select options={categories.filter((item) => item.fulfillmentType === 'TEXT_SECRET').map((item) => ({ label: item.categoryName, value: item.id }))} />
         </Form.Item>
-        <Form.Item label="批次名称" name="batchName" rules={[{ required: true, message: '请输入批次名称' }]}>
-          <Input />
+        <Form.Item label="批次名称" name="batchName">
+          <Input placeholder="不填则自动生成" />
         </Form.Item>
-        <Form.Item label="有效期" name="validRange" rules={[{ required: true, message: '请选择有效期' }]}>
+        <Form.Item label="有效期" name="validRange">
           <DatePicker.RangePicker showTime style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item label="分隔符" name="delimiter" rules={[{ required: true, message: '请选择分隔符' }]}>
