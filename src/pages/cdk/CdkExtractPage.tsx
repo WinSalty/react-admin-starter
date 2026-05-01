@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { App, Button, Result, Spin, Tag } from 'antd';
 import { CheckCircleOutlined, CopyOutlined, KeyOutlined } from '@ant-design/icons';
 import { useParams } from 'react-router-dom';
@@ -17,11 +17,16 @@ import { collectDeviceFingerprint } from '@/utils/deviceFingerprint';
 function CdkExtractPage() {
   const { message } = App.useApp();
   const { token = '' } = useParams();
+  const loadedTokenRef = useRef('');
   const [loading, setLoading] = useState(true);
   const [extract, setExtract] = useState<CdkExtractView>();
   const [errorText, setErrorText] = useState('');
 
   useEffect(() => {
+    if (!token || loadedTokenRef.current === token) {
+      return;
+    }
+    loadedTokenRef.current = token;
     async function loadExtract() {
       setLoading(true);
       try {
