@@ -13,10 +13,7 @@ const Login = lazy(() => import('@/pages/auth/Login'));
 const Register = lazy(() => import('@/pages/auth/Register'));
 const AccountSettings = lazy(() => import('@/pages/account/AccountSettings'));
 const BenefitProductPage = lazy(() => import('@/pages/benefit/BenefitProductPage'));
-const CdkBatchPage = lazy(() => import('@/pages/cdk/CdkBatchPage'));
-const CdkCodePage = lazy(() => import('@/pages/cdk/CdkCodePage'));
-const CdkExtractPage = lazy(() => import('@/pages/cdk/CdkExtractPage'));
-const CdkRedeemRecordPage = lazy(() => import('@/pages/cdk/CdkRedeemRecordPage'));
+const CredentialModulePage = lazy(() => import('@/pages/credential/CredentialModulePage'));
 const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
 const PermissionPage = lazy(() => import('@/pages/permission/PermissionPage'));
 const PointAuditPage = lazy(() => import('@/pages/points/PointAuditPage'));
@@ -58,14 +55,6 @@ export const router = createBrowserRouter(
       element: (
         <LazyRoute>
           <Navigate to="/dashboard" replace />
-        </LazyRoute>
-      ),
-    },
-    {
-      path: '/cdk/extract/:token',
-      element: (
-        <LazyRoute>
-          <CdkExtractPage />
         </LazyRoute>
       ),
     },
@@ -209,31 +198,61 @@ export const router = createBrowserRouter(
           ),
         },
         {
-          path: dynamicRouteMap.cdkBatches.path,
+          path: dynamicRouteMap.credentialBatches.path,
           element: (
             <LazyRoute>
-              <RouteGuard permissionCode={dynamicRouteMap.cdkBatches.routeCode}>
-                <CdkBatchPage />
+              <RouteGuard permissionCode={dynamicRouteMap.credentialBatches.routeCode}>
+                <CredentialModulePage moduleKind="batches" />
               </RouteGuard>
             </LazyRoute>
           ),
         },
         {
-          path: dynamicRouteMap.cdkCodes.path,
+          path: dynamicRouteMap.credentialItems.path,
           element: (
             <LazyRoute>
-              <RouteGuard permissionCode={dynamicRouteMap.cdkCodes.routeCode}>
-                <CdkCodePage />
+              <RouteGuard permissionCode={dynamicRouteMap.credentialItems.routeCode}>
+                <CredentialModulePage moduleKind="items" />
               </RouteGuard>
             </LazyRoute>
           ),
         },
         {
-          path: dynamicRouteMap.cdkRedeemRecords.path,
+          path: dynamicRouteMap.credentialExtractLinks.path,
           element: (
             <LazyRoute>
-              <RouteGuard permissionCode={dynamicRouteMap.cdkRedeemRecords.routeCode}>
-                <CdkRedeemRecordPage />
+              <RouteGuard permissionCode={dynamicRouteMap.credentialExtractLinks.routeCode}>
+                <CredentialModulePage moduleKind="extractLinks" />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: dynamicRouteMap.credentialCategories.path,
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode={dynamicRouteMap.credentialCategories.routeCode}>
+                <CredentialModulePage moduleKind="categories" />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: dynamicRouteMap.credentialImportTasks.path,
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode={dynamicRouteMap.credentialImportTasks.routeCode}>
+                <CredentialModulePage moduleKind="importTasks" />
+              </RouteGuard>
+            </LazyRoute>
+          ),
+        },
+        {
+          path: dynamicRouteMap.credentialRedeemRecords.path,
+          element: (
+            <LazyRoute>
+              <RouteGuard permissionCode={dynamicRouteMap.credentialRedeemRecords.routeCode}>
+                <CredentialModulePage moduleKind="redeemRecords" />
               </RouteGuard>
             </LazyRoute>
           ),

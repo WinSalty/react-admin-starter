@@ -5,7 +5,6 @@ import type { TableProps, TabsProps } from 'antd';
 import {
   DatabaseOutlined,
   FilterOutlined,
-  GiftOutlined,
   LockOutlined,
   PieChartOutlined,
   QuestionCircleOutlined,
@@ -20,13 +19,8 @@ import {
   fetchPointLedger,
   fetchPointRechargeOrders,
 } from '@/services/points';
-import { redeemCdk } from '@/services/cdk';
 import { createOnlineRecharge } from '@/services/trade';
 import type { PointAccount, PointFreezeOrder, PointLedgerRecord, PointRechargeOrder } from '@/types/points';
-
-interface RedeemForm {
-  cdk: string;
-}
 
 interface OnlineRechargeForm {
   amount: number;
@@ -34,13 +28,12 @@ interface OnlineRechargeForm {
 
 /**
  * 积分钱包页面。
- * 展示当前用户积分余额、CDK 兑换入口和积分相关记录。
+ * 展示当前用户积分余额、在线充值入口和积分相关记录。
  * author: sunshengxian
  * 创建日期：2026-04-24
  */
 function WalletPage() {
   const { message } = App.useApp();
-  const [redeemForm] = Form.useForm<RedeemForm>();
   const [onlineRechargeForm] = Form.useForm<OnlineRechargeForm>();
   const [account, setAccount] = useState<PointAccount>();
   const [ledgerRecords, setLedgerRecords] = useState<PointLedgerRecord[]>([]);
@@ -48,7 +41,6 @@ function WalletPage() {
   const [consumeRecords, setConsumeRecords] = useState<PointLedgerRecord[]>([]);
   const [freezeRecords, setFreezeRecords] = useState<PointFreezeOrder[]>([]);
   const [loading, setLoading] = useState(false);
-  const [redeeming, setRedeeming] = useState(false);
   const [recharging, setRecharging] = useState(false);
   const [recordKeyword, setRecordKeyword] = useState('');
 
@@ -182,22 +174,6 @@ function WalletPage() {
     ],
   );
 
-  const handleRedeem = async (values: RedeemForm) => {
-    setRedeeming(true);
-    try {
-      const response = await redeemCdk(values.cdk, createClientIdempotencyKey());
-      if (response.code !== 0) {
-        message.error(response.message || '兑换失败');
-        return;
-      }
-      message.success(`兑换成功，到账 ${response.data.grantedPoints} 积分`);
-      redeemForm.resetFields();
-      void loadWallet();
-    } finally {
-      setRedeeming(false);
-    }
-  };
-
   const handleOnlineRecharge = async (values: OnlineRechargeForm) => {
     setRecharging(true);
     try {
@@ -258,24 +234,6 @@ function WalletPage() {
 
       <div className="wallet-action-grid">
         <WalletActionCard
-          title="CDK 兑换"
-          description="输入 CDK 兑换码，兑换积分到您的账户"
-          icon={<GiftOutlined />}
-          artwork="gift"
-        >
-          <Form form={redeemForm} layout="inline" className="wallet-action-form" onFinish={(values) => void handleRedeem(values)}>
-            <Form.Item name="cdk" rules={[{ required: true, message: '请输入 CDK' }]}>
-              <Input className="wallet-cdk-input" placeholder="XXXX-XXXX-XXXX-XXXX-C" allowClear />
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" htmlType="submit" loading={redeeming}>
-                兑换
-              </Button>
-            </Form.Item>
-          </Form>
-        </WalletActionCard>
-
-        <WalletActionCard
           title="在线充值"
           description="通过在线充值，快速获取更多积分"
           icon={<WalletOutlined />}
@@ -299,7 +257,7 @@ function WalletPage() {
         </WalletActionCard>
       </div>
 
-      <Card className="wallet-record-card" title={<WalletSectionTitle icon={<GiftOutlined />} title="积分记录" />}>
+      <Card className="wallet-record-card" title={<WalletSectionTitle icon={<DatabaseOutlined />} title="积分记录" />}>
         <Tabs
           items={tabItems}
           tabBarExtraContent={
@@ -358,7 +316,7 @@ function WalletMetricCard({
 }
 
 /**
- * 钱包操作卡片，承载 CDK 兑换与在线充值表单。
+ * 钱包操作卡片，承载在线充值表单。
  * author: sunshengxian
  * 创建日期：2026-04-26
  */
@@ -467,7 +425,7 @@ function directionLabel(direction: string) {
   return labels[direction] || direction;
 }
 
-function createClientIdempotencyKey(prefix = 'cdk') {
+function createClientIdempotencyKey(prefix = 'online') {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 

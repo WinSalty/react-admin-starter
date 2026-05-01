@@ -70,20 +70,35 @@ export const dynamicRouteMap = {
     componentKey: 'SystemConfigPage',
     routeCode: 'configs',
   },
-  cdkBatches: {
-    path: '/system/cdk/batches',
-    componentKey: 'CdkBatchPage',
-    routeCode: 'cdk_batch',
+  credentialBatches: {
+    path: '/system/credentials/batches',
+    componentKey: 'CredentialModulePage:batches',
+    routeCode: 'credential_batch',
   },
-  cdkCodes: {
-    path: '/system/cdk/codes',
-    componentKey: 'CdkCodePage',
-    routeCode: 'cdk_code',
+  credentialItems: {
+    path: '/system/credentials/items',
+    componentKey: 'CredentialModulePage:items',
+    routeCode: 'credential_item',
   },
-  cdkRedeemRecords: {
-    path: '/system/cdk/redeem-records',
-    componentKey: 'CdkRedeemRecordPage',
-    routeCode: 'cdk_redeem_record',
+  credentialExtractLinks: {
+    path: '/system/credentials/extract-links',
+    componentKey: 'CredentialModulePage:extractLinks',
+    routeCode: 'credential_extract_link',
+  },
+  credentialCategories: {
+    path: '/system/credentials/categories',
+    componentKey: 'CredentialModulePage:categories',
+    routeCode: 'credential_category',
+  },
+  credentialImportTasks: {
+    path: '/system/credentials/import-tasks',
+    componentKey: 'CredentialModulePage:importTasks',
+    routeCode: 'credential_import_task',
+  },
+  credentialRedeemRecords: {
+    path: '/system/credentials/redeem-records',
+    componentKey: 'CredentialModulePage:redeemRecords',
+    routeCode: 'credential_redeem_record',
   },
   pointsAudit: {
     path: '/system/points/audit',

@@ -81,8 +81,7 @@ function RiskAlertPage() {
             placeholder="全部类型"
             style={{ width: 220 }}
             options={[
-              { label: '兑换锁定', value: 'cdk_redeem_locked' },
-              { label: '双人复核', value: 'cdk_batch_double_review' },
+              { label: '凭证兑换锁定', value: 'credential_redeem_locked' },
             ]}
           />
         </Form.Item>
@@ -118,8 +117,7 @@ function renderStatusTag(status: string) {
 
 function renderAlertTypeText(alertType: string) {
   const map: Record<string, string> = {
-    cdk_redeem_locked: '兑换锁定',
-    cdk_batch_double_review: '双人复核',
+    credential_redeem_locked: '凭证兑换锁定',
   };
   return map[alertType] || alertType;
 }
