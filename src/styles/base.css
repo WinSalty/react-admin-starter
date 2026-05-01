@@ -481,6 +481,11 @@ body {
   font-weight: 600;
 }
 
+.cdk-extract-code-list {
+  display: grid;
+  gap: 10px;
+}
+
 .cdk-extract-code-box strong {
   overflow-wrap: anywhere;
   color: #111827;

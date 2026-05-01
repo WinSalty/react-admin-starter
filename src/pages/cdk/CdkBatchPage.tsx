@@ -34,6 +34,7 @@ interface BatchCreateForm {
 
 interface BatchExtractLinkForm {
   maxAccessCount: number;
+  codesPerLink: number;
   expireAt: dayjs.Dayjs;
   remark?: string;
 }
@@ -52,6 +53,7 @@ const DEFAULT_TOTAL_COUNT = 10;
 const DETAIL_CODE_PAGE_SIZE = 100;
 const DEFAULT_EXTRACT_ACCESS_COUNT = 1;
 const DEFAULT_EXTRACT_EXPIRE_HOURS = 24;
+const DEFAULT_CODES_PER_EXTRACT_LINK = 1;
 
 const detailFields: Array<DetailField<CdkBatch>> = [
   { key: 'batchName', label: '批次名称', render: (record) => record.batchName },
@@ -94,6 +96,7 @@ function CdkBatchPage() {
   const [extractSaving, setExtractSaving] = useState(false);
   const [batchExtractLinkText, setBatchExtractLinkText] = useState('');
   const [batchExtractSummary, setBatchExtractSummary] = useState('');
+  const watchedCodesPerLink = Form.useWatch('codesPerLink', extractForm) || DEFAULT_CODES_PER_EXTRACT_LINK;
 
   const loadRecords = useCallback(
     async (nextPageNo = pageNo, nextPageSize = pageSize) => {
@@ -183,6 +186,7 @@ function CdkBatchPage() {
     setBatchExtractSummary('');
     extractForm.setFieldsValue({
       maxAccessCount: DEFAULT_EXTRACT_ACCESS_COUNT,
+      codesPerLink: DEFAULT_CODES_PER_EXTRACT_LINK,
       expireAt: dayjs().add(DEFAULT_EXTRACT_EXPIRE_HOURS, 'hour'),
       remark: detailRecord.batchNo,
     });
@@ -197,6 +201,7 @@ function CdkBatchPage() {
     try {
       const response = await createCdkBatchExtractLinks(detailRecord.id, {
         maxAccessCount: values.maxAccessCount,
+        codesPerLink: values.codesPerLink,
         expireAt: values.expireAt.format(DATE_TIME_FORMAT),
         remark: values.remark,
       });
@@ -206,7 +211,7 @@ function CdkBatchPage() {
       }
       const linkText = response.data.links.map((link) => link.url || '').filter(Boolean).join('\n');
       setBatchExtractLinkText(linkText);
-      setBatchExtractSummary(`已生成 ${response.data.generatedCount.toLocaleString()} 条，跳过 ${response.data.skippedCount.toLocaleString()} 条`);
+      setBatchExtractSummary(`已生成 ${response.data.generatedCount.toLocaleString()} 个链接，覆盖 ${response.data.codeCount.toLocaleString()} 个 CDK，跳过 ${response.data.skippedCount.toLocaleString()} 个 CDK`);
       message.success(response.message);
     } finally {
       setExtractSaving(false);
@@ -444,6 +449,14 @@ function CdkBatchPage() {
           <Form.Item label="访问次数" name="maxAccessCount" rules={[{ required: true, message: '请输入访问次数' }]}>
             <InputNumber min={1} max={100} precision={0} style={{ width: '100%' }} />
           </Form.Item>
+          <Form.Item
+            label="每个链接包含 CDK 数"
+            name="codesPerLink"
+            rules={[{ required: true, message: '请输入每个链接包含的 CDK 数量' }]}
+            extra={renderExtractLinkEstimate(detailCodeTotal, watchedCodesPerLink)}
+          >
+            <InputNumber min={1} max={100} precision={0} style={{ width: '100%' }} />
+          </Form.Item>
           <Form.Item label="过期时间" name="expireAt" rules={[{ required: true, message: '请选择过期时间' }]}>
             <DatePicker showTime format={DATE_TIME_FORMAT} style={{ width: '100%' }} />
           </Form.Item>
@@ -531,6 +544,12 @@ function calculateTotalPoints(record: CdkBatch) {
 
 function buildCodeText(codes: CdkCode[]) {
   return codes.map((code) => code.cdk).filter(Boolean).join('\n');
+}
+
+function renderExtractLinkEstimate(totalCount: number, codesPerLink: number) {
+  const safeCodesPerLink = Math.max(1, codesPerLink || DEFAULT_CODES_PER_EXTRACT_LINK);
+  const linkCount = Math.ceil(totalCount / safeCodesPerLink);
+  return `当前批次约生成 ${linkCount.toLocaleString()} 个链接，每个链接最多提取 ${safeCodesPerLink.toLocaleString()} 个 CDK`;
 }
 
 export default CdkBatchPage;

@@ -137,6 +137,7 @@ export interface CdkExtractLink {
 export interface CdkExtractLinkCreateParams {
   maxAccessCount: number;
   expireAt: string;
+  codesPerLink?: number;
   remark?: string;
 }
 
@@ -145,6 +146,7 @@ export interface CdkBatchExtractLinkResult {
   batchNo: string;
   batchName: string;
   generatedCount: number;
+  codeCount: number;
   skippedCount: number;
   links: CdkExtractLink[];
 }
@@ -176,6 +178,8 @@ export interface CdkExtractAccessRecordListParams {
 
 export interface CdkExtractView {
   cdk: string;
+  cdks?: string[];
+  cdkCount?: number;
   batchName: string;
   benefitType: string;
   benefitText: string;

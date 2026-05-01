@@ -51,10 +51,11 @@ function CdkExtractPage() {
   }, [token]);
 
   const handleCopy = async () => {
-    if (!extract?.cdk) {
+    const text = resolveCdkText(extract);
+    if (!text) {
       return;
     }
-    if (await copyText(extract.cdk)) {
+    if (await copyText(text)) {
       message.success('CDK 已复制');
       return;
     }
@@ -88,6 +89,10 @@ function CdkExtractPage() {
                   <dd>{extract.validTo || '-'}</dd>
                 </div>
                 <div>
+                  <dt>CDK 数量</dt>
+                  <dd>{resolveCdks(extract).length}</dd>
+                </div>
+                <div>
                   <dt>剩余访问</dt>
                   <dd>{extract.remainingAccessCount}</dd>
                 </div>
@@ -96,9 +101,13 @@ function CdkExtractPage() {
 
             <div className="cdk-extract-code-box">
               <span>CDK</span>
-              <strong>{extract.cdk}</strong>
+              <div className="cdk-extract-code-list">
+                {resolveCdks(extract).map((cdk) => (
+                  <strong key={cdk}>{cdk}</strong>
+                ))}
+              </div>
               <Button type="primary" size="large" icon={<CopyOutlined />} onClick={() => void handleCopy()}>
-                一键复制
+                一键复制全部
               </Button>
               <p>
                 <CheckCircleOutlined /> 当前链接已完成校验
@@ -113,6 +122,20 @@ function CdkExtractPage() {
       </section>
     </main>
   );
+}
+
+function resolveCdks(extract?: CdkExtractView) {
+  if (!extract) {
+    return [];
+  }
+  if (extract.cdks?.length) {
+    return extract.cdks;
+  }
+  return extract.cdk ? [extract.cdk] : [];
+}
+
+function resolveCdkText(extract?: CdkExtractView) {
+  return resolveCdks(extract).join('\n');
 }
 
 export default CdkExtractPage;
