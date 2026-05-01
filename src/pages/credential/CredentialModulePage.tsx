@@ -14,8 +14,6 @@ import {
   StopOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { useNavigate } from 'react-router-dom';
-import { dynamicRouteMap } from '@/access/routeMap';
 import ListSearchCard from '@/components/admin/ListSearchCard';
 import ListTableCard from '@/components/admin/ListTableCard';
 import SubmitModalForm from '@/components/admin/SubmitModalForm';
@@ -25,21 +23,23 @@ import {
   createBatchCredentialExtractLinks,
   createCredentialCategory,
   createGeneratedCredentialBatch,
-  createItemCredentialExtractLink,
   disableCredentialBatch,
   disableCredentialItem,
   enableCredentialItem,
+  fetchCredentialBatchItems,
   fetchCredentialBatches,
   fetchCredentialCategories,
+  fetchCredentialExtractLinks,
   fetchCredentialImportTasks,
+  fetchCredentialItemExtractLinks,
   fetchCredentialItems,
   fetchCredentialRedeemRecords,
   previewCredentialImport,
-  revealCredentialItem,
 } from '@/services/credential';
 import type {
   CredentialBatch,
   CredentialCategory,
+  CredentialExtractLink,
   CredentialExtractLinkCopyResult,
   CredentialGeneratedSecret,
   CredentialImportPreview,
@@ -99,6 +99,16 @@ interface CredentialResultState {
   extractLinks?: CredentialExtractLinkCopyResult[];
 }
 
+interface CredentialBatchItemState {
+  title: string;
+  items: CredentialItem[];
+}
+
+interface CredentialLinkState {
+  title: string;
+  links: CredentialExtractLink[];
+}
+
 interface CategoryForm {
   categoryCode: string;
   categoryName: string;
@@ -122,8 +132,7 @@ const moduleMeta: Record<CredentialModuleKind, { title: string; icon: JSX.Elemen
  * 创建日期：2026-05-01
  */
 function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
-  const { message, modal } = App.useApp();
-  const navigate = useNavigate();
+  const { message } = App.useApp();
   const [searchForm] = Form.useForm<SearchForm>();
   const [generatedForm] = Form.useForm<GeneratedBatchForm>();
   const [importForm] = Form.useForm<ImportBatchForm>();
@@ -136,9 +145,12 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
   const [generatedOpen, setGeneratedOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
-  const [linkTarget, setLinkTarget] = useState<CredentialBatch | CredentialItem>();
+  const [linkTarget, setLinkTarget] = useState<CredentialBatch>();
   const [importPreview, setImportPreview] = useState<CredentialImportPreview>();
   const [resultState, setResultState] = useState<CredentialResultState>();
+  const [batchItemState, setBatchItemState] = useState<CredentialBatchItemState>();
+  const [linkState, setLinkState] = useState<CredentialLinkState>();
+  const [detailLoading, setDetailLoading] = useState(false);
   const validRangePresets = buildCredentialValidRangePresets();
   const expireAtPresets = buildCredentialExpireAtPresets();
 
@@ -277,9 +289,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       expireAt: values.expireAt?.format('YYYY-MM-DD HH:mm:ss'),
       remark: values.remark,
     };
-    const response = 'batchNo' in linkTarget
-      ? await createBatchCredentialExtractLinks(linkTarget.id, payload)
-      : await createItemCredentialExtractLink(linkTarget.id, payload);
+    const response = await createBatchCredentialExtractLinks(linkTarget.id, payload);
     if (response.code !== 0) {
       return;
     }
@@ -287,7 +297,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
     if (response.data.links?.length) {
       setResultState({
         title: '提取链接生成结果',
-        batchId: 'batchNo' in linkTarget ? linkTarget.id : linkTarget.batchId,
+        batchId: linkTarget.id,
         extractLinks: response.data.links,
       });
     }
@@ -308,22 +318,21 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
     void loadCategories();
   };
 
-  const handleReveal = async (record: CredentialItem) => {
-    const response = await revealCredentialItem(record.id);
-    if (response.code !== 0) {
-      return;
-    }
-    modal.info({
-      title: `凭证明文 ${record.itemNo}`,
-      content: <Input.TextArea value={response.data.secretText} readOnly autoSize />,
-      okText: '关闭',
-    });
-  };
-
   const copyGeneratedSecrets = async (records: CredentialGeneratedSecret[]) => {
     const text = records.map((item) => item.secretText).join('\n');
     if (await copyText(text)) {
       message.success('CDK 已复制');
+    }
+  };
+
+  const copyCredentialItems = async (records: CredentialItem[]) => {
+    const text = records.map((item) => item.secretText || '').filter(Boolean).join('\n');
+    if (!text) {
+      message.error('暂无可复制凭证明文');
+      return;
+    }
+    if (await copyText(text)) {
+      message.success('凭证明文已复制');
     }
   };
 
@@ -334,10 +343,50 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
     }
   };
 
-  const viewExtractLinks = (batchId?: string) => {
-    const query = batchId ? `?batchId=${batchId}` : '';
+  const viewBatchItems = async (batch: CredentialBatch) => {
+    setDetailLoading(true);
+    try {
+      const response = await fetchCredentialBatchItems(batch.id);
+      if (response.code !== 0) {
+        message.error(response.message || '凭证明细获取失败');
+        return;
+      }
+      setBatchItemState({ title: `${batch.batchName} 凭证明细`, items: response.data });
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const viewExtractLinks = async (batchId?: string, title = '提取链接') => {
+    if (!batchId) {
+      return;
+    }
     setResultState(undefined);
-    navigate(`${dynamicRouteMap.credentialExtractLinks.path}${query}`);
+    setDetailLoading(true);
+    try {
+      const response = await fetchCredentialExtractLinks({ batchId, pageNo: 1, pageSize: 100 });
+      if (response.code !== 0) {
+        message.error(response.message || '提取链接获取失败');
+        return;
+      }
+      setLinkState({ title, links: response.data.records });
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const viewItemLinks = async (item: CredentialItem) => {
+    setDetailLoading(true);
+    try {
+      const response = await fetchCredentialItemExtractLinks(item.id);
+      if (response.code !== 0) {
+        message.error(response.message || '提取链接获取失败');
+        return;
+      }
+      setLinkState({ title: `${item.itemNo} 提取链接`, links: response.data });
+    } finally {
+      setDetailLoading(false);
+    }
   };
 
   const columns = useMemo<TableProps<CredentialRow>['columns']>(() => buildColumns(moduleKind, {
@@ -349,7 +398,8 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       setLinkTarget(record);
       linkForm.setFieldsValue({ itemsPerLink: 1, maxAccessCount: 3, expireAt: undefined });
     },
-    onViewLinks: (record) => viewExtractLinks(record.id),
+    onViewItems: (record) => void viewBatchItems(record),
+    onViewLinks: (record) => void viewExtractLinks(record.id, `${record.batchName} 提取链接`),
     onDisableItem: async (record) => {
       await disableCredentialItem(record.id);
       void loadRecords();
@@ -358,8 +408,8 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       await enableCredentialItem(record.id);
       void loadRecords();
     },
-    onReveal: (record) => void handleReveal(record),
-  }), [linkForm, loadRecords, moduleKind]);
+    onViewItemLinks: (record) => void viewItemLinks(record),
+  }), [linkForm, loadRecords, moduleKind, viewBatchItems, viewExtractLinks, viewItemLinks]);
 
   const extra = (
     <Space>
@@ -564,7 +614,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
             </Button>
           ) : null,
           resultState?.extractLinks?.length ? (
-            <Button key="view-links" onClick={() => viewExtractLinks(resultState.batchId)}>
+            <Button key="view-links" onClick={() => void viewExtractLinks(resultState.batchId, '提取链接生成结果')}>
               查看提取链接
             </Button>
           ) : null,
@@ -619,6 +669,63 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
           />
         ) : null}
       </Modal>
+
+      <Modal
+        title={batchItemState?.title || '批次凭证明细'}
+        open={!!batchItemState}
+        width={920}
+        onCancel={() => setBatchItemState(undefined)}
+        footer={[
+          <Button key="copy-items" icon={<CopyOutlined />} onClick={() => void copyCredentialItems(batchItemState?.items || [])}>
+            复制全部
+          </Button>,
+          <Button key="close" type="primary" onClick={() => setBatchItemState(undefined)}>
+            关闭
+          </Button>,
+        ]}
+      >
+        <Table<CredentialItem>
+          columns={[
+            { title: '明细编号', dataIndex: 'itemNo', width: 220 },
+            { title: '卡密 / CDK', dataIndex: 'secretText', render: (value) => value || '-' },
+            { title: '状态', dataIndex: 'status', width: 110, render: renderStatusTag },
+            {
+              title: '操作',
+              key: 'actions',
+              width: 90,
+              render: (_, record) => (
+                <Button type="link" icon={<CopyOutlined />} onClick={() => void copyCredentialItems([record])}>
+                  复制
+                </Button>
+              ),
+            },
+          ]}
+          dataSource={batchItemState?.items || []}
+          loading={detailLoading}
+          pagination={{ pageSize: 10, showSizeChanger: false }}
+          rowKey="id"
+          size="small"
+        />
+      </Modal>
+
+      <Modal
+        title={linkState?.title || '提取链接'}
+        open={!!linkState}
+        width={960}
+        onCancel={() => setLinkState(undefined)}
+        footer={<Button type="primary" onClick={() => setLinkState(undefined)}>关闭</Button>}
+      >
+        <Table<CredentialExtractLink>
+          columns={extractLinkColumns}
+          dataSource={linkState?.links || []}
+          loading={detailLoading}
+          locale={{ emptyText: <Empty description="暂无提取链接" /> }}
+          pagination={{ pageSize: 10, showSizeChanger: false }}
+          rowKey="id"
+          size="small"
+          scroll={{ x: 960 }}
+        />
+      </Modal>
     </div>
   );
 }
@@ -627,11 +734,12 @@ function buildColumns(
   moduleKind: CredentialModuleKind,
   handlers: {
     onDisableBatch: (record: CredentialBatch) => Promise<void>;
-    onCreateLink: (record: CredentialBatch | CredentialItem) => void;
+    onCreateLink: (record: CredentialBatch) => void;
+    onViewItems: (record: CredentialBatch) => void;
     onViewLinks: (record: CredentialBatch) => void;
     onDisableItem: (record: CredentialItem) => Promise<void>;
     onEnableItem: (record: CredentialItem) => Promise<void>;
-    onReveal: (record: CredentialItem) => void;
+    onViewItemLinks: (record: CredentialItem) => void;
   },
 ): TableProps<CredentialRow>['columns'] {
   if (moduleKind === 'categories') {
@@ -659,12 +767,13 @@ function buildColumns(
         title: '操作',
         key: 'actions',
         fixed: 'right',
-        width: 290,
+        width: 360,
         render: (_, record) => {
           const batch = record as CredentialBatch;
           return (
             <Space size={4}>
-              <Button type="link" icon={<LinkOutlined />} disabled={batch.status !== 'active'} onClick={() => handlers.onCreateLink(batch)}>生成链接</Button>
+              <Button type="link" icon={<EyeOutlined />} onClick={() => handlers.onViewItems(batch)}>查看凭证</Button>
+              <Button type="link" icon={<LinkOutlined />} disabled={batch.status !== 'active' || (batch.linkedCount || 0) > 0} onClick={() => handlers.onCreateLink(batch)}>生成链接</Button>
               <Button type="link" icon={<EyeOutlined />} disabled={!batch.linkedCount} onClick={() => handlers.onViewLinks(batch)}>查看链接</Button>
               <Popconfirm title="确认停用该批次？" onConfirm={() => void handlers.onDisableBatch(batch)}>
                 <Button type="link" danger icon={<StopOutlined />} disabled={batch.status !== 'active'}>停用</Button>
@@ -678,7 +787,7 @@ function buildColumns(
   if (moduleKind === 'items') {
     return [
       { title: '编号', dataIndex: 'itemNo', width: 220 },
-      { title: '脱敏值', dataIndex: 'secretMask', width: 180 },
+      { title: '卡密 / CDK', dataIndex: 'secretText', width: 220, render: (value) => value || '-' },
       { title: '来源', dataIndex: 'sourceType', width: 120 },
       { title: '状态', dataIndex: 'status', width: 110, render: renderStatusTag },
       { title: '消费单号', dataIndex: 'consumeBizNo', width: 220, render: (value) => value || '-' },
@@ -692,8 +801,7 @@ function buildColumns(
           const item = record as CredentialItem;
           return (
             <Space size={4}>
-              <Button type="link" icon={<EyeOutlined />} onClick={() => handlers.onReveal(item)}>明文</Button>
-              <Button type="link" icon={<LinkOutlined />} disabled={item.status !== 'active'} onClick={() => handlers.onCreateLink(item)}>生成链接</Button>
+              <Button type="link" icon={<EyeOutlined />} onClick={() => handlers.onViewItemLinks(item)}>详情</Button>
               {item.status === 'disabled' ? (
                 <Button type="link" onClick={() => void handlers.onEnableItem(item)}>启用</Button>
               ) : (
@@ -729,6 +837,20 @@ function buildColumns(
     { title: '时间', dataIndex: 'createdAt', width: 180 },
   ];
 }
+
+const extractLinkColumns: TableProps<CredentialExtractLink>['columns'] = [
+  { title: '链接编号', dataIndex: 'linkNo', width: 220 },
+  { title: '凭证数', dataIndex: 'itemCount', width: 90, align: 'right' },
+  {
+    title: '访问次数',
+    key: 'access',
+    width: 120,
+    render: (_, record) => `${record.accessedCount || 0}/${record.maxAccessCount || 0}`,
+  },
+  { title: '状态', dataIndex: 'status', width: 110, render: renderStatusTag },
+  { title: '过期时间', dataIndex: 'expireAt', width: 180, render: (value) => value || '-' },
+  { title: '最近访问', dataIndex: 'lastAccessedAt', width: 180, render: (value) => value || '-' },
+];
 
 function renderBatchCell(record: CredentialBatch) {
   return (

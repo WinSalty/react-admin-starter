@@ -308,7 +308,7 @@ function CredentialExtractLinkPage() {
 
 const itemColumns: TableProps<CredentialItem>['columns'] = [
   { title: '编号', dataIndex: 'itemNo', width: 220 },
-  { title: '脱敏值', dataIndex: 'secretMask', width: 220, render: (value) => value || '-' },
+  { title: '卡密 / CDK', dataIndex: 'secretText', width: 220, render: (value) => value || '-' },
   { title: '来源', dataIndex: 'sourceType', width: 120 },
   { title: '状态', dataIndex: 'status', width: 120, render: renderStatusTag },
   { title: '消费时间', dataIndex: 'consumedAt', width: 180, render: (value) => value || '-' },
@@ -320,9 +320,26 @@ const accessColumns: TableProps<CredentialExtractAccessRecord>['columns'] = [
   { title: '失败原因', dataIndex: 'failureReason', width: 160, render: (value) => value || '-' },
   { title: 'IP', dataIndex: 'clientIp', width: 140, render: (value) => value || '-' },
   { title: '指纹', dataIndex: 'browserFingerprint', width: 220, ellipsis: true },
+  { title: 'UA 摘要', dataIndex: 'userAgentHash', width: 220, ellipsis: true, render: (value) => value || '-' },
+  { title: '设备信息', dataIndex: 'deviceSnapshot', width: 260, ellipsis: true, render: renderDeviceSnapshot },
   { title: '凭证数', dataIndex: 'itemCount', width: 100 },
   { title: '访问时间', dataIndex: 'createdAt', width: 180 },
 ];
+
+function renderDeviceSnapshot(value?: string) {
+  if (!value) {
+    return '-';
+  }
+  try {
+    const data = JSON.parse(value) as Record<string, unknown>;
+    const fields = ['platform', 'language', 'screen', 'timezone']
+      .map((key) => data[key])
+      .filter(Boolean);
+    return fields.length ? fields.join(' / ') : value;
+  } catch {
+    return value;
+  }
+}
 
 function renderStatusTag(status: string) {
   const colorMap: Record<string, string> = {

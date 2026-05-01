@@ -101,6 +101,7 @@ export interface CredentialItem {
   batchId?: string;
   categoryId?: string;
   itemNo: string;
+  secretText?: string;
   secretMask: string;
   checksum?: string;
   sourceType: string;

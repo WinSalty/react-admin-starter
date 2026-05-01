@@ -102,6 +102,11 @@ export async function disableCredentialBatch(id: string): Promise<ApiResponse<Cr
   return response.data;
 }
 
+export async function fetchCredentialBatchItems(id: string): Promise<ApiResponse<CredentialItem[]>> {
+  const response = await request.get<ApiResponse<CredentialItem[]>>(`/api/admin/credentials/batches/${id}/items`);
+  return response.data;
+}
+
 export async function createBatchCredentialExtractLinks(
   id: string,
   payload: CredentialExtractLinkCreateRequest,
@@ -120,6 +125,11 @@ export async function createItemCredentialExtractLink(
   payload: CredentialExtractLinkCreateRequest,
 ): Promise<ApiResponse<CredentialExtractLinkCreateResult>> {
   const response = await request.post<ApiResponse<CredentialExtractLinkCreateResult>>(`/api/admin/credentials/items/${id}/extract-links`, payload);
+  return response.data;
+}
+
+export async function fetchCredentialItemExtractLinks(id: string): Promise<ApiResponse<CredentialExtractLink[]>> {
+  const response = await request.get<ApiResponse<CredentialExtractLink[]>>(`/api/admin/credentials/items/${id}/extract-links`);
   return response.data;
 }
 
