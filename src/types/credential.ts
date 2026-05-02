@@ -242,7 +242,14 @@ export interface CredentialExtractAccessRecord {
   success: boolean;
   failureReason?: string;
   clientIp?: string;
+  userAgent?: string;
   userAgentHash?: string;
+  browser?: string;
+  browserVersion?: string;
+  osName?: string;
+  osVersion?: string;
+  deviceType?: string;
+  deviceBrand?: string;
   browserFingerprint?: string;
   deviceSnapshot?: string;
   traceId?: string;

@@ -140,7 +140,7 @@
 | 积分账户 | `GET /api/points/account`、`GET /api/points/ledger`、`GET /api/points/recharge/orders`、`GET /api/points/consume/orders`、`GET /api/points/freeze/orders` |
 | CDK 兑换 | `POST /api/points/cdk/redeem` |
 | 管理端 CDK | `GET/POST /api/admin/cdk/batches`、`POST /api/admin/cdk/batches/{id}/void`、`POST /api/admin/cdk/batches/{id}/extract-links`、`GET /api/admin/cdk/codes`、`POST /api/admin/cdk/codes/{id}/status`、`POST /api/admin/cdk/codes/{id}/extract-links`、`GET /api/admin/cdk/extract-links/{id}/access-records`、`GET /api/admin/cdk/redeem-records` |
-| CDK 公开提取 | `POST /api/public/cdk/extract/{token}`，匿名提取页面会采集浏览器指纹摘要，展示提取链接说明信息，并支持一键复制单个或多个 CDK |
+| CDK 公开提取 | `POST /api/public/cdk/extract/{token}`，匿名提取页面会采集浏览器指纹摘要，后台访问记录展示 User-Agent 解析后的浏览器、系统和设备信息，并支持一键复制单个或多个 CDK |
 | 积分审计 | `GET /api/admin/points/accounts`、`GET /api/admin/points/ledger`、`POST /api/admin/points/adjustments`、`POST /api/admin/points/adjustments/{id}/approve`、`GET /api/admin/points/reconciliation` |
 
 ## 配套环境说明

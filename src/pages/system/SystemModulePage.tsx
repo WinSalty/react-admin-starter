@@ -370,7 +370,7 @@ function SystemModulePage({ moduleKey }: SystemModulePageProps) {
             showTotal: (count) => `共 ${count} 条`,
           }}
           rowKey="id"
-          scroll={{ x: config.readonly ? 1080 : 1180 }}
+          scroll={{ x: moduleKey === 'logs' ? 1480 : config.readonly ? 1080 : 1180 }}
           onChange={handleTableChange}
         />
       </ListTableCard>
@@ -586,6 +586,13 @@ const moduleConfigs: Record<SystemModuleKey, ModuleConfig> = {
       { key: 'owner', label: '操作人' },
       { key: 'target', label: '目标对象' },
       { key: 'ipAddress', label: 'IP 地址' },
+      { key: 'browser', label: '浏览器' },
+      { key: 'browserVersion', label: '浏览器版本' },
+      { key: 'osName', label: '操作系统' },
+      { key: 'osVersion', label: '系统版本' },
+      { key: 'deviceType', label: '设备类型' },
+      { key: 'deviceBrand', label: '设备品牌' },
+      { key: 'userAgent', label: 'User-Agent' },
       { key: 'result', label: '结果' },
       { key: 'durationMs', label: '耗时(ms)' },
       { key: 'status', label: '状态' },
@@ -607,6 +614,9 @@ const moduleConfigs: Record<SystemModuleKey, ModuleConfig> = {
       { title: '类型', dataIndex: 'logType', width: 110 },
       { title: '操作人', dataIndex: 'owner', width: 110 },
       { title: '目标', dataIndex: 'target', width: 180 },
+      { title: '浏览器', key: 'browser', width: 170, render: (_, record) => renderVersionText(record.browser, record.browserVersion) },
+      { title: '系统', key: 'os', width: 150, render: (_, record) => renderVersionText(record.osName, record.osVersion) },
+      { title: '设备', key: 'device', width: 130, render: (_, record) => [record.deviceType, record.deviceBrand].filter(Boolean).join(' / ') || '-' },
       { title: '结果', dataIndex: 'result', width: 90 },
       { title: '耗时(ms)', dataIndex: 'durationMs', width: 100, align: 'right' },
     ],
@@ -624,6 +634,10 @@ function renderStatusTag(status: SystemStatus) {
     return <Tag color="processing">待激活</Tag>;
   }
   return <Tag>停用</Tag>;
+}
+
+function renderVersionText(name?: string, version?: string) {
+  return [name, version].filter(Boolean).join(' ') || '-';
 }
 
 /**

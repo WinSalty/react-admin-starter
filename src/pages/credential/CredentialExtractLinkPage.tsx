@@ -285,7 +285,7 @@ function CredentialExtractLinkPage() {
               pagination={false}
               rowKey="id"
               size="small"
-              scroll={{ x: 1100 }}
+              scroll={{ x: 1980 }}
             />
           </ListTableCard>
         </div>
@@ -319,12 +319,20 @@ const accessColumns: TableProps<CredentialExtractAccessRecord>['columns'] = [
   { title: '结果', dataIndex: 'success', width: 100, render: (value: boolean) => <Tag color={value ? 'success' : 'error'}>{value ? '成功' : '失败'}</Tag> },
   { title: '失败原因', dataIndex: 'failureReason', width: 160, render: (value) => value || '-' },
   { title: 'IP', dataIndex: 'clientIp', width: 140, render: (value) => value || '-' },
+  { title: '浏览器', key: 'browser', width: 180, render: (_, record) => renderVersionText(record.browser, record.browserVersion) },
+  { title: '系统', key: 'os', width: 160, render: (_, record) => renderVersionText(record.osName, record.osVersion) },
+  { title: '设备', key: 'device', width: 140, render: (_, record) => [record.deviceType, record.deviceBrand].filter(Boolean).join(' / ') || '-' },
+  { title: 'User-Agent', dataIndex: 'userAgent', width: 260, ellipsis: true, render: (value) => value || '-' },
   { title: '指纹', dataIndex: 'browserFingerprint', width: 220, ellipsis: true },
   { title: 'UA 摘要', dataIndex: 'userAgentHash', width: 220, ellipsis: true, render: (value) => value || '-' },
   { title: '设备信息', dataIndex: 'deviceSnapshot', width: 260, ellipsis: true, render: renderDeviceSnapshot },
   { title: '凭证数', dataIndex: 'itemCount', width: 100 },
   { title: '访问时间', dataIndex: 'createdAt', width: 180 },
 ];
+
+function renderVersionText(name?: string, version?: string) {
+  return [name, version].filter(Boolean).join(' ') || '-';
+}
 
 function renderDeviceSnapshot(value?: string) {
   if (!value) {

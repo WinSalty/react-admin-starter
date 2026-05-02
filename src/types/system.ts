@@ -28,6 +28,13 @@ export interface SystemRecord {
   owner: string;
   createdAt: string;
   updatedAt: string;
+  userAgent?: string;
+  browser?: string;
+  browserVersion?: string;
+  osName?: string;
+  osVersion?: string;
+  deviceType?: string;
+  deviceBrand?: string;
   [key: string]:
     | string
     | number
