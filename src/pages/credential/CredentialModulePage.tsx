@@ -23,6 +23,7 @@ import {
   createBatchCredentialExtractLinks,
   createCredentialCategory,
   createGeneratedCredentialBatch,
+  copyCredentialExtractLinkUrl,
   disableCredentialBatch,
   disableCredentialItem,
   enableCredentialItem,
@@ -94,20 +95,24 @@ interface LinkForm {
 
 interface CredentialResultState {
   title: string;
+  batchName?: string;
   batchId?: string;
   generatedSecrets?: CredentialGeneratedSecret[];
   extractLinks?: CredentialExtractLinkCopyResult[];
-}
-
-interface CredentialBatchItemState {
-  title: string;
-  items: CredentialItem[];
 }
 
 interface CredentialLinkState {
   title: string;
   links: CredentialExtractLink[];
 }
+
+interface CredentialBatchDetailState {
+  batch: CredentialBatch;
+  items: CredentialItem[];
+  links: CredentialExtractLink[];
+}
+
+type LinkTarget = Pick<CredentialBatch, 'id' | 'batchName' | 'status' | 'linkedCount'>;
 
 interface CategoryForm {
   categoryCode: string;
@@ -156,11 +161,11 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
   const [generatedOpen, setGeneratedOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
-  const [linkTarget, setLinkTarget] = useState<CredentialBatch>();
+  const [linkTarget, setLinkTarget] = useState<LinkTarget>();
   const [importPreview, setImportPreview] = useState<CredentialImportPreview>();
   const [resultState, setResultState] = useState<CredentialResultState>();
-  const [batchItemState, setBatchItemState] = useState<CredentialBatchItemState>();
   const [linkState, setLinkState] = useState<CredentialLinkState>();
+  const [batchDetailState, setBatchDetailState] = useState<CredentialBatchDetailState>();
   const [detailLoading, setDetailLoading] = useState(false);
   const validRangePresets = buildCredentialValidRangePresets();
   const expireAtPresets = buildCredentialExpireAtPresets();
@@ -230,6 +235,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
     if (response.data.generatedSecrets?.length) {
       setResultState({
         title: `${response.data.batchName} 生成结果`,
+        batchName: response.data.batchName,
         batchId: response.data.id,
         generatedSecrets: response.data.generatedSecrets,
       });
@@ -278,13 +284,12 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       return;
     }
     message.success('卡密批次已导入');
-    if (response.data.extractLinks?.length) {
-      setResultState({
-        title: `${response.data.batchName} 提取链接`,
-        batchId: response.data.id,
-        extractLinks: response.data.extractLinks,
-      });
-    }
+    setResultState({
+      title: response.data.extractLinks?.length ? `${response.data.batchName} 提取链接` : `${response.data.batchName} 导入结果`,
+      batchName: response.data.batchName,
+      batchId: response.data.id,
+      extractLinks: response.data.extractLinks,
+    });
     setImportOpen(false);
     setImportPreview(undefined);
     importForm.resetFields();
@@ -309,11 +314,13 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
     message.success(`已生成 ${response.data.linkCount} 个提取链接`);
     if (response.data.links?.length) {
       setResultState({
-        title: '提取链接生成结果',
+        title: `${linkTarget.batchName} 提取链接`,
+        batchName: linkTarget.batchName,
         batchId: linkTarget.id,
         extractLinks: response.data.links,
       });
     }
+    setBatchDetailState(undefined);
     setLinkTarget(undefined);
     linkForm.resetFields();
     void loadRecords();
@@ -356,15 +363,39 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
     }
   };
 
-  const viewBatchItems = async (batch: CredentialBatch) => {
+  const copyPublicLinks = async (records: CredentialExtractLink[]) => {
+    const activeRecords = records.filter((item) => item.copyable && item.status === 'active');
+    if (!activeRecords.length) {
+      message.error('暂无可复制的对外链接');
+      return;
+    }
+    const responses = await Promise.all(activeRecords.map((item) => copyCredentialExtractLinkUrl(item.id)));
+    const urls = responses.filter((item) => item.code === 0).map((item) => item.data.url);
+    if (!urls.length) {
+      message.error('对外链接复制失败');
+      return;
+    }
+    if (await copyText(urls.join('\n'))) {
+      message.success('对外链接已复制');
+    }
+  };
+
+  const openBatchDetail = async (batch: CredentialBatch) => {
     setDetailLoading(true);
     try {
-      const response = await fetchCredentialBatchItems(batch.id);
-      if (response.code !== 0) {
-        message.error(response.message || '凭证明细获取失败');
+      const [itemResponse, linkResponse] = await Promise.all([
+        fetchCredentialBatchItems(batch.id),
+        fetchCredentialExtractLinks({ batchId: batch.id, pageNo: 1, pageSize: 100 }),
+      ]);
+      if (itemResponse.code !== 0) {
+        message.error(itemResponse.message || '凭证明细获取失败');
         return;
       }
-      setBatchItemState({ title: `${batch.batchName} 凭证明细`, items: response.data });
+      setBatchDetailState({
+        batch,
+        items: itemResponse.data,
+        links: linkResponse.code === 0 ? linkResponse.data.records : [],
+      });
     } finally {
       setDetailLoading(false);
     }
@@ -407,12 +438,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       await disableCredentialBatch(record.id);
       void loadRecords();
     },
-    onCreateLink: (record) => {
-      setLinkTarget(record);
-      linkForm.setFieldsValue({ itemsPerLink: 1, maxAccessCount: 3, expireAt: undefined });
-    },
-    onViewItems: (record) => void viewBatchItems(record),
-    onViewLinks: (record) => void viewExtractLinks(record.id, `${record.batchName} 提取链接`),
+    onOpenBatchDetail: (record) => void openBatchDetail(record),
     onDisableItem: async (record) => {
       await disableCredentialItem(record.id);
       void loadRecords();
@@ -422,7 +448,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       void loadRecords();
     },
     onViewItemLinks: (record) => void viewItemLinks(record),
-  }), [linkForm, loadRecords, moduleKind, viewBatchItems, viewExtractLinks, viewItemLinks]);
+  }), [loadRecords, moduleKind, openBatchDetail, viewItemLinks]);
 
   const extra = (
     <Space>
@@ -590,8 +616,8 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
         <Form.Item label="过期时间" name="expireAt">
           <DatePicker showTime presets={expireAtPresets} style={{ width: '100%' }} placeholder="默认永久有效" />
         </Form.Item>
-        <Form.Item label="备注" name="remark">
-          <Input />
+        <Form.Item label="说明信息" name="remark">
+          <Input.TextArea rows={3} placeholder="展示在提取页面，可填写发放说明、使用提示或活动说明" />
         </Form.Item>
       </SubmitModalForm>
 
@@ -629,6 +655,20 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
           resultState?.extractLinks?.length ? (
             <Button key="view-links" onClick={() => void viewExtractLinks(resultState.batchId, '提取链接生成结果')}>
               查看提取链接
+            </Button>
+          ) : null,
+          resultState?.batchId && !resultState.extractLinks?.length ? (
+            <Button key="create-links" icon={<LinkOutlined />} onClick={() => {
+              setResultState(undefined);
+              setLinkTarget({
+                id: resultState.batchId || '',
+                batchName: resultState.batchName || resultState.title,
+                status: 'active',
+                linkedCount: 0,
+              });
+              linkForm.setFieldsValue({ itemsPerLink: 1, maxAccessCount: 3, expireAt: undefined, remark: undefined });
+            }}>
+              生成链接
             </Button>
           ) : null,
           <Button key="close" type="primary" onClick={() => setResultState(undefined)}>
@@ -681,44 +721,83 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
             size="small"
           />
         ) : null}
+        {!resultState?.generatedSecrets?.length && !resultState?.extractLinks?.length ? (
+          <Empty description="批次已创建，可继续生成提取链接" />
+        ) : null}
       </Modal>
 
       <Modal
-        title={batchItemState?.title || '批次凭证明细'}
-        open={!!batchItemState}
-        width={920}
-        onCancel={() => setBatchItemState(undefined)}
+        title={batchDetailState ? `${batchDetailState.batch.batchName} 详情` : '批次详情'}
+        open={!!batchDetailState}
+        width={1080}
+        onCancel={() => setBatchDetailState(undefined)}
         footer={[
-          <Button key="copy-items" icon={<CopyOutlined />} onClick={() => void copyCredentialItems(batchItemState?.items || [])}>
-            复制全部
+          <Button key="copy-items" icon={<CopyOutlined />} onClick={() => void copyCredentialItems(batchDetailState?.items || [])}>
+            复制全部凭证
           </Button>,
-          <Button key="close" type="primary" onClick={() => setBatchItemState(undefined)}>
+          <Button
+            key="create-links"
+            icon={<LinkOutlined />}
+            disabled={!batchDetailState || batchDetailState.batch.status !== 'active' || (batchDetailState.batch.linkedCount || 0) > 0 || batchDetailState.links.length > 0}
+            onClick={() => {
+              if (!batchDetailState) {
+                return;
+              }
+              setLinkTarget(batchDetailState.batch);
+              linkForm.setFieldsValue({ itemsPerLink: 1, maxAccessCount: 3, expireAt: undefined, remark: undefined });
+            }}
+          >
+            生成链接
+          </Button>,
+          <Button
+            key="copy-public"
+            icon={<CopyOutlined />}
+            disabled={!batchDetailState?.links.length}
+            onClick={() => void copyPublicLinks(batchDetailState?.links || [])}
+          >
+            复制全部对外链接
+          </Button>,
+          <Button key="close" type="primary" onClick={() => setBatchDetailState(undefined)}>
             关闭
           </Button>,
         ]}
       >
-        <Table<CredentialItem>
-          columns={[
-            { title: '明细编号', dataIndex: 'itemNo', width: 220 },
-            { title: '卡密 / CDK', dataIndex: 'secretText', render: (value) => value || '-' },
-            { title: '状态', dataIndex: 'status', width: 110, render: renderStatusTag },
-            {
-              title: '操作',
-              key: 'actions',
-              width: 90,
-              render: (_, record) => (
-                <Button type="link" icon={<CopyOutlined />} onClick={() => void copyCredentialItems([record])}>
-                  复制
-                </Button>
-              ),
-            },
-          ]}
-          dataSource={batchItemState?.items || []}
-          loading={detailLoading}
-          pagination={{ pageSize: 10, showSizeChanger: false }}
-          rowKey="id"
-          size="small"
-        />
+        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+          <Table<CredentialItem>
+            title={() => '凭证明细'}
+            columns={[
+              { title: '明细编号', dataIndex: 'itemNo', width: 220 },
+              { title: '卡密 / CDK', dataIndex: 'secretText', render: (value) => value || '-' },
+              { title: '状态', dataIndex: 'status', width: 110, render: renderStatusTag },
+              {
+                title: '操作',
+                key: 'actions',
+                width: 90,
+                render: (_, record) => (
+                  <Button type="link" icon={<CopyOutlined />} onClick={() => void copyCredentialItems([record])}>
+                    复制
+                  </Button>
+                ),
+              },
+            ]}
+            dataSource={batchDetailState?.items || []}
+            loading={detailLoading}
+            pagination={{ pageSize: 10, showSizeChanger: false }}
+            rowKey="id"
+            size="small"
+          />
+          <Table<CredentialExtractLink>
+            title={() => '提取链接'}
+            columns={extractLinkColumns}
+            dataSource={batchDetailState?.links || []}
+            loading={detailLoading}
+            locale={{ emptyText: <Empty description="暂无提取链接" /> }}
+            pagination={{ pageSize: 10, showSizeChanger: false }}
+            rowKey="id"
+            size="small"
+            scroll={{ x: 960 }}
+          />
+        </Space>
       </Modal>
 
       <Modal
@@ -726,7 +805,12 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
         open={!!linkState}
         width={960}
         onCancel={() => setLinkState(undefined)}
-        footer={<Button type="primary" onClick={() => setLinkState(undefined)}>关闭</Button>}
+        footer={[
+          <Button key="copy-public" icon={<CopyOutlined />} disabled={!linkState?.links.length} onClick={() => void copyPublicLinks(linkState?.links || [])}>
+            复制全部对外链接
+          </Button>,
+          <Button key="close" type="primary" onClick={() => setLinkState(undefined)}>关闭</Button>,
+        ]}
       >
         <Table<CredentialExtractLink>
           columns={extractLinkColumns}
@@ -747,9 +831,7 @@ function buildColumns(
   moduleKind: CredentialModuleKind,
   handlers: {
     onDisableBatch: (record: CredentialBatch) => Promise<void>;
-    onCreateLink: (record: CredentialBatch) => void;
-    onViewItems: (record: CredentialBatch) => void;
-    onViewLinks: (record: CredentialBatch) => void;
+    onOpenBatchDetail: (record: CredentialBatch) => void;
     onDisableItem: (record: CredentialItem) => Promise<void>;
     onEnableItem: (record: CredentialItem) => Promise<void>;
     onViewItemLinks: (record: CredentialItem) => void;
@@ -780,14 +862,12 @@ function buildColumns(
         title: '操作',
         key: 'actions',
         fixed: 'right',
-        width: 360,
+        width: 150,
         render: (_, record) => {
           const batch = record as CredentialBatch;
           return (
             <Space size={4}>
-              <Button type="link" icon={<EyeOutlined />} onClick={() => handlers.onViewItems(batch)}>查看凭证</Button>
-              <Button type="link" icon={<LinkOutlined />} disabled={batch.status !== 'active' || (batch.linkedCount || 0) > 0} onClick={() => handlers.onCreateLink(batch)}>生成链接</Button>
-              <Button type="link" icon={<EyeOutlined />} disabled={!batch.linkedCount} onClick={() => handlers.onViewLinks(batch)}>查看链接</Button>
+              <Button type="link" icon={<EyeOutlined />} onClick={() => handlers.onOpenBatchDetail(batch)}>详情</Button>
               <Popconfirm title="确认停用该批次？" onConfirm={() => void handlers.onDisableBatch(batch)}>
                 <Button type="link" danger icon={<StopOutlined />} disabled={batch.status !== 'active'}>停用</Button>
               </Popconfirm>

@@ -73,6 +73,7 @@ function PublicCredentialExtractPage() {
             <strong>{data.batchName}</strong>
             <span>{data.linkNo} · 剩余可打开 {data.remainingAccessCount} 次 · {data.expireAt} 过期</span>
           </div>
+          {data.remark ? <div className="public-extract-note">{data.remark}</div> : null}
           <Space>
             <Tag color={data.fulfillmentType === 'POINTS_REDEEM' ? 'purple' : 'blue'}>
               {data.fulfillmentType === 'POINTS_REDEEM' ? '积分 CDK' : '文本卡密'}

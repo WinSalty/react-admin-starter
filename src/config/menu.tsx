@@ -58,6 +58,8 @@ const menuIconMap: Record<string, ReactNode> = {
   FileSearchOutlined: <FileSearchOutlined />,
   NotificationOutlined: <NotificationOutlined />,
   GiftOutlined: <GiftOutlined />,
+  ImportOutlined: <ImportOutlined />,
+  LinkOutlined: <LinkOutlined />,
   WalletOutlined: <WalletOutlined />,
   ShopOutlined: <ShopOutlined />,
   WarningOutlined: <WarningOutlined />,

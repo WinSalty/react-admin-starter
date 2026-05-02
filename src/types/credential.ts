@@ -219,6 +219,7 @@ export interface CredentialPublicExtractResult {
   categoryName: string;
   fulfillmentType: string;
   batchName: string;
+  remark?: string;
   remainingAccessCount: number;
   expireAt: string;
   items: CredentialPublicExtractItem[];
