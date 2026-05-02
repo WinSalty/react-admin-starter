@@ -79,14 +79,14 @@ interface ImportBatchForm {
   delimiter: string;
   validRange?: [dayjs.Dayjs, dayjs.Dayjs];
   createExtractLinks?: boolean;
-  itemsPerLink?: number;
+  itemsPerLink?: ItemsPerLinkValue;
   maxAccessCount?: number;
   expireAt?: dayjs.Dayjs;
   remark?: string;
 }
 
 interface LinkForm {
-  itemsPerLink: number;
+  itemsPerLink: ItemsPerLinkValue;
   maxAccessCount: number;
   expireAt?: dayjs.Dayjs;
   remark?: string;
@@ -124,6 +124,17 @@ const moduleMeta: Record<CredentialModuleKind, { title: string; icon: JSX.Elemen
   importTasks: { title: '导入任务', icon: <ImportOutlined /> },
   redeemRecords: { title: '兑换记录', icon: <FileSearchOutlined /> },
 };
+
+const DEFAULT_GENERATED_BATCH_COUNT = 5;
+const ALL_IN_ONE_ITEMS_PER_LINK_VALUE = 'ALL_IN_ONE';
+const DEFAULT_ITEM_SCOPE = 'UNLINKED_ACTIVE';
+const COMMON_ITEMS_PER_LINK_OPTIONS = [1, 5, 10, 20, 50];
+const itemsPerLinkOptions = [
+  { label: '全部 Key 一个链接', value: ALL_IN_ONE_ITEMS_PER_LINK_VALUE },
+  ...COMMON_ITEMS_PER_LINK_OPTIONS.map((value) => ({ label: `${value} 个 Key / 链接`, value })),
+];
+
+type ItemsPerLinkValue = number | typeof ALL_IN_ONE_ITEMS_PER_LINK_VALUE;
 
 /**
  * 凭证中心模块页面。
@@ -258,8 +269,9 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       globalDeduplicate: true,
       caseSensitive: true,
       createExtractLinks: values.createExtractLinks,
-      itemsPerLink: values.itemsPerLink,
+      itemsPerLink: resolveItemsPerLink(values.itemsPerLink),
       maxAccessCount: values.maxAccessCount,
+      itemScope: resolveItemScope(values.itemsPerLink),
       expireAt: values.expireAt?.format('YYYY-MM-DD HH:mm:ss'),
     });
     if (response.code !== 0) {
@@ -284,8 +296,9 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
       return;
     }
     const payload = {
-      itemsPerLink: values.itemsPerLink,
+      itemsPerLink: resolveItemsPerLink(values.itemsPerLink),
       maxAccessCount: values.maxAccessCount,
+      itemScope: resolveItemScope(values.itemsPerLink),
       expireAt: values.expireAt?.format('YYYY-MM-DD HH:mm:ss'),
       remark: values.remark,
     };
@@ -429,7 +442,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
           <Button type="primary" icon={<PlusOutlined />} onClick={() => {
             generatedForm.setFieldsValue({
               categoryId: defaultCategoryId('POINTS_REDEEM'),
-              totalCount: 100,
+              totalCount: DEFAULT_GENERATED_BATCH_COUNT,
               points: 100,
             });
             setGeneratedOpen(true);
@@ -556,7 +569,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
         </Form.Item>
         <Space.Compact block>
           <Form.Item label="每链接数量" name="itemsPerLink" style={{ width: '33%' }}>
-            <InputNumber min={1} precision={0} style={{ width: '100%' }} />
+            <Select options={itemsPerLinkOptions} style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item label="访问次数" name="maxAccessCount" style={{ width: '33%' }}>
             <InputNumber min={1} precision={0} style={{ width: '100%' }} />
@@ -569,7 +582,7 @@ function CredentialModulePage({ moduleKind }: CredentialModulePageProps) {
 
       <SubmitModalForm<LinkForm> title="生成提取链接" open={!!linkTarget} form={linkForm} onCancel={() => setLinkTarget(undefined)} onFinish={(values) => void handleCreateLink(values)}>
         <Form.Item label="每链接数量" name="itemsPerLink" rules={[{ required: true, message: '请输入每链接数量' }]}>
-          <InputNumber min={1} precision={0} style={{ width: '100%' }} />
+          <Select options={itemsPerLinkOptions} style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item label="访问次数" name="maxAccessCount" rules={[{ required: true, message: '请输入访问次数' }]}>
           <InputNumber min={1} precision={0} style={{ width: '100%' }} />
@@ -836,6 +849,14 @@ function buildColumns(
     { title: '失败原因', dataIndex: 'failureReason', width: 160, render: (value) => value || '-' },
     { title: '时间', dataIndex: 'createdAt', width: 180 },
   ];
+}
+
+function resolveItemsPerLink(value?: ItemsPerLinkValue) {
+  return value === ALL_IN_ONE_ITEMS_PER_LINK_VALUE ? 1 : value || 1;
+}
+
+function resolveItemScope(value?: ItemsPerLinkValue) {
+  return value === ALL_IN_ONE_ITEMS_PER_LINK_VALUE ? ALL_IN_ONE_ITEMS_PER_LINK_VALUE : DEFAULT_ITEM_SCOPE;
 }
 
 const extractLinkColumns: TableProps<CredentialExtractLink>['columns'] = [

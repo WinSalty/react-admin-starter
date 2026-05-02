@@ -91,6 +91,7 @@ export async function confirmCredentialImport(payload: {
   createExtractLinks?: boolean;
   itemsPerLink?: number;
   maxAccessCount?: number;
+  itemScope?: string;
   expireAt?: string;
 }): Promise<ApiResponse<CredentialBatch>> {
   const response = await request.post<ApiResponse<CredentialBatch>>('/api/admin/credentials/batches/imported/confirm', payload);
