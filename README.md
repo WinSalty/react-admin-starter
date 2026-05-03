@@ -196,7 +196,7 @@ export VITE_API_BASE_URL=https://api.example.com
 ### 1. 安装依赖
 
 ```bash
-cd /Users/salty/codeProject/ai/react-admin-starter
+cd /Users/salty/codeProject/ai/coding/front/react-admin-starter
 npm install
 ```
 
@@ -263,7 +263,7 @@ Ctrl + C
 同域反向代理场景：
 
 ```bash
-cd /Users/salty/codeProject/ai/react-admin-starter
+cd /Users/salty/codeProject/ai/coding/front/react-admin-starter
 npm ci
 npm run build
 ```
@@ -271,7 +271,7 @@ npm run build
 前后端分域场景：
 
 ```bash
-cd /Users/salty/codeProject/ai/react-admin-starter
+cd /Users/salty/codeProject/ai/coding/front/react-admin-starter
 npm ci
 VITE_API_BASE_URL=https://api.example.com npm run build
 ```

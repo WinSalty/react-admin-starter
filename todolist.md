@@ -7,7 +7,7 @@
 当前目录仍为：
 
 ```txt
-/Users/salty/codeProject/ai/react-admin-starter
+/Users/salty/codeProject/ai/coding/front/react-admin-starter
 ```
 
 当前只保留本 `todolist.md`。下一步将重新初始化项目工程和 git 仓库。
